@@ -220,7 +220,8 @@ function downloadAsHTML(projectSrc, {
       + `COMPAT = ${compatibility.checked},\nTURBO = ${turbo.checked},\n`
       + `PROJECT_ID = ${JSON.stringify(projectId)},\n`
       + `WIDTH = ${width},\nHEIGHT = ${height},\n`
-      + `EXTENSION_URL = ${JSON.stringify(extension)};\n`
+      + `EXTENSION_URL = ${JSON.stringify(extension)},\n`
+      + `GENERATED = ${Date.now()};\n`
       + scripts;
     if (!noVM) {
       template = removePercentSection(template, 'no-vm');
