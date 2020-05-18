@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>HTMLifier</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="Converts a Scratch project to HTML/JavaScript"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <!-- no-offline -->
+    <link rel="stylesheet" type="text/css" href="../../sheep3.css">
+    <script src="../../sheep3.js" charset="utf-8"></script>
+    <script src="./offlineifier.js" charset="utf-8"></script>
+    <!-- /no-offline -->
+    <link href="https://fonts.googleapis.com/css2?family=Exo:wght@500&family=Roboto:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./main.css">
+    <script src="./hacky-file-getter.js" charset="utf-8"></script>
+    <script src="./download.js" charset="utf-8"></script>
+    <style media="screen">
+      html {
+        /* https://stackoverflow.com/a/56467997 */
+        scroll-padding-top: 120px;
+      }
+      :target {
+        animation: flash 3s;
+      }
+      @keyframes flash {
+        0% {
+          background-color: rgba(255, 255, 0, 0.5);
+        }
+        100% {
+          background-color: transparent;
+        }
+      }
+      button,
+      input[type=file],
+      ::-webkit-file-upload-button {
+        cursor: pointer;
+      }
+      #load-no-minify {
+        font-size: 1.2em;
+      }
+      .offline::after {
+        content: 'Offline edition';
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        color: rgba(0, 0, 0, 0.5);
+        margin: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Project HTMLifier</h1>
+      <h3><em>Convert a Scratch project to HTML</em></h3>
+      <button class="htmlify" id="other-htmlify-btn">HTMLify</button>
+    </div>
+    <div class="mainarea">
+      <!-- no-offline -->
+      <p><button id="offlineify">Download offline version</button> (An HTML file that can be opened and used in the browser without an internet connection)</p>
+      <!-- /no-offline -->
+      <p>This packages your Scratch project into a single HTML file that can run on its own in a web browser. The HTML file will be pretty big because it contains the entire Scratch engine (2.6 MB) and the costume and sound files used in the project. There is no direct translation between a Scratch block and a JavaScript equivalent because the two languages are fundamentally different, so you should not use the code in the generated file for learning HTML or JavaScript after Scratch.</p>
+      <p>The project will automatically start, and there are no green flag or stop sign buttons.</p>
+      <p><label><input type="radio" name="upload-mode" value="id" checked> Project ID: <input type="number" placeholder="Project ID" value="284516654" id="id"> (the ID of the project on the Scratch website)</label></p>
+      <p><label><input type="radio" name="upload-mode" value="file"> Upload project file: <input type="file" id="file" accept=".sb,.sb2,.sb3"></label></p>
+      <fieldset>
+        <legend>Options</legend>
+        <p><label for="title">Project name: </label><input type="text" placeholder="Project name" value="Zombie Cube Escape!" id="title"> (the text displayed in the browser tab)</p>
+        <p><label for="username">Username value: </label><input type="text" placeholder="Username" value="griffpatch" id="username"> (the value that the username block reports)</p>
+        <p><label><input type="checkbox" id="fullscreen" checked> Show fullscreen button?</label></p>
+        <p><label><input type="checkbox" id="turbo"> Enable <a href="https://en.scratch-wiki.info/wiki/Turbo_Mode">turbo mode</a>?</label></p>
+        <p><label><input type="checkbox" id="use-colour"> Use custom variable/list monitor colour: <input type="color" id="monitor-colour" value="#ff8c1a">? (If unchecked, a translucent black will be used.)</label></p>
+        <p><label><input type="checkbox" id="progress" checked> Load progress indicator?</label></p>
+        <p><label><input type="checkbox" id="loading-image"> Loading image: <input type="file" id="loading-image-file" accept="image/*"></label></p>
+        <p><label><input type="checkbox" id="compatibility" checked> Enable compatibility mode?<a id="ref-2" href="#note-2"><sup>2</sup></a></label></p>
+        <fieldset>
+          <legend>Cloud variable source</legend>
+          <p><label><input type="radio" name="cloud-provider" value="localstorage" checked> Save cloud variables locally using localStorage<a id="ref-1" href="#note-1"><sup>1</sup></a></label></p>
+          <p><label><input type="radio" name="cloud-provider" value="ws"> Use a <a href="https://github.com/SheepTester/primitive-cloud-server">custom server</a>: <input type="url" id="cloud-ws" placeholder="ws://localhost:3000/"></label></p>
+        </fieldset>
+        <fieldset>
+          <legend><a href="https://sheeptester.github.io/scratch-gui/">E羊icques</a> (modded) options</legend>
+          <p><label><input type="checkbox" id="wider"> Does this project use a <a href="https://sheeptester.github.io/scratch-gui/?width=640&height=360">custom size</a>?</label> <label>Width: <input type="number" value="640" id="width"></label> <label>Height: <input type="number" value="360" id="height"></label></p>
+          <p><label>Load <a href="https://github.com/LLK/scratch-vm/blob/develop/docs/extensions.md#types-of-extensions">unofficial extension</a> from URL: <input type="url" id="extension-url"></label></p>
+        </fieldset>
+      </fieldset>
+      <p>
+        <button id="load-no-minify">HTMLify</button>
+      </p>
+      <ul class="log" id="log"></ul>
+      <p>If you want to view or edit the HTML file, you can use the specialized <a href="https://sheeptester.github.io/words-go-here/htmlifier/large-file-editor/">Large File Editor</a> to hide the long lines that may hang or crash normal text editors.</p>
+      <p id="note-1"><a href="#ref-1"><sup>1</sup></a>You may have to deal with privacy laws around cookies outside of Scratch.</p>
+      <p id="note-2"><a href="#ref-2"><sup>2</sup></a>Compatibility mode forces projects to run at 30 FPS, like in Scratch 2.0. Turning this off allows the project to run at a higher framerate (usually 60 FPS, depending on the computer screen's refresh rate).</p>
+      <h2>Update history</h2>
+      <p>See the code and previous versions on <a href="https://github.com/SheepTester/words-go-here/tree/master/htmlifier">Github</a>.</p>
+      <h3>2020-05-01</h3>
+      <ul>
+        <li>Support for custom extensions from a URL</li>
+        <li>CSS by <a href="https://scratch.mit.edu/users/mrcringekidyt/">Mr. Cringe Kid</a></li>
+      </ul>
+      <h3>2020-03-29</h3>
+      <ul>
+        <li>Fixed custom stage sizes</li>
+      </ul>
+      <h3>2020-03-27</h3>
+      <ul>
+        <li>Show an image such as a gif while loading</li>
+        <li>Fixed dragging sprites simulating another green flag click</li>
+      </ul>
+      <h3>2020-01-06</h3>
+      <ul>
+        <li>An offline version of the HTMLifier</li>
+      </ul>
+      <h3>2019-12-25</h3>
+      <ul>
+        <li>An option to use a custom cloud server for cloud variables instead of saving to localStorage</li>
+      </ul>
+      <h3>2019-11-23</h3>
+      <ul>
+        <li>A fullscreen button</li>
+        <li>An option to change monitor colours</li>
+      </ul>
+      <h3>2019-10-05</h3>
+      <ul>
+        <li>New ask box</li>
+      </ul>
+      <h3>2019-09-28</h3>
+      <ul>
+        <li>A status text that shows the assets loaded</li>
+        <li>Support the video extension</li>
+        <li>Support draggable sprites</li>
+      </ul>
+      <h3>2019-08-08</h3>
+      <ul>
+        <li>Removed "Scratch" from the name of this utility just in case</li>
+      </ul>
+      <h3>2019-07-27</h3>
+      <ul>
+        <li>Support 16:9 projects</li>
+        <li>Simplify the number of modes for HTMLification</li>
+      </ul>
+      <h3>2019-07-13</h3>
+      <ul>
+        <li>Cloud variables store in localStorage</li>
+      </ul>
+      <h3>2019-06-29</h3>
+      <ul>
+        <li>Upload project file instead of using project ID</li>
+        <li>Toggle compatibility and turbo mode</li>
+      </ul>
+      <h3>2019-03-31</h3>
+      <ul>
+        <li>Variable and list watchers</li>
+      </ul>
+      <h3>2019-02-09</h3>
+      <ul>
+        <li>Project start</li>
+      </ul>
+      <p>Made by <a href="https://scratch.mit.edu/users/Sheep_maker/">Sheep_maker</a>, who used <a href="https://github.com/LLK/scratch-vm/">scratch-vm</a>, <a href="http://danml.com/download.html">download.js</a>, and their dependencies for this project.</p>
+      <p>CSS by <a href="https://scratch.mit.edu/users/mrcringekidyt/">Mr. Cringe Kid</a>.</p>
+    </div>
+    <!-- VM relies on document.body existing oof -->
+    <script src="https://sheeptester.github.io/scratch-vm/16-9/vm.min.js" charset="utf-8"></script>
+    <script type="text/javascript">
+const loadNoMinifyBtn = document.getElementById('load-no-minify');
+const otherHtmlifyBtn = document.getElementById('other-htmlify-btn')
+const title = document.getElementById('title');
+const id = document.getElementById('id');
+const username = document.getElementById('username');
+const file = document.getElementById('file');
+const logOutput = document.getElementById('log');
+const compatibility = document.getElementById('compatibility');
+const turbo = document.getElementById('turbo');
+const wider = document.getElementById('wider');
+const progressBar = document.getElementById('progress');
+const fullscreen = document.getElementById('fullscreen');
+const useColour = document.getElementById('use-colour');
+const monitorColour = document.getElementById('monitor-colour');
+const cloudServer = document.getElementById('cloud-ws');
+const useLoadingImage = document.getElementById('loading-image');
+const loadingImage = document.getElementById('loading-image-file');
+const width = document.getElementById('width');
+const height = document.getElementById('height');
+const extensionURL = document.getElementById('extension-url');
+let scroll = false
+function log(text, style) {
+  const entry = document.createElement('div')
+  entry.className = `log-entry log-${style}`
+  entry.textContent = text
+  logOutput.appendChild(entry)
+  if (scroll) logOutput.scrollTop = logOutput.scrollHeight
+}
+function getProject() {
+  if (document.querySelector('input[name="upload-mode"]:checked').value === 'file') {
+    if (!file.files || !file.files[0]) return Promise.reject(new Error('No file selected'));
+    return new Promise(res => {
+      const reader = new FileReader();
+      reader.onload = () => res({data: reader.result});
+      reader.readAsDataURL(file.files[0]);
+    });
+  } else {
+    return Promise.resolve({id: id.value});
+  }
+}
+function load() {
+  loadNoMinifyBtn.disabled = true;
+  otherHtmlifyBtn.disabled = true;
+  logOutput.innerHTML = '';
+  scroll = true;
+  getProject()
+    .then(src => downloadAsHTML(src, {
+      title: title.value,
+      username: username.value,
+      log,
+      progressBar: progressBar.checked,
+      fullscreen: fullscreen.checked,
+      monitorColour: useColour.checked ? monitorColour.value : null,
+      cloudServer: document.querySelector('input[name="cloud-provider"]:checked').value === 'ws'
+        ? cloudServer.value : null,
+      projectId: id.value,
+      loadingImage: useLoadingImage ? loadingImage.files[0] : null,
+      customRatio: wider.checked,
+      width: wider.checked ? width.value : 480,
+      height: wider.checked ? height.value : 360,
+      extension: extensionURL.value || null
+    }))
+    .then(html => {
+      log('Attempting to download HTML file...', 'status')
+      download(html, title.value + '.html', 'text/html');
+      log('Done!', 'done');
+      loadNoMinifyBtn.disabled = false;
+      otherHtmlifyBtn.disabled = false;
+    }).catch(err => {
+      console.error(err);
+      if (err.message !== 'error logged') {
+        log('Unexpected error:\n' + err.stack, 'error');
+      }
+      loadNoMinifyBtn.disabled = false;
+      otherHtmlifyBtn.disabled = false;
+      scroll = false;
+    });
+}
+loadNoMinifyBtn.addEventListener('click', load);
+otherHtmlifyBtn.addEventListener('click', load);
+file.addEventListener('change', e => {
+  if (file.files[0]) {
+    document.querySelector('input[name="upload-mode"][value="file"]').checked = true;
+  }
+});
+cloudServer.addEventListener('change', e => {
+  document.querySelector('input[name="cloud-provider"][value="ws"]').checked = true;
+})
+width.addEventListener('change', e => {
+  wider.checked = true;
+});
+height.addEventListener('change', e => {
+  wider.checked = true;
+});
+monitorColour.addEventListener('change', e => {
+  useColour.checked = true;
+});
+loadingImage.addEventListener('change', e => {
+  useLoadingImage.checked = true;
+});
+/* no-offline */
+const offlineifyBtn = document.getElementById('offlineify');
+offlineifyBtn.addEventListener('click', e => {
+  logOutput.innerHTML = '';
+  offlineifyBtn.disabled = true;
+  scroll = true;
+  offlineify({log})
+    .then(() => {
+      offlineifyBtn.disabled = false;
+    })
+    .catch(err => {
+      console.error(err);
+      if (err.message !== 'error logged') {
+        log('Unexpected error:\n' + err.stack, 'error');
+      }
+      offlineifyBtn.disabled = false;
+      scroll = false;
+    });
+})
+/* /no-offline */
+    </script>
+  </body>
+</html>

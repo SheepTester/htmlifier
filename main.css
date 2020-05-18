@@ -1,0 +1,90 @@
+/**
+ * CSS by Mr. Cringe Kid (https://scratch.mit.edu/users/mrcringekidyt/).
+ *
+ * See changes made to their CSS on Github:
+ * https://github.com/SheepTester/words-go-here/commits/master/htmlifier/main.css
+ */
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #37373c;
+  color: white;
+  margin: 0px;
+  padding: 0px;
+}
+a {
+  text-decoration: none;
+  color: #00d755;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+.log {
+  color: #b93700;
+  background-color: #f0f0b4;
+  padding: 10px 0;
+  font-family: 'Exo', sans-serif;
+  height: 100px;
+  resize: vertical;
+  overflow: auto;
+}
+.log-entry {
+  padding: 0 10px;
+  white-space: pre-wrap;
+}
+.log-error {
+  background-color: red;
+  color: white;
+}
+.log-done {
+  background-color: green;
+  color: white;
+}
+.log-progress {
+  opacity: 0.5;
+}
+
+.header {
+  font-size: 10px;
+  position: sticky;
+  background-color: white;
+  top: 0px;
+  color: #0f0f14;
+  margin: 0px;
+  padding: 10px;
+  padding-left: 15px;
+  z-index: 100;
+  box-shadow: black 5px 5px 10px;
+}
+
+.mainarea {
+  margin: 50px;
+  background-color: #19191e;
+  color: #f0f0f0;
+  padding: 25px;
+  border-radius: 8px;
+}
+@media (max-width: 600px) {
+  .mainarea {
+    margin: 0;
+    border-radius: 0;
+  }
+}
+.htmlify {
+  position: relative;
+  top: -83px;
+  padding: 15px;
+  float: right;
+  background-color: #78ffc3;
+  border: 0px;
+  border-radius: 5px;
+  font-family: 'Roboto', sans-serif;
+  height: 90px;
+  transition: background-color 0.25s, border-radius 0.25s;
+}
+.htmlify:hover {
+  background-color: #78c3ff;
+  border-radius: 0px;
+  transition: background-color 0.25s, border-radius 0.25s;
+}
