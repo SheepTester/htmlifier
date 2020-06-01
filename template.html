@@ -20,14 +20,24 @@ body {
 }
 #wrapper {
   display: block;
-  width: 100vw;
-  height: {HEIGHT/WIDTH%}vw;
   position: relative;
+  % no-cursor % cursor: none; % /no-cursor %
 }
 #monitors {
   position: absolute;
   top: 0;
   left: 0;
+}
+% stretch %
+#wrapper {
+  width: 100vw;
+  height: 100vh;
+}
+% /stretch %
+% fit %
+#wrapper {
+  width: 100vw;
+  height: {HEIGHT/WIDTH%}vw;
 }
 @media (min-aspect-ratio: {PROJECT_RATIO}) {
   #wrapper {
@@ -35,6 +45,7 @@ body {
     width: {WIDTH/HEIGHT%}vh;
   }
 }
+% /fit %
 #stage {
   width: 100%;
   height: 100%;
@@ -595,7 +606,12 @@ const runBenchmark = function () {
   function resize() {
     const rect = canvas.getBoundingClientRect();
     renderer.resize(rect.width, rect.height);
+    % stretch %
+    monitorWrapper.style.transform = `scaleX(${rect.width / WIDTH}) scaleY(${rect.height / HEIGHT})`;
+    % /stretch %
+    % fit %
     monitorWrapper.style.transform = `scale(${rect.height / HEIGHT})`;
+    % /fit %
   }
   const monitorWrapper = document.getElementById('monitors');
   const canvas = document.getElementById('stage');

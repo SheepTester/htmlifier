@@ -72,6 +72,8 @@
         <p><label><input type="checkbox" id="progress" checked> Load progress indicator?</label></p>
         <p><label><input type="checkbox" id="loading-image"> Loading image: <input type="file" id="loading-image-file" accept="image/*"></label></p>
         <p><label><input type="checkbox" id="compatibility" checked> Enable compatibility mode?</label><a id="ref-2" href="#note-2"><sup>2</sup></a></p>
+        <p><label><input type="checkbox" id="stretch"> Stretch the canvas to fit (as opposed to maintaining the aspect ratio)?</label></p>
+        <p><label><input type="checkbox" id="no-cursor"> Hide cursor?</label></p>
         <p><label><input type="checkbox" id="pointer-lock"> Lock the pointer on click? The mouse x/y blocks will report the mouse movement.</label><a id="ref-3" href="#note-3"><sup>3</sup></a></p>
         <fieldset>
           <legend>Cloud variable source</legend>
@@ -186,6 +188,8 @@ const height = document.getElementById('height');
 const extensionURL = document.getElementById('extension-url');
 const noLimits = document.getElementById('no-limits');
 const pointerLock = document.getElementById('pointer-lock');
+const stretch = document.getElementById('stretch');
+const noCursor = document.getElementById('no-cursor');
 let scroll = false
 function log(text, style) {
   const entry = document.createElement('div')
@@ -229,7 +233,9 @@ function load() {
       height: wider.checked ? height.value : 360,
       extension: extensionURL.value || null,
       noLimits: noLimits.checked,
-      pointerLock: pointerLock.checked
+      pointerLock: pointerLock.checked,
+      stretch: stretch.checked,
+      noCursor: noCursor.checked
     }))
     .then(html => {
       log('Attempting to download HTML file...', 'status')
