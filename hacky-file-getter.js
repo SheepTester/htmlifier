@@ -125,7 +125,8 @@ function downloadAsHTML(projectSrc, {
   height = 360,
   extension = null,
   loadingImage = null,
-  noLimits = false
+  noLimits = false,
+  pointerLock = false
 } = {}) {
   const modded = true
   // Otherwise, the modded NotVirtualMachine will not get width and height
@@ -241,6 +242,7 @@ function downloadAsHTML(projectSrc, {
     if (monitorColour) template = template.replace(/\{COLOUR\}/g, () => monitorColour);
     else template = removePercentSection(template, 'monitor-colour');
     if (!noLimits) template = removePercentSection(template, 'limits');
+    if (!pointerLock) template = removePercentSection(template, 'pointer-lock');
     if (cloudServer) {
       template = removePercentSection(template, 'cloud-localstorage')
         .replace(/\{CLOUD_HOST\}/g, () => JSON.stringify(cloudServer));

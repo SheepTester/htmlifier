@@ -656,7 +656,24 @@ const runBenchmark = function () {
       (nativeSize[1] / rect.height) * (y - (rect.height / 2))
     ];
   }
+  % pointer-lock %
+  function pointerLocked() {
+    return document.pointerLockElement === canvas ||
+      document.mozPointerLockElement === canvas;
+  }
+  % /pointer-lock %
   function mousemove(e) {
+    % pointer-lock %
+    if (pointerLocked()) {
+      vm.postIOData('mouse', {
+        x: e.movementX + WIDTH / 2,
+        y: e.movementY + HEIGHT / 2,
+        canvasWidth: WIDTH,
+        canvasHeight: HEIGHT
+      });
+      return;
+    }
+    % /pointer-lock %
     const {x, y} = getEventXY(e);
     const rect = canvas.getBoundingClientRect();
     const mousePosition = [x - rect.left, y - rect.top];
@@ -686,10 +703,22 @@ const runBenchmark = function () {
     });
   }
   function mousedown(e) {
+    mouseDown = true;
+    % pointer-lock %
+    if (pointerLocked()) {
+      vm.postIOData('mouse', {
+        isDown: true,
+        x: e.movementX + WIDTH / 2,
+        y: e.movementY + HEIGHT / 2,
+        canvasWidth: WIDTH,
+        canvasHeight: HEIGHT
+      });
+      return;
+    }
+    % /pointer-lock %
     const {x, y} = getEventXY(e);
     const rect = canvas.getBoundingClientRect();
     const mousePosition = [x - rect.left, y - rect.top];
-    mouseDown = true;
     mouseDownPosition = mousePosition;
     mouseDownTimeoutId = setTimeout(onStartDrag, 400);
     vm.postIOData('mouse', {
@@ -705,8 +734,6 @@ const runBenchmark = function () {
     }
   }
   function mouseup(e) {
-    const {x, y} = getEventXY(e);
-    const rect = canvas.getBoundingClientRect();
     cancelMouseDownTimeout();
     mouseDown = false;
     mouseDownPosition = null;
@@ -716,6 +743,20 @@ const runBenchmark = function () {
       dragOffset = null;
       dragId = null;
     }
+    % pointer-lock %
+    if (pointerLocked()) {
+      vm.postIOData('mouse', {
+        isDown: false,
+        x: e.movementX + WIDTH / 2,
+        y: e.movementY + HEIGHT / 2,
+        canvasWidth: WIDTH,
+        canvasHeight: HEIGHT
+      });
+      return;
+    }
+    % /pointer-lock %
+    const {x, y} = getEventXY(e);
+    const rect = canvas.getBoundingClientRect();
     vm.postIOData('mouse', {
       isDown: false,
       x: x - rect.left,
@@ -738,6 +779,13 @@ const runBenchmark = function () {
     e.preventDefault();
   });
   window.addEventListener('resize', resize);
+  % pointer-lock %
+  canvas.requestPointerLock = canvas.requestPointerLock ||
+    canvas.mozRequestPointerLock;
+  canvas.addEventListener('click', e => {
+    canvas.requestPointerLock();
+  });
+  % /pointer-lock %
 
   /* https://github.com/LLK/scratch-gui/blob/develop/src/lib/vm-listener-hoc.jsx#L86-L115 */
   document.addEventListener('keydown', e => {
