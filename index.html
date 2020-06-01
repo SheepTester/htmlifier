@@ -81,6 +81,7 @@
           <legend><a href="https://sheeptester.github.io/scratch-gui/">E羊icques</a> (modded) options</legend>
           <p><label><input type="checkbox" id="wider"> Does this project use a <a href="https://sheeptester.github.io/scratch-gui/?width=640&height=360">custom size</a>?</label> <label>Width: <input type="number" value="640" id="width"></label> <label>Height: <input type="number" value="360" id="height"></label></p>
           <p><label>Load <a href="https://github.com/LLK/scratch-vm/blob/develop/docs/extensions.md#types-of-extensions">unofficial extension</a> from URL: <input type="url" id="extension-url"></label></p>
+          <p><label><input type="checkbox" id="no-limits"> Remove limits such as clone and list length limits?</label></p>
         </fieldset>
       </fieldset>
       <p>
@@ -181,6 +182,7 @@ const loadingImage = document.getElementById('loading-image-file');
 const width = document.getElementById('width');
 const height = document.getElementById('height');
 const extensionURL = document.getElementById('extension-url');
+const noLimits = document.getElementById('no-limits');
 let scroll = false
 function log(text, style) {
   const entry = document.createElement('div')
@@ -221,7 +223,8 @@ function load() {
       customRatio: wider.checked,
       width: wider.checked ? width.value : 480,
       height: wider.checked ? height.value : 360,
-      extension: extensionURL.value || null
+      extension: extensionURL.value || null,
+      noLimits: noLimits.checked
     }))
     .then(html => {
       log('Attempting to download HTML file...', 'status')

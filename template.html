@@ -584,6 +584,9 @@ const runBenchmark = function () {
 
     vm.setCompatibilityMode(COMPAT);
     vm.setTurboMode(TURBO);
+    % limits %
+    vm.requireLimits(false);
+    % /limits %
     vm.greenFlag();
 
     initialized = true;
