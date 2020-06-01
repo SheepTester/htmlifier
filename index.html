@@ -197,9 +197,10 @@ function log(text, style) {
 function getProject() {
   if (document.querySelector('input[name="upload-mode"]:checked').value === 'file') {
     if (!file.files || !file.files[0]) return Promise.reject(new Error('No file selected'));
-    return new Promise(res => {
+    return new Promise((res, rej) => {
       const reader = new FileReader();
       reader.onload = () => res({data: reader.result});
+      reader.onerror = rej;
       reader.readAsDataURL(file.files[0]);
     });
   } else {

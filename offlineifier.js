@@ -21,7 +21,8 @@ function offlineify ({
     }
   }
   function problemFetching (file) {
-    return () => {
+    return err => {
+      console.error(err);
       log(`There was a problem fetching ${file} from the internet`, 'error')
       throw new Error('error logged')
     }

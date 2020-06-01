@@ -595,7 +595,7 @@ const runBenchmark = function () {
   function resize() {
     const rect = canvas.getBoundingClientRect();
     renderer.resize(rect.width, rect.height);
-    monitorWrapper.style.transform = `scale(${rect.height / 360})`;
+    monitorWrapper.style.transform = `scale(${rect.height / HEIGHT})`;
   }
   const monitorWrapper = document.getElementById('monitors');
   const canvas = document.getElementById('stage');
@@ -845,8 +845,9 @@ const runBenchmark = function () {
         monitor.style.left = record.x + 'px';
         monitor.style.top = record.y + 'px';
         if (record.mode === 'list') {
-          monitor.style.width = record.width + 'px';
-          monitor.style.height = record.height + 'px';
+          // If the list has never been resized, the width/height will be 0. Weird
+          monitor.style.width = (record.width || 100) + 'px';
+          monitor.style.height = (record.height || 200) + 'px';
         }
         const label = document.createElement('span');
         label.className = 'monitor-label';

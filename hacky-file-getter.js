@@ -133,7 +133,8 @@ function downloadAsHTML(projectSrc, {
   // and that messes up mouse things (see #7)
   customRatio = true
   function problemFetching (file) {
-    return () => {
+    return err => {
+      console.error(err)
       log(`There was a problem fetching ${file} from the internet`, 'error')
       throw new Error('error logged')
     }
