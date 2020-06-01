@@ -450,7 +450,7 @@ class VideoProvider {
 
 const Scratch = window.Scratch = window.Scratch || {};
 
-const runBenchmark = function () {
+const runBenchmark = async function () {
   const vm = new window.NotVirtualMachine(% custom-ratio % WIDTH, HEIGHT % /custom-ratio %);
   Scratch.vm = vm;
 
@@ -459,149 +459,6 @@ const runBenchmark = function () {
   storage.addWebStore([AssetType.Project], () => PROJECT_JSON);
   storage.addWebStore([AssetType.ImageVector, AssetType.ImageBitmap, AssetType.Sound], asset => ASSETS[asset.assetId]);
   vm.attachStorage(storage);
-
-  % loading-progress %
-  const progress = document.getElementById('loading-progress');
-  const _load = storage.webHelper.load;
-  let total = 0, complete = 0;
-  storage.webHelper.load = function (...args) {
-    const result = _load.call(this, ...args);
-    total += 1;
-    progress.textContent = complete + '/' + total;
-    result.then(() => {
-      complete += 1;
-      progress.textContent = complete + '/' + total;
-    });
-    return result;
-  };
-  % /loading-progress %
-  % loading-image %
-  const loadingImage = document.getElementById('loading-image');
-  % /loading-image %
-
-  if (SRC === 'file') {
-    fetch(FILE)
-      .then(r => r.arrayBuffer())
-      .then(b => vm.loadProject(b));
-  } else {
-    vm.downloadProjectId('');
-  }
-  let initialized = false;
-  vm.on('workspaceUpdate', () => {
-    if (initialized) return;
-
-    % loading-progress %
-    if (progress.parentNode) {
-      progress.parentNode.removeChild(progress);
-    }
-    % /loading-progress %
-    % loading-image %
-    if (loadingImage.parentNode) {
-      loadingImage.parentNode.removeChild(loadingImage);
-    }
-    % /loading-image %
-
-    const noop = () => null;
-    vm.setVideoProvider(new VideoProvider());
-    % cloud-localstorage %
-    vm.setCloudProvider({
-      updateVariable(name, value) {
-        try {
-          localStorage.setItem('[s3] ' + name, value);
-        } catch (e) {
-          console.error('Cannot use localStorage?', e);
-        }
-      },
-      createVariable: noop,
-      renameVariable: noop,
-      deleteVariable: noop,
-      requestCloseConnection: noop
-    });
-
-    setTimeout(() => {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.slice(0, 5) === '[s3] ') {
-          vm.postIOData('cloud', {
-            varUpdate: {
-              name: key.slice(5),
-              value: localStorage.getItem(key)
-            }
-          });
-        }
-      }
-      window.addEventListener('storage', e => {
-        if (e.storageArea === localStorage && e.key.slice(0, 5) === '[s3] ') {
-          vm.postIOData('cloud', {
-            varUpdate: {
-              name: e.key.slice(5),
-              value: e.newValue
-            }
-          });
-        }
-      });
-    });
-    % /cloud-localstorage %
-    % cloud-ws %
-    let ws;
-    function openConnection() {
-      try {
-        ws = new WebSocket({CLOUD_HOST});
-      } catch (err) {
-        console.warn(err);
-        return;
-      }
-      ws.onmessage = onMessage;
-      ws.onopen = onOpen;
-      ws.onclose = onClose;
-    }
-    openConnection();
-    function onMessage(e) {
-      e.data.split('\n').forEach(message => {
-        if (message) {
-          const { name, value } = JSON.parse(message)
-          vm.postIOData('cloud', {
-            varUpdate: {name, value}
-          });
-        }
-      });
-    }
-    function sendData(data) {
-      data.user = DESIRED_USERNAME;
-      data.project_id = PROJECT_ID;
-      ws.send(JSON.stringify(data) + '\n');
-    }
-    function onOpen() {
-      sendData({method: 'handshake'});
-    }
-    function onClose() {
-      setTimeout(openConnection, 500);
-    }
-    vm.setCloudProvider({
-      updateVariable(name, value) {
-        sendData({method: 'set', name, value});
-      },
-      createVariable: noop,
-      renameVariable: noop,
-      deleteVariable: noop,
-      requestCloseConnection() {
-        if (ws && ws.readyState !== WebSocket.CLOSING && ws.readyState !== WebSocket.CLOSED) {
-          ws.onclose = noop;
-          ws.close();
-        }
-      }
-    })
-    % /cloud-ws %
-
-    vm.setCompatibilityMode(COMPAT);
-    vm.setTurboMode(TURBO);
-    % limits %
-    vm.requireLimits(false);
-    % /limits %
-    vm.greenFlag();
-
-    initialized = true;
-  });
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
@@ -624,10 +481,106 @@ const runBenchmark = function () {
   vm.attachV2SVGAdapter(new ScratchSVGRenderer.SVGRenderer());
   vm.attachV2BitmapAdapter(new ScratchSVGRenderer.BitmapAdapter(% custom-ratio % WIDTH, HEIGHT % /custom-ratio %));
 
-  const askBoxWrapper = document.getElementById('asking-box');
-  const question = document.getElementById('question');
-  const askBox = document.getElementById('answer');
+  const noop = () => null;
+  vm.setVideoProvider(new VideoProvider());
 
+  let cloudProvider;
+
+  % cloud-localstorage %
+  cloudProvider = {
+    updateVariable(name, value) {
+      try {
+        localStorage.setItem('[s3] ' + name, value);
+      } catch (e) {
+        console.error('Cannot use localStorage?', e);
+      }
+    },
+    createVariable: noop,
+    renameVariable: noop,
+    deleteVariable: noop,
+    requestCloseConnection: noop
+  };
+  % /cloud-localstorage %
+
+  % cloud-ws %
+  let ws;
+  function openConnection() {
+    try {
+      ws = new WebSocket({CLOUD_HOST});
+    } catch (err) {
+      console.warn(err);
+      return;
+    }
+    ws.onmessage = onMessage;
+    ws.onopen = onOpen;
+    ws.onclose = onClose;
+  }
+  openConnection();
+  function onMessage(e) {
+    e.data.split('\n').forEach(message => {
+      if (message) {
+        const { name, value } = JSON.parse(message)
+        vm.postIOData('cloud', {
+          varUpdate: {name, value}
+        });
+      }
+    });
+  }
+  function sendData(data) {
+    data.user = DESIRED_USERNAME;
+    data.project_id = PROJECT_ID;
+    ws.send(JSON.stringify(data) + '\n');
+  }
+  function onOpen() {
+    sendData({method: 'handshake'});
+  }
+  function onClose() {
+    setTimeout(openConnection, 500);
+  }
+  cloudProvider = {
+    updateVariable(name, value) {
+      sendData({method: 'set', name, value});
+    },
+    createVariable: noop,
+    renameVariable: noop,
+    deleteVariable: noop,
+    requestCloseConnection() {
+      if (ws && ws.readyState !== WebSocket.CLOSING && ws.readyState !== WebSocket.CLOSED) {
+        ws.onclose = noop;
+        ws.close();
+      }
+    }
+  };
+  % /cloud-ws %
+
+  vm.setCompatibilityMode(COMPAT);
+  vm.setTurboMode(TURBO);
+  % limits %
+  vm.requireLimits(false);
+  % /limits %
+
+  vm.start();
+
+  % loading-progress %
+  const progress = document.getElementById('loading-progress');
+  const _load = storage.webHelper.load;
+  let total = 0, complete = 0;
+  storage.webHelper.load = function (...args) {
+    const result = _load.call(this, ...args);
+    total += 1;
+    progress.textContent = complete + '/' + total;
+    result.then(() => {
+      complete += 1;
+      progress.textContent = complete + '/' + total;
+    });
+    return result;
+  };
+  % /loading-progress %
+  % loading-image %
+  const loadingImage = document.getElementById('loading-image');
+  % /loading-image %
+
+  // MOUSE
   /* https://github.com/LLK/scratch-gui/blob/develop/src/containers/stage.jsx#L176-L300 */
   const getEventXY = e => {
     if (e.touches && e.touches[0]) {
@@ -803,6 +756,7 @@ const runBenchmark = function () {
   });
   % /pointer-lock %
 
+  // KEY PRESSED?
   /* https://github.com/LLK/scratch-gui/blob/develop/src/lib/vm-listener-hoc.jsx#L86-L115 */
   document.addEventListener('keydown', e => {
     if (e.target !== document && e.target !== document.body) return;
@@ -826,6 +780,9 @@ const runBenchmark = function () {
     }
   });
 
+  // ASK AND WAIT
+  const question = document.getElementById('question');
+  const askBox = document.getElementById('answer');
   vm.runtime.addListener('QUESTION', questionData => {
     /* null means the asking was interrupted by stop script block */
     if (questionData === null) {
@@ -845,6 +802,7 @@ const runBenchmark = function () {
     }
   });
 
+  // MONITORS
   const getVariable = (targetId, variableId) => {
       const target = targetId ?
           vm.runtime.getTargetById(targetId) :
@@ -921,10 +879,47 @@ const runBenchmark = function () {
   vm.postIOData('userData', {username: DESIRED_USERNAME});
 
   % extension-url %
-  vm.extensionManager.loadExtensionURL(EXTENSION_URL);
+  await vm.extensionManager.loadExtensionURL(EXTENSION_URL);
   % /extension-url %
 
-  vm.start();
+  await fetch(FILE)
+    .then(r => r.arrayBuffer())
+    .then(b => vm.loadProject(b))
+
+  % loading-progress %
+  if (progress.parentNode) {
+    progress.parentNode.removeChild(progress);
+  }
+  % /loading-progress %
+  % loading-image %
+  if (loadingImage.parentNode) {
+    loadingImage.parentNode.removeChild(loadingImage);
+  }
+  % /loading-image %
+
+  if (cloudProvider) vm.setCloudProvider(cloudProvider);
+  % cloud-localstorage %
+  const stageVariables = vm.runtime.getTargetForStage().variables;
+  for (const { name, isCloud } of Object.values(stageVariables)) {
+    if (isCloud) {
+      const value = localStorage.getItem('[s3] ' + name);
+      if (value === null) continue;
+      vm.postIOData('cloud', { varUpdate: { name, value } });
+    }
+  }
+  window.addEventListener('storage', e => {
+    if (e.storageArea === localStorage && e.key.slice(0, 5) === '[s3] ') {
+      vm.postIOData('cloud', {
+        varUpdate: {
+          name: e.key.slice(5),
+          value: e.newValue
+        }
+      });
+    }
+  });
+  % /cloud-localstorage %
+
+  vm.greenFlag();
 };
 
 window.onload = function () {

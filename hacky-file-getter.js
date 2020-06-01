@@ -1,35 +1,22 @@
 const extensionWorkerGet = /new\s+Worker\([^")]*"[^"]*(extension-worker(?:\.min)?\.js)"\)/
 
-window.downloadAsHTML = (() => {
-const collecteyData = {assets: {}};
-
 /**
  * @param {Asset} asset - calculate a URL for this asset.
  * @returns {string} a URL to download a project file.
  */
-const getProjectUrl = function (asset) {
-    const assetIdParts = asset.assetId.split('.');
-    const assetUrlParts = ['https://projects.scratch.mit.edu/', assetIdParts[0]];
-    if (assetIdParts[1]) {
-        assetUrlParts.push(assetIdParts[1]);
-    }
-    return collecteyData.projectJSON = assetUrlParts.join('');
+const getProjectUrl = ({ assetId }) => {
+  const [id, otherPart] = assetId.split('.');
+  const assetUrlParts = ['https://projects.scratch.mit.edu/', id];
+  if (otherPart) assetUrlParts.push(otherPart);
+  return assetUrlParts.join('');
 };
 
 /**
  * @param {Asset} asset - calculate a URL for this asset.
  * @returns {string} a URL to download a project asset (PNG, WAV, etc.)
  */
-const getAssetUrl = function (asset) {
-    const assetUrlParts = [
-        'https://cdn.assets.scratch.mit.edu/',
-        'internalapi/asset/',
-        asset.assetId,
-        '.',
-        asset.dataFormat,
-        '/get/'
-    ];
-    return collecteyData.assets[asset.assetId] = assetUrlParts.join('');
+const getAssetUrl = ({ assetId, dataFormat }) => {
+  return `https://cdn.assets.scratch.mit.edu/internalapi/asset/${assetId}.${dataFormat}/get/`;
 };
 
 class LoadingProgress {
@@ -76,7 +63,7 @@ const runBenchmark = function (id, logProgress) {
     vm.downloadProjectId(id);
 
     vm.on('workspaceUpdate', () => {
-        res(collecteyData);
+        res(vm);
     });
 
     // Run threads
@@ -100,13 +87,11 @@ function removePercentSection(str, key) {
   }
   return str;
 }
-function getDataURLFromURL(url) {
-  return fetch(url).then(r => r.blob()).then(getDataURL);
-}
 function getDataURL(blob) {
-  return new Promise(res => {
+  return new Promise((res, rej) => {
     const reader = new FileReader();
     reader.onload = e => res(e.target.result);
+    reader.onerror = rej
     reader.readAsDataURL(blob);
   });
 }
@@ -141,25 +126,21 @@ function downloadAsHTML(projectSrc, {
       throw new Error('error logged')
     }
   }
-  log('Getting assets...', 'status');
+  log('Getting project...', 'status');
   return Promise.all([
     // make preface variables
-    projectSrc.id
+    (projectSrc.id
       ? runBenchmark(projectSrc.id, ({complete, total}, file) => {
         log(complete + '/' + total + (file ? ` (+ ${file.data.length / 1000} kB ${file.dataFormat})` : ''), 'progress')
       })
-        .then(({assets, projectJSON}) => {
-          log('Assembling assets...', 'status');
-          return Promise.all([
-            getDataURLFromURL(projectJSON).then(data => projectJSON = data),
-            ...Object.keys(assets).map(assetId => getDataURLFromURL(assets[assetId]).then(data => assets[assetId] = data))
-          ]).then(() => {
-            log('Assets ready.', 'status');
-            return `var SRC = "id",\nPROJECT_JSON = "${projectJSON}",\n`
-              + `ASSETS = ${JSON.stringify(assets)},\n`;
-          });
+        .then(vm => {
+          log('Creating .sb3 file...', 'status');
+          return vm.saveProjectSb3()
         })
-      : Promise.resolve(`var SRC = "file",\nFILE = "${projectSrc.data}",\n`),
+      : Promise.resolve(projectSrc.file))
+      .then(async blob => {
+        return `var FILE = ${JSON.stringify(await getDataURL(blob))},\n`
+      }),
 
     // fetch scripts
     noVM
@@ -266,6 +247,3 @@ function downloadAsHTML(projectSrc, {
       .replace(/\{SCRIPTS\}/g, () => scripts);
   });
 }
-
-return downloadAsHTML;
-})();

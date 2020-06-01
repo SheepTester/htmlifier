@@ -201,14 +201,9 @@ function log(text, style) {
 function getProject() {
   if (document.querySelector('input[name="upload-mode"]:checked').value === 'file') {
     if (!file.files || !file.files[0]) return Promise.reject(new Error('No file selected'));
-    return new Promise((res, rej) => {
-      const reader = new FileReader();
-      reader.onload = () => res({data: reader.result});
-      reader.onerror = rej;
-      reader.readAsDataURL(file.files[0]);
-    });
+    return { file: file.files[0] };
   } else {
-    return Promise.resolve({id: id.value});
+    return {id: id.value};
   }
 }
 function load() {
@@ -216,27 +211,26 @@ function load() {
   otherHtmlifyBtn.disabled = true;
   logOutput.innerHTML = '';
   scroll = true;
-  getProject()
-    .then(src => downloadAsHTML(src, {
-      title: title.value,
-      username: username.value,
-      log,
-      progressBar: progressBar.checked,
-      fullscreen: fullscreen.checked,
-      monitorColour: useColour.checked ? monitorColour.value : null,
-      cloudServer: document.querySelector('input[name="cloud-provider"]:checked').value === 'ws'
-        ? cloudServer.value : null,
-      projectId: id.value,
-      loadingImage: useLoadingImage ? loadingImage.files[0] : null,
-      customRatio: wider.checked,
-      width: wider.checked ? width.value : 480,
-      height: wider.checked ? height.value : 360,
-      extension: extensionURL.value || null,
-      noLimits: noLimits.checked,
-      pointerLock: pointerLock.checked,
-      stretch: stretch.checked,
-      noCursor: noCursor.checked
-    }))
+  downloadAsHTML(getProject(), {
+    title: title.value,
+    username: username.value,
+    log,
+    progressBar: progressBar.checked,
+    fullscreen: fullscreen.checked,
+    monitorColour: useColour.checked ? monitorColour.value : null,
+    cloudServer: document.querySelector('input[name="cloud-provider"]:checked').value === 'ws'
+      ? cloudServer.value : null,
+    projectId: id.value,
+    loadingImage: useLoadingImage ? loadingImage.files[0] : null,
+    customRatio: wider.checked,
+    width: wider.checked ? width.value : 480,
+    height: wider.checked ? height.value : 360,
+    extension: extensionURL.value || null,
+    noLimits: noLimits.checked,
+    pointerLock: pointerLock.checked,
+    stretch: stretch.checked,
+    noCursor: noCursor.checked
+  })
     .then(html => {
       log('Attempting to download HTML file...', 'status')
       download(html, title.value + '.html', 'text/html');
