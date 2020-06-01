@@ -127,6 +127,9 @@ function downloadAsHTML(projectSrc, {
   loadingImage = null
 } = {}) {
   const modded = true
+  // Otherwise, the modded NotVirtualMachine will not get width and height
+  // and that messes up mouse things (see #7)
+  customRatio = true
   function problemFetching (file) {
     return () => {
       log(`There was a problem fetching ${file} from the internet`, 'error')
