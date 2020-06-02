@@ -23,6 +23,9 @@ body {
   position: relative;
   % no-cursor % cursor: none; % /no-cursor %
 }
+.loading #wrapper {
+  visibility: hidden;
+}
 #monitors {
   position: absolute;
   top: 0;
@@ -64,6 +67,11 @@ body {
   position: fixed;
   max-width: 100%;
   max-height: 100%;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
 }
 % /loading-image %
 % fullscreen %
@@ -204,7 +212,12 @@ body {
 }
 </style>
 </head>
-<body>
+<body class="loading">
+<script type="text/javascript">
+if (true % loading-image % && false % /loading-image %) {
+  document.body.classList.remove('loading');
+}
+</script>
 <div id="wrapper">
 <canvas id="stage"></canvas>
 <div id="monitors"></div>
@@ -921,17 +934,6 @@ const runBenchmark = async function () {
     .then(r => r.arrayBuffer())
     .then(b => vm.loadProject(b))
 
-  % loading-progress %
-  if (progress.parentNode) {
-    progress.parentNode.removeChild(progress);
-  }
-  % /loading-progress %
-  % loading-image %
-  if (loadingImage.parentNode) {
-    loadingImage.parentNode.removeChild(loadingImage);
-  }
-  % /loading-image %
-
   vm.setCloudProvider(cloudProvider);
   % cloud-localstorage %
   const stageVariables = vm.runtime.getTargetForStage().variables;
@@ -967,6 +969,18 @@ const runBenchmark = async function () {
   % cloud-ws %
   openConnection();
   % /cloud-ws %
+
+  % loading-progress %
+  if (progress.parentNode) {
+  progress.parentNode.removeChild(progress);
+  }
+  % /loading-progress %
+  % loading-image %
+  if (loadingImage.parentNode) {
+  loadingImage.parentNode.removeChild(loadingImage);
+  }
+  document.body.classList.remove('loading');
+  % /loading-image %
 
   vm.greenFlag();
 };
