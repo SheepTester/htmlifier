@@ -455,9 +455,12 @@ const runBenchmark = async function () {
   Scratch.vm = vm;
 
   const storage = new ScratchStorage();
+  Scratch.storage = storage;
+  % loading-progess %
   const AssetType = storage.AssetType;
   storage.addWebStore([AssetType.Project], () => PROJECT_JSON);
   storage.addWebStore([AssetType.ImageVector, AssetType.ImageBitmap, AssetType.Sound], asset => ASSETS[asset.assetId]);
+  % /loading-progess %
   vm.attachStorage(storage);
 
   function resize() {
@@ -476,14 +479,24 @@ const runBenchmark = async function () {
   resize();
   Scratch.renderer = renderer;
   vm.attachRenderer(renderer);
+
   const audioEngine = new window.AudioEngine();
+  Scratch.audioEngine = audioEngine;
   vm.attachAudioEngine(audioEngine);
-  vm.attachV2SVGAdapter(new ScratchSVGRenderer.SVGRenderer());
-  vm.attachV2BitmapAdapter(new ScratchSVGRenderer.BitmapAdapter(% custom-ratio % WIDTH, HEIGHT % /custom-ratio %));
+
+  const svgRenderer = new ScratchSVGRenderer.SVGRenderer();
+  Scratch.svgRenderer = svgRenderer;
+  vm.attachV2SVGAdapter(svgRenderer);
+
+  const bitmapAdapter = new ScratchSVGRenderer.BitmapAdapter(% custom-ratio % WIDTH, HEIGHT % /custom-ratio %);
+  Scratch.bitmapAdapter = bitmapAdapter;
+  vm.attachV2BitmapAdapter(bitmapAdapter);
+
+  const videoProvider = new VideoProvider();
+  Scratch.videoProvider = videoProvider;
+  vm.setVideoProvider(videoProvider);
 
   const noop = () => null;
-  vm.setVideoProvider(new VideoProvider());
-
   let cloudProvider;
 
   % cloud-localstorage %

@@ -69,7 +69,6 @@
         <p><label><input type="checkbox" id="fullscreen" checked> Show fullscreen button?</label></p>
         <p><label><input type="checkbox" id="turbo"> Enable <a href="https://en.scratch-wiki.info/wiki/Turbo_Mode">turbo mode</a>?</label></p>
         <p><label><input type="checkbox" id="use-colour"> Use custom variable/list monitor colour: <input type="color" id="monitor-colour" value="#ff8c1a">? (If unchecked, a translucent black will be used.)</label></p>
-        <p><label><input type="checkbox" id="progress" checked> Load progress indicator?</label></p>
         <p><label><input type="checkbox" id="loading-image"> Loading image: <input type="file" id="loading-image-file" accept="image/*"></label></p>
         <p><label><input type="checkbox" id="compatibility" checked> Enable compatibility mode?</label><a id="ref-2" href="#note-2"><sup>2</sup></a></p>
         <p><label><input type="checkbox" id="stretch"> Stretch the canvas to fit (as opposed to maintaining the aspect ratio)?</label></p>
@@ -176,7 +175,6 @@ const logOutput = document.getElementById('log');
 const compatibility = document.getElementById('compatibility');
 const turbo = document.getElementById('turbo');
 const wider = document.getElementById('wider');
-const progressBar = document.getElementById('progress');
 const fullscreen = document.getElementById('fullscreen');
 const useColour = document.getElementById('use-colour');
 const monitorColour = document.getElementById('monitor-colour');
@@ -215,7 +213,6 @@ function load() {
     title: title.value,
     username: username.value,
     log,
-    progressBar: progressBar.checked,
     fullscreen: fullscreen.checked,
     monitorColour: useColour.checked ? monitorColour.value : null,
     cloudServer: document.querySelector('input[name="cloud-provider"]:checked').value === 'ws'

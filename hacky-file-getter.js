@@ -99,7 +99,7 @@ function downloadAsHTML(projectSrc, {
   title = 'Project',
   username = 'griffpatch',
   customRatio = false,
-  progressBar = true,
+  progressBar = false, // No longer useful
   fullscreen = true,
   log = console.log,
   monitorColour = null,
