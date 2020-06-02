@@ -104,6 +104,7 @@ function downloadAsHTML(projectSrc, {
   log = console.log,
   monitorColour = null,
   cloudServer = false,
+  specialCloud = false,
   projectId = null,
   noVM = false,
   width = 480,
@@ -230,8 +231,14 @@ function downloadAsHTML(projectSrc, {
     if (stretch) template = removePercentSection(template, 'fit');
     else template = removePercentSection(template, 'stretch');
     if (!noCursor) template = removePercentSection(template, 'no-cursor');
+    if (!specialCloud) {
+      template = removePercentSection(template, 'special-cloud');
+    }
     if (cloudServer) {
-      template = removePercentSection(template, 'cloud-localstorage')
+      if (!specialCloud) {
+        template = removePercentSection(template, 'cloud-localstorage');
+      }
+      template = removePercentSection(template, 'cloud-localstorage-provider')
         .replace(/\{CLOUD_HOST\}/g, () => JSON.stringify(cloudServer));
     } else {
       template = removePercentSection(template, 'cloud-ws');

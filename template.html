@@ -450,6 +450,8 @@ class VideoProvider {
 
 const Scratch = window.Scratch = window.Scratch || {};
 
+const CLOUD_PREFIX = '\u2601 ';
+
 const runBenchmark = async function () {
   const vm = new window.NotVirtualMachine(% custom-ratio % WIDTH, HEIGHT % /custom-ratio %);
   Scratch.vm = vm;
@@ -497,25 +499,6 @@ const runBenchmark = async function () {
   vm.setVideoProvider(videoProvider);
 
   const noop = () => null;
-  let cloudProvider;
-
-  % cloud-localstorage %
-  cloudProvider = {
-    updateVariable(name, value) {
-      try {
-        localStorage.setItem('[s3] ' + name, value);
-      } catch (e) {
-        console.error('Cannot use localStorage?', e);
-      }
-    },
-    createVariable: noop,
-    renameVariable: noop,
-    deleteVariable: noop,
-    requestCloseConnection: noop
-  };
-  % /cloud-localstorage %
-
-  % cloud-ws %
   let ws;
   function openConnection() {
     try {
@@ -528,7 +511,6 @@ const runBenchmark = async function () {
     ws.onopen = onOpen;
     ws.onclose = onClose;
   }
-  openConnection();
   function onMessage(e) {
     e.data.split('\n').forEach(message => {
       if (message) {
@@ -550,21 +532,61 @@ const runBenchmark = async function () {
   function onClose() {
     setTimeout(openConnection, 500);
   }
-  cloudProvider = {
+  const cloudProvider = {
     updateVariable(name, value) {
-      sendData({method: 'set', name, value});
+      % special-cloud %
+      if (name === CLOUD_PREFIX + 'eval') {
+        try {
+          vm.postIOData('cloud', {
+            varUpdate: {
+              name: CLOUD_PREFIX + 'eval output',
+              value: eval(value)
+            }
+          });
+        } catch (err) {
+          vm.postIOData('cloud', {
+            varUpdate: {
+              name: CLOUD_PREFIX + 'eval error',
+              value: err.toString()
+            }
+          });
+        }
+      } else % cloud-ws % if (name.startsWith(CLOUD_PREFIX + 'local storage')) % /cloud-ws % {
+        % /special-cloud %
+        % cloud-localstorage %
+        try {
+          localStorage.setItem('[s3] ' + name, value);
+        } catch (e) {
+          console.error('Cannot use localStorage?', e);
+        }
+        % /cloud-localstorage %
+        % special-cloud %
+        % cloud-ws %
+      } else {
+        % /cloud-ws %
+        % /special-cloud %
+        % cloud-ws %
+        sendData({method: 'set', name, value});
+        % /cloud-ws %
+        % special-cloud %
+      }
+      % /special-cloud %
     },
     createVariable: noop,
     renameVariable: noop,
     deleteVariable: noop,
+    % cloud-ws %
     requestCloseConnection() {
       if (ws && ws.readyState !== WebSocket.CLOSING && ws.readyState !== WebSocket.CLOSED) {
         ws.onclose = noop;
         ws.close();
       }
     }
+    % /cloud-ws %
+    % cloud-localstorage-provider %
+    requestCloseConnection: noop
+    % /cloud-localstorage-provider %
   };
-  % /cloud-ws %
 
   vm.setCompatibilityMode(COMPAT);
   vm.setTurboMode(TURBO);
@@ -910,11 +932,16 @@ const runBenchmark = async function () {
   }
   % /loading-image %
 
-  if (cloudProvider) vm.setCloudProvider(cloudProvider);
+  vm.setCloudProvider(cloudProvider);
   % cloud-localstorage %
   const stageVariables = vm.runtime.getTargetForStage().variables;
   for (const { name, isCloud } of Object.values(stageVariables)) {
     if (isCloud) {
+      % special-cloud %
+      % cloud-ws %
+      if (!name.startsWith(CLOUD_PREFIX + 'local storage')) continue;
+      % /cloud-ws %
+      % /special-cloud %
       const value = localStorage.getItem('[s3] ' + name);
       if (value === null) continue;
       vm.postIOData('cloud', { varUpdate: { name, value } });
@@ -922,15 +949,24 @@ const runBenchmark = async function () {
   }
   window.addEventListener('storage', e => {
     if (e.storageArea === localStorage && e.key.slice(0, 5) === '[s3] ') {
+      const name = e.key.slice(5);
+      % special-cloud %
+      % cloud-ws %
+      if (!name.startsWith(`[s3] ${CLOUD_PREFIX}local storage`)) return;
+      % /cloud-ws %
+      % /special-cloud %
       vm.postIOData('cloud', {
         varUpdate: {
-          name: e.key.slice(5),
+          name,
           value: e.newValue
         }
       });
     }
   });
   % /cloud-localstorage %
+  % cloud-ws %
+  openConnection();
+  % /cloud-ws %
 
   vm.greenFlag();
 };
