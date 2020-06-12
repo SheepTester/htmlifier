@@ -42,33 +42,40 @@ class LoadingProgress {
     }
 }
 
+// Basically vm.downloadProjectId except it actually returns the promise
+function downloadProjectId (vm, storage, id) {
+  return storage.load(storage.AssetType.Project, id)
+    .then(projectAsset => vm.loadProject(projectAsset.data));
+}
+
 /**
  * Run the benchmark with given parameters in the location's hash field or
  * using defaults.
  */
 const runBenchmark = function (id, logProgress) {
-  return new Promise(res => {
-    // Lots of global variables to make debugging easier
-    // Instantiate the VM.
-    const vm = new window.NotVirtualMachine();
+  // return new Promise(res => {
+  // Lots of global variables to make debugging easier
+  // Instantiate the VM.
+  const vm = new window.NotVirtualMachine();
+  const storage = new ScratchStorage(); /* global ScratchStorage */
+  window.Scratch = { vm, storage };
 
-    const storage = new ScratchStorage(); /* global ScratchStorage */
-    const AssetType = storage.AssetType;
-    storage.addWebStore([AssetType.Project], getProjectUrl);
-    storage.addWebStore([AssetType.ImageVector, AssetType.ImageBitmap, AssetType.Sound], getAssetUrl);
-    vm.attachStorage(storage);
+  const AssetType = storage.AssetType;
+  storage.addWebStore([AssetType.Project], getProjectUrl);
+  storage.addWebStore([AssetType.ImageVector, AssetType.ImageBitmap, AssetType.Sound], getAssetUrl);
+  vm.attachStorage(storage);
 
-    if (logProgress) new LoadingProgress(logProgress).on(storage);
+  if (logProgress) new LoadingProgress(logProgress).on(storage);
 
-    vm.downloadProjectId(id);
+  // Run threads
+  vm.start();
 
-    vm.on('workspaceUpdate', () => {
-        res(vm);
-    });
+  return downloadProjectId(vm, storage, id).then(() => vm);
 
-    // Run threads
-    vm.start();
-  });
+  // vm.on('workspaceUpdate', () => {
+  //     res(vm);
+  // });
+  // });
 };
 
 function removePercentSection(str, key) {
