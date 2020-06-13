@@ -106,7 +106,7 @@ function getDataURL(blob) {
     const reader = new FileReader();
     reader.onload = e => reader.result
       ? res(reader.result)
-      : rej(new Error('File might be too large (could not generate a data URI of the file).'));
+      : rej(new Error('File might be too large (could not generate a data URI of the file). Try generating a .zip instead?'));
     reader.onerror = rej
     reader.readAsDataURL(blob);
   });
