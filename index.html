@@ -98,6 +98,7 @@
       </fieldset>
       <p>
         <button id="load-no-minify">HTMLify</button>
+        <label><input type="checkbox" id="autodownload" checked> Download automatically?</label>
       </p>
       <ul class="log" id="log"></ul>
       <p>If you want to view or edit the HTML file, you can use the specialized <a href="https://sheeptester.github.io/words-go-here/htmlifier/large-file-editor/">Large File Editor</a> to hide the long lines that may hang or crash normal text editors.</p>
@@ -215,6 +216,7 @@ const specialCloud = document.getElementById('special-cloud');
 const zip = document.getElementById('zip');
 const monitorText = document.getElementById('monitor-text');
 const transparentMonitors = document.getElementById('transparent-monitor');
+const autodownload = document.getElementById('autodownload')
 let scroll = false
 function log(text, style) {
   const entry = document.createElement('div')
@@ -222,6 +224,7 @@ function log(text, style) {
   entry.textContent = text
   logOutput.appendChild(entry)
   if (scroll) logOutput.scrollTop = logOutput.scrollHeight
+  return entry
 }
 function getProject() {
   if (document.querySelector('input[name="upload-mode"]:checked').value === 'file') {
@@ -261,9 +264,34 @@ function load() {
     transparentMonitors: transparentMonitors.checked,
   })
     .then(blob => {
-      log('Attempting to download file...', 'status')
-      download(blob, title.value + (blob.type === 'application/zip' ? '.zip' : '.html'), blob.type);
-      log('Done!', 'done');
+      function downloadBlob () {
+        log('Attempting to download file.', 'status');
+        download(blob, title.value + (blob.type === 'application/zip' ? '.zip' : '.html'), blob.type);
+      }
+      if (autodownload.checked) {
+        downloadBlob();
+      }
+      const entry = log('Done! ', 'done');
+      const downloadBtn = document.createElement('button');
+      downloadBtn.textContent = 'Download';
+      downloadBtn.addEventListener('click', downloadBlob);
+      entry.appendChild(downloadBtn);
+      if (blob.type === 'text/html') {
+        const previewBtn = document.createElement('button');
+        previewBtn.textContent = 'Open preview';
+        previewBtn.addEventListener('click', async e => {
+          const newTab = window.open('', '_blank');
+          newTab.document.write('<style>html, body { height: 100%; margin: 0; }</style><body></body>');
+          const frame = document.createElement('iframe');
+          frame.style = 'width: 100%; height: 100%; border: none;';
+          frame.srcdoc = await blob.text();
+          frame.addEventListener('load', e => {
+            newTab.document.title = frame.contentDocument.title;
+          });
+          newTab.document.body.appendChild(frame);
+        })
+        entry.appendChild(previewBtn);
+      }
       loadNoMinifyBtn.disabled = false;
       otherHtmlifyBtn.disabled = false;
     }).catch(err => {
