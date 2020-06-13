@@ -130,7 +130,8 @@ function downloadAsHTML(projectSrc, {
   noLimits = false,
   pointerLock = false,
   stretch = false,
-  noCursor = false
+  noCursor = false,
+  zip: outputZip = false,
 } = {}) {
   const modded = true
   // Otherwise, the modded NotVirtualMachine will not get width and height
@@ -147,6 +148,7 @@ function downloadAsHTML(projectSrc, {
   loadingProgress.callback = ({complete, total}, file) => {
     log(complete + '/' + total + (file ? ` (+ ${file.data.length / 1000} kB ${file.dataFormat})` : ''), 'progress')
   };
+  let zip
   return Promise.all([
     // make preface variables
     projectSrc.id
@@ -154,21 +156,31 @@ function downloadAsHTML(projectSrc, {
         .then(async ({ data: projectAsset }) => {
           log('Loading project...', 'status');
           await vm.loadProject(projectAsset);
-          log('Getting data URIs...', 'status');
-          const preface = `var TYPE = 'json',\nPROJECT_JSON = ${
-            JSON.stringify(await getDataURL(new Blob([projectAsset])))
-          },\nASSETS = ${
-            JSON.stringify(Object.fromEntries(await Promise.all(getAssets(vm.runtime)
-              .map(async ({ fileName, fileContent }) => [
-                fileName,
-                await getDataURL(new Blob([fileContent]))
-              ]))), null, 2)
-          },\n`;
-          return preface;
+          if (outputZip) {
+            zip = await JSZip.loadAsync(Scratch.vm.saveProjectSb3())
+            return 'var TYPE = "zip",\n';
+          } else {
+            log('Getting data URIs...', 'status');
+            const preface = `var TYPE = 'json',\nPROJECT_JSON = ${
+              JSON.stringify(await getDataURL(new Blob([projectAsset])))
+            },\nASSETS = ${
+              JSON.stringify(Object.fromEntries(await Promise.all(getAssets(vm.runtime)
+                .map(async ({ fileName, fileContent }) => [
+                  fileName,
+                  await getDataURL(new Blob([fileContent]))
+                ]))), null, 2)
+            },\n`;
+            return preface;
+          }
         })
       : Promise.resolve(projectSrc.file)
         .then(async blob => {
-          return `var TYPE = 'file',\nFILE = ${JSON.stringify(await getDataURL(blob))},\n`;
+          if (outputZip) {
+            zip = await JSZip.loadAsync(blob)
+            return 'var TYPE = "zip",\n';
+          } else {
+            return `var TYPE = 'file',\nFILE = ${JSON.stringify(await getDataURL(blob))},\n`;
+          }
         }),
 
     // fetch scripts
@@ -271,7 +283,7 @@ function downloadAsHTML(projectSrc, {
     } else {
       template = removePercentSection(template, 'cloud-ws');
     }
-    return template
+    const html = template
       .replace(/% \/?[a-z0-9-]+ %/g, '')
       // .replace(/\s*\r?\n\s*/g, '')
       .replace(/\{TITLE\}/g, () => title)
@@ -280,5 +292,19 @@ function downloadAsHTML(projectSrc, {
       .replace(/\{PROJECT_RATIO\}/g, () => `${width}/${height}`)
       .replace(/\{LOADING_IMAGE\}/g, () => loadingImageURL.replace(/&/g, '&amp;').replace(/"/g, '&quot;'))
       .replace(/\{SCRIPTS\}/g, () => scripts);
+    if (outputZip) {
+      zip.file('index.html', html);
+      log('Generating .zip file...', 'status');
+      return zip.generateAsync({
+        type: 'blob',
+        // Same as VirtualMachine#saveProjectSb3
+        compression: 'DEFLATE',
+        compressionOptions: {
+          level: 6
+        }
+      });
+    } else {
+      return new Blob([html], { type: 'text/html' });
+    }
   });
 }

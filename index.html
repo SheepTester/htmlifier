@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Exo:wght@500&family=Roboto:wght@300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./main.css">
     <script src="./download.js" charset="utf-8"></script>
+    <script src="./jszip.min.js" charset="utf-8"></script>
     <style media="screen">
       html {
         /* https://stackoverflow.com/a/56467997 */
@@ -74,6 +75,7 @@
         <p><label><input type="checkbox" id="stretch"> Stretch the canvas to fit (as opposed to maintaining the aspect ratio)?</label></p>
         <p><label><input type="checkbox" id="no-cursor"> Hide cursor?</label></p>
         <p><label><input type="checkbox" id="pointer-lock"> Lock the pointer on click? The mouse x/y blocks will report the mouse movement.</label><a id="ref-3" href="#note-3"><sup>3</sup></a></p>
+        <p><label><input type="checkbox" id="zip"> Output a .zip file? The .zip file will contain an index.html file and separate files for the project's assets.</p>
         <fieldset>
           <legend>Cloud variable source</legend>
           <p><label><input type="radio" name="cloud-provider" value="localstorage" checked> Save cloud variables locally using localStorage</label><a id="ref-1" href="#note-1"><sup>1</sup></a></p>
@@ -203,6 +205,7 @@ const pointerLock = document.getElementById('pointer-lock');
 const stretch = document.getElementById('stretch');
 const noCursor = document.getElementById('no-cursor');
 const specialCloud = document.getElementById('special-cloud');
+const zip = document.getElementById('zip');
 let scroll = false
 function log(text, style) {
   const entry = document.createElement('div')
@@ -243,11 +246,12 @@ function load() {
     pointerLock: pointerLock.checked,
     stretch: stretch.checked,
     noCursor: noCursor.checked,
-    specialCloud: specialCloud.checked
+    specialCloud: specialCloud.checked,
+    zip: zip.checked,
   })
-    .then(html => {
-      log('Attempting to download HTML file...', 'status')
-      download(html, title.value + '.html', 'text/html');
+    .then(blob => {
+      log('Attempting to download file...', 'status')
+      download(blob, title.value + (blob.type === 'application/zip' ? '.zip' : '.html'), blob.type);
       log('Done!', 'done');
       loadNoMinifyBtn.disabled = false;
       otherHtmlifyBtn.disabled = false;
@@ -263,9 +267,16 @@ function load() {
 }
 loadNoMinifyBtn.addEventListener('click', load);
 otherHtmlifyBtn.addEventListener('click', load);
+let defaultTitle = true;
+title.addEventListener('change', e => {
+  defaultTitle = false;
+});
 file.addEventListener('change', e => {
   if (file.files[0]) {
     document.querySelector('input[name="upload-mode"][value="file"]').checked = true;
+    if (defaultTitle) {
+      title.value = file.files[0].name.replace(/\.\w+$/, '').replace(/_/g, ' ')
+    }
   }
 });
 cloudServer.addEventListener('change', e => {
