@@ -465,7 +465,7 @@ const Scratch = window.Scratch = window.Scratch || {};
 
 const CLOUD_PREFIX = '\u2601 ';
 
-const runBenchmark = async function () {
+const runBenchmark = function () {
   const vm = new window.NotVirtualMachine(% custom-ratio % WIDTH, HEIGHT % /custom-ratio %);
   Scratch.vm = vm;
 
@@ -929,15 +929,20 @@ const runBenchmark = async function () {
 
   vm.postIOData('userData', {username: DESIRED_USERNAME});
 
-  % extension-url %
-  await vm.extensionManager.loadExtensionURL(EXTENSION_URL);
-  % /extension-url %
+  return Promise.resolve()
 
-  await vm.loadProject(
-    TYPE === 'file'
-      ? await fetch(FILE).then(r => r.arrayBuffer())
-      : (await storage.load(storage.AssetType.Project)).data
-  )
+    % extension-url %
+    .then(() => vm.extensionManager.loadExtensionURL(EXTENSION_URL))
+    % /extension-url %
+
+    .then(
+      () => TYPE === 'file'
+        ? fetch(FILE).then(r => r.arrayBuffer())
+        : storage.load(storage.AssetType.Project).then(asset => asset.data)
+    )
+    .then(data => vm.loadProject(data))
+
+    .then(() => {
 
   vm.setCloudProvider(cloudProvider);
   % cloud-localstorage %
@@ -988,6 +993,8 @@ const runBenchmark = async function () {
   % /loading-image %
 
   vm.greenFlag();
+
+    });
 };
 
 window.onload = function () {
