@@ -939,7 +939,22 @@ const runBenchmark = function () {
 
     .then(
       () => TYPE === 'file'
-        ? fetch(FILE).then(r => r.arrayBuffer())
+        ? Promise.all(FILE
+          .map(slice => fetch(slice)
+            .then(r => r.arrayBuffer())))
+          .then(slices => {
+            if (slices.length === 1) return slices[0];
+            // https://gist.github.com/72lions/4528834
+            let bytes = 0;
+            for (const slice of slices) bytes += slice.byteLength;
+            const array = new Uint8Array(bytes);
+            let pointer = 0;
+            for (const slice of slices) {
+              array.set(new Uint8Array(slice), pointer);
+              pointer += slice.byteLength;
+            }
+            return array.buffer;
+          })
         : storage.load(storage.AssetType.Project).then(asset => asset.data)
     )
     .then(data => vm.loadProject(data))

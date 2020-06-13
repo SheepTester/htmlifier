@@ -1,4 +1,5 @@
 const extensionWorkerGet = /new\s+Worker\([^")]*"[^"]*(extension-worker(?:\.min)?\.js)"\)/
+const SLICE_SIZE = 1024 * 1024; // 1 MiB
 
 /**
  * @param {Asset} asset - calculate a URL for this asset.
@@ -179,7 +180,13 @@ function downloadAsHTML(projectSrc, {
             zip = await JSZip.loadAsync(blob)
             return 'var TYPE = "zip",\n';
           } else {
-            return `var TYPE = 'file',\nFILE = ${JSON.stringify(await getDataURL(blob))},\n`;
+            // Inspired by https://stackoverflow.com/a/25813769
+            const slices = [];
+            for (let i = 0; i < blob.size; i += SLICE_SIZE) {
+              slices.push(blob.slice(i, i + SLICE_SIZE));
+            }
+            const dataURLs = await Promise.all(slices.map(getDataURL))
+            return `var TYPE = 'file',\nFILE = ${JSON.stringify(dataURLs)},\n`;
           }
         }),
 
