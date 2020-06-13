@@ -68,20 +68,27 @@
         <p><label for="username">Username value: </label><input type="text" placeholder="Username" value="ScratchCat" id="username"> (the value that the username block reports)</p>
         <p><label><input type="checkbox" id="fullscreen" checked> Show fullscreen button?</label></p>
         <p><label><input type="checkbox" id="turbo"> Enable <a href="https://en.scratch-wiki.info/wiki/Turbo_Mode">turbo mode</a>?</label></p>
-        <p><label><input type="checkbox" id="use-colour"> Use custom variable/list monitor colour: <input type="color" id="monitor-colour" value="#ff8c1a">? (If unchecked, a translucent black will be used.)</label></p>
         <p><label><input type="checkbox" id="progress" checked> Load progress indicator?</label></p>
         <p><label><input type="checkbox" id="loading-image"> Loading image: <input type="file" id="loading-image-file" accept="image/*"></label></p>
         <p><label><input type="checkbox" id="compatibility" checked> Enable compatibility mode?</label><a id="ref-2" href="#note-2"><sup>2</sup></a></p>
         <p><label><input type="checkbox" id="stretch"> Stretch the canvas to fit (as opposed to maintaining the aspect ratio)?</label></p>
         <p><label><input type="checkbox" id="no-cursor"> Hide cursor?</label></p>
         <p><label><input type="checkbox" id="pointer-lock"> Lock the pointer on click? The mouse x/y blocks will report the mouse movement.</label><a id="ref-3" href="#note-3"><sup>3</sup></a></p>
-        <p><label><input type="checkbox" id="zip"> Output a .zip file? The .zip file will contain an index.html file and separate files for the project's assets.</p>
+        <p><label><input type="checkbox" id="zip"> Output a .zip file? The .zip file will contain an index.html file and separate files for the project's assets.</label></p>
+        <fieldset>
+          <legend>Monitor style</legend>
+          <p><label><input type="checkbox" id="use-colour"> Use custom variable/list monitor colour: <input type="color" id="monitor-colour" value="#ff8c1a">? (If unchecked, a translucent black will be used.)</label></p>
+          <p><label>Monitor text colour: <input type="color" id="monitor-text" value="#ffffff"></label></p>
+          <p><label><input type="checkbox" id="transparent-monitor"> Hide the monitor background boxes?</label></p>
+        </fieldset>
+        <p></p>
         <fieldset>
           <legend>Cloud variable source</legend>
           <p><label><input type="radio" name="cloud-provider" value="localstorage" checked> Save cloud variables locally using localStorage</label><a id="ref-1" href="#note-1"><sup>1</sup></a></p>
           <p><label><input type="radio" name="cloud-provider" value="ws"> Use a <a href="https://github.com/SheepTester/primitive-cloud-server">custom server</a>: <input type="url" id="cloud-ws" placeholder="ws://localhost:3000/"></label></p>
           <p><label><input type="checkbox" id="special-cloud"> Give certain cloud variables special behaviours depending on the name?</label><a id="ref-4" href="#note-4"><sup>4</sup></a></p>
         </fieldset>
+        <p></p>
         <fieldset>
           <legend><a href="https://sheeptester.github.io/scratch-gui/">E羊icques</a> (modded) options</legend>
           <p><label><input type="checkbox" id="wider"> Does this project use a <a href="https://sheeptester.github.io/scratch-gui/?width=640&height=360">custom size</a>?</label> <label>Width: <input type="number" value="640" id="width"></label> <label>Height: <input type="number" value="360" id="height"></label></p>
@@ -206,6 +213,8 @@ const stretch = document.getElementById('stretch');
 const noCursor = document.getElementById('no-cursor');
 const specialCloud = document.getElementById('special-cloud');
 const zip = document.getElementById('zip');
+const monitorText = document.getElementById('monitor-text');
+const transparentMonitors = document.getElementById('transparent-monitor');
 let scroll = false
 function log(text, style) {
   const entry = document.createElement('div')
@@ -248,6 +257,8 @@ function load() {
     noCursor: noCursor.checked,
     specialCloud: specialCloud.checked,
     zip: zip.checked,
+    monitorText: monitorText.value,
+    transparentMonitors: transparentMonitors.checked,
   })
     .then(blob => {
       log('Attempting to download file...', 'status')

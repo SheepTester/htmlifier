@@ -98,13 +98,16 @@ body {
 % /fullscreen %
 .monitor {
   position: absolute;
+  border: 1px solid transparent;
+  % monitor-box %
+  border-color: rgba(0, 0, 0, 0.2);
   background-color: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  % /monitor-box %
   border-radius: 0.25rem;
   font-size: 0.75rem;
   overflow: hidden;
   padding: 3px;
-  color: white;
+  color: {MONITOR_TEXT};
   white-space: pre;
 }
 .monitor-label {
@@ -123,12 +126,12 @@ body {
   transform: translateZ(0);
 }
 .default .monitor-value, .slider .monitor-value {
-  background-color: rgba(0, 0, 0, 0.5);
+  % monitor-box % background-color: rgba(0, 0, 0, 0.5); % /monitor-box %
   margin: 0 5px;
   padding: 1px 3px;
 }
 .large {
-  background-color: rgba(0, 0, 0, 0.6);
+  % monitor-box % background-color: rgba(0, 0, 0, 0.6); % /monitor-box %
   padding: 0.1rem 0.25rem;
   min-width: 3rem;
 }
@@ -161,8 +164,11 @@ body {
   transform: translateZ(0);
   text-align: left;
   border-radius: 0.25rem;
+  border: 1px solid transparent;
+  % monitor-box %
+  border-color: rgba(0, 0, 0, 0.2);
   background-color: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  % /monitor-box %
   height: 20px;
   line-height: 20px;
   padding: 0 5px;

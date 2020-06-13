@@ -132,6 +132,8 @@ function downloadAsHTML(projectSrc, {
   stretch = false,
   noCursor = false,
   zip: outputZip = false,
+  monitorText = 'white',
+  transparentMonitors = false,
 } = {}) {
   const modded = true
   // Otherwise, the modded NotVirtualMachine will not get width and height
@@ -283,6 +285,7 @@ function downloadAsHTML(projectSrc, {
     } else {
       template = removePercentSection(template, 'cloud-ws');
     }
+    if (transparentMonitors) template = removePercentSection(template, 'monitor-box');
     const html = template
       .replace(/% \/?[a-z0-9-]+ %/g, '')
       // .replace(/\s*\r?\n\s*/g, '')
@@ -290,6 +293,7 @@ function downloadAsHTML(projectSrc, {
       .replace(/\{HEIGHT\/WIDTH%\}/g, () => 100 * height / width)
       .replace(/\{WIDTH\/HEIGHT%\}/g, () => 100 * width / height)
       .replace(/\{PROJECT_RATIO\}/g, () => `${width}/${height}`)
+      .replace(/\{MONITOR_TEXT\}/g, () => monitorText)
       .replace(/\{LOADING_IMAGE\}/g, () => loadingImageURL.replace(/&/g, '&amp;').replace(/"/g, '&quot;'))
       .replace(/\{SCRIPTS\}/g, () => scripts);
     if (outputZip) {
