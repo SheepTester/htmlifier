@@ -104,7 +104,9 @@ function removePercentSection(str, key) {
 function getDataURL(blob) {
   return new Promise((res, rej) => {
     const reader = new FileReader();
-    reader.onload = e => res(e.target.result);
+    reader.onload = e => reader.result
+      ? res(reader.result)
+      : rej(new Error('File might be too large (could not generate a data URI of the file).'));
     reader.onerror = rej
     reader.readAsDataURL(blob);
   });

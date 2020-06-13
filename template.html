@@ -473,10 +473,12 @@ const runBenchmark = function () {
   Scratch.storage = storage;
   % loading-progess %
   const AssetType = storage.AssetType;
-  storage.addWebStore([AssetType.Project], () => PROJECT_JSON);
+  storage.addWebStore([AssetType.Project], () => TYPE === 'zip' ? './project.json' : PROJECT_JSON);
   storage.addWebStore(
     [AssetType.ImageVector, AssetType.ImageBitmap, AssetType.Sound],
-    ({ assetId, dataFormat }) => ASSETS[`${assetId}.${dataFormat}`]
+    ({ assetId, dataFormat }) => TYPE === 'zip'
+      ? `./${assetId}.${dataFormat}`
+      : ASSETS[`${assetId}.${dataFormat}`]
   );
   % /loading-progess %
   vm.attachStorage(storage);
