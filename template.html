@@ -474,7 +474,10 @@ const runBenchmark = async function () {
   % loading-progess %
   const AssetType = storage.AssetType;
   storage.addWebStore([AssetType.Project], () => PROJECT_JSON);
-  storage.addWebStore([AssetType.ImageVector, AssetType.ImageBitmap, AssetType.Sound], asset => ASSETS[asset.assetId]);
+  storage.addWebStore(
+    [AssetType.ImageVector, AssetType.ImageBitmap, AssetType.Sound],
+    ({ assetId, dataFormat }) => ASSETS[`${assetId}.${dataFormat}`]
+  );
   % /loading-progess %
   vm.attachStorage(storage);
 
@@ -503,7 +506,7 @@ const runBenchmark = async function () {
   Scratch.svgRenderer = svgRenderer;
   vm.attachV2SVGAdapter(svgRenderer);
 
-  const bitmapAdapter = new ScratchSVGRenderer.BitmapAdapter(% custom-ratio % WIDTH, HEIGHT % /custom-ratio %);
+  const bitmapAdapter = new ScratchSVGRenderer.BitmapAdapter(null, null, % custom-ratio % WIDTH, HEIGHT % /custom-ratio %);
   Scratch.bitmapAdapter = bitmapAdapter;
   vm.attachV2BitmapAdapter(bitmapAdapter);
 
@@ -930,9 +933,11 @@ const runBenchmark = async function () {
   await vm.extensionManager.loadExtensionURL(EXTENSION_URL);
   % /extension-url %
 
-  await fetch(FILE)
-    .then(r => r.arrayBuffer())
-    .then(b => vm.loadProject(b))
+  await vm.loadProject(
+    TYPE === 'file'
+      ? await fetch(FILE).then(r => r.arrayBuffer())
+      : (await storage.load(storage.AssetType.Project)).data
+  )
 
   vm.setCloudProvider(cloudProvider);
   % cloud-localstorage %

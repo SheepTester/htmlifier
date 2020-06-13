@@ -48,35 +48,42 @@ function downloadProjectId (vm, storage, id) {
     .then(projectAsset => vm.loadProject(projectAsset.data));
 }
 
-/**
- * Run the benchmark with given parameters in the location's hash field or
- * using defaults.
- */
-const runBenchmark = function (id, logProgress) {
-  // return new Promise(res => {
-  // Lots of global variables to make debugging easier
-  // Instantiate the VM.
-  const vm = new window.NotVirtualMachine();
-  const storage = new ScratchStorage(); /* global ScratchStorage */
-  window.Scratch = { vm, storage };
-
-  const AssetType = storage.AssetType;
-  storage.addWebStore([AssetType.Project], getProjectUrl);
-  storage.addWebStore([AssetType.ImageVector, AssetType.ImageBitmap, AssetType.Sound], getAssetUrl);
-  vm.attachStorage(storage);
-
-  if (logProgress) new LoadingProgress(logProgress).on(storage);
-
-  // Run threads
-  vm.start();
-
-  return downloadProjectId(vm, storage, id).then(() => vm);
-
-  // vm.on('workspaceUpdate', () => {
-  //     res(vm);
-  // });
-  // });
+// Based on https://github.com/LLK/scratch-vm/blob/develop/src/serialization/serialize-assets.js
+const serializeAssets = function (runtime, assetType) {
+    const targets = runtime.targets;
+    const assetDescs = [];
+    for (let i = 0; i < targets.length; i++) {
+        const currTarget = targets[i];
+        const currAssets = currTarget.sprite[assetType];
+        for (let j = 0; j < currAssets.length; j++) {
+            const currAsset = currAssets[j];
+            const asset = currAsset.asset;
+            assetDescs.push({
+                fileName: `${asset.assetId}.${asset.dataFormat}`,
+                fileContent: asset.data});
+        }
+    }
+    return assetDescs;
 };
+const getAssets = runtime => [
+  ...serializeAssets(runtime, 'sounds'),
+  ...serializeAssets(runtime, 'costumes')
+];
+
+const vm = new window.NotVirtualMachine();
+const storage = new ScratchStorage(); /* global ScratchStorage */
+window.Scratch = { vm, storage };
+
+const AssetType = storage.AssetType;
+storage.addWebStore([AssetType.Project], getProjectUrl);
+storage.addWebStore([AssetType.ImageVector, AssetType.ImageBitmap, AssetType.Sound], getAssetUrl);
+vm.attachStorage(storage);
+
+const loadingProgress = new LoadingProgress();
+loadingProgress.on(storage);
+
+// Run threads
+vm.start();
 
 function removePercentSection(str, key) {
   /*
@@ -106,7 +113,7 @@ function downloadAsHTML(projectSrc, {
   title = 'Project',
   username = 'griffpatch',
   customRatio = false,
-  progressBar = false, // No longer useful
+  progressBar = true,
   fullscreen = true,
   log = console.log,
   monitorColour = null,
@@ -135,20 +142,32 @@ function downloadAsHTML(projectSrc, {
     }
   }
   log('Getting project...', 'status');
+  loadingProgress.callback = ({complete, total}, file) => {
+    log(complete + '/' + total + (file ? ` (+ ${file.data.length / 1000} kB ${file.dataFormat})` : ''), 'progress')
+  };
   return Promise.all([
     // make preface variables
-    (projectSrc.id
-      ? runBenchmark(projectSrc.id, ({complete, total}, file) => {
-        log(complete + '/' + total + (file ? ` (+ ${file.data.length / 1000} kB ${file.dataFormat})` : ''), 'progress')
-      })
-        .then(vm => {
-          log('Creating .sb3 file...', 'status');
-          return vm.saveProjectSb3()
+    projectSrc.id
+      ? storage.load(storage.AssetType.Project, projectSrc.id)
+        .then(async ({ data: projectAsset }) => {
+          log('Loading project...', 'status');
+          await vm.loadProject(projectAsset);
+          log('Getting data URIs...', 'status');
+          const preface = `var TYPE = 'json',\nPROJECT_JSON = ${
+            JSON.stringify(await getDataURL(new Blob([projectAsset])))
+          },\nASSETS = ${
+            JSON.stringify(Object.fromEntries(await Promise.all(getAssets(vm.runtime)
+              .map(async ({ fileName, fileContent }) => [
+                fileName,
+                await getDataURL(new Blob([fileContent]))
+              ]))), null, 2)
+          },\n`;
+          return preface;
         })
-      : Promise.resolve(projectSrc.file))
-      .then(async blob => {
-        return `var FILE = ${JSON.stringify(await getDataURL(blob))},\n`
-      }),
+      : Promise.resolve(projectSrc.file)
+        .then(async blob => {
+          return `var TYPE = 'file',\nFILE = ${JSON.stringify(await getDataURL(blob))},\n`;
+        }),
 
     // fetch scripts
     noVM
