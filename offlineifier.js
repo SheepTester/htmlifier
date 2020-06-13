@@ -47,13 +47,23 @@ function offlineify ({
       }),
     fetch('./hacky-file-getter.js').catch(problemFetching('the HTMLifying script')).then(toText('the HTMLifying script')).then(removeScriptTag),
     fetch('./download.js').catch(problemFetching('the downloader')).then(toText('the downloader')).then(removeScriptTag),
+    fetch('./jszip.min.js').catch(problemFetching('JSZip')).then(toText('JSZip')).then(removeScriptTag),
     fetch('./template.html').catch(problemFetching('the HTML template')).then(toDataURI),
     fetch('./main.css').catch(problemFetching('the CSS')).then(toText('the CSS'))
-  ]).then(([html, [vm, extensionWorker], hackyFileGetter, downloader, template, css]) => {
+  ]).then(([
+    html,
+    [vm, extensionWorker],
+    hackyFileGetter,
+    downloader,
+    jszip,
+    template,
+    css
+  ]) => {
     html = html
       .replace('<body>', '<body class="offline">')
       // Using functions to avoid $ substitution
       .replace('<script src="./hacky-file-getter.js" charset="utf-8"></script>', () => `<script>${hackyFileGetter}</script>`)
+      .replace('<script src="./jszip.min.js" charset="utf-8"></script>', () => `<script>${jszip}</script>`)
       .replace('<script src="./download.js" charset="utf-8"></script>', () => `<script>${downloader}</script>`)
       // . wildcard in regex doesn't include newlines lol
       // https://stackoverflow.com/a/45981809
