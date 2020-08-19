@@ -12,8 +12,8 @@
 html, body {
   background-color:#ffffff00;
   font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
-  margin-left: 5vw;
-  margin-right: 5vw;
+  margin-left: 7vw;
+  margin-right: 7vw;
 }
 
 html {
@@ -93,6 +93,9 @@ a:hover {
   border-radius: 20px;
   color: #111;
   background-color: #fff;
+  padding-left: 22px;
+  padding-right: 22px;
+  margin-bottom: 200px;
 }
 
 .htmlify {
