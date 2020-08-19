@@ -1,23 +1,53 @@
 /**
- * CSS by Mr. Cringe Kid (https://scratch.mit.edu/users/mrcringekidyt/).
- *
- * See changes made to their CSS on Github:
- * https://github.com/SheepTester/words-go-here/commits/master/htmlifier/main.css
+ * CSS by Vanceagher
  */
 
-body {
-  font-family: 'Roboto', sans-serif;
-  background-color: #37373c;
-  color: white;
-  margin: 0px;
-  padding: 0px;
+@import url(https://fonts.googleapis.com/css2?family=Helvetica:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap);
+
+@font-face { 
+  font-family: 'ScratchFont';
+  src: url('scratchfont.ttf');
 }
+
+html, body {
+  background-color:#ffffff00;
+  font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif;
+  margin-left: 15vw;
+  margin-right: 15vw;
+}
+
+html {
+  background-color: #4D97FF;
+}
+
+h1 {
+  color: #f8a31e;
+  font-family: ScratchFont;
+  font-size: 100px;
+  text-shadow: -1px 1px 0 #fff, 1px 1px 0 #fff, 1px -1px 0 #fff, -1px -1px 0 #fff;
+  text-align: center;
+  margin-top: 55px;
+}
+
 a {
   text-decoration: none;
-  color: #00d755;
+  color: #e851de;
 }
 a:hover {
   text-decoration: underline;
+}
+
+#offlineify {
+  border-radius: 5px;
+  border: none;
+  background-color: #dbdbdb;
+  padding: 10px;
+  transition: .2s;
+}
+
+#offlineify:hover {
+  background-color: #ccc;
+  cursor: pointer;
 }
 
 .log {
@@ -59,18 +89,12 @@ a:hover {
 }
 
 .mainarea {
-  margin: 50px;
-  background-color: #19191e;
-  color: #f0f0f0;
-  padding: 25px;
-  border-radius: 8px;
+  padding-top: 2px;
+  border-radius: 20px;
+  color: #111;
+  background-color: #fff;
 }
-@media (max-width: 600px) {
-  .mainarea {
-    margin: 0;
-    border-radius: 0;
-  }
-}
+
 .htmlify {
   position: relative;
   top: -83px;
@@ -87,4 +111,91 @@ a:hover {
   background-color: #78c3ff;
   border-radius: 0px;
   transition: background-color 0.25s, border-radius 0.25s;
+}
+
+#monitor-colour {
+  border: none;
+  background: none;
+  height: 20px;
+  width: 20px;
+}
+
+#monitor-text {
+  border: none;
+  background: none;
+  height: 20px;
+  width: 20px;
+}
+
+#id {
+  position: absolute;
+  margin-left: 12px;
+  border-radius: 5px;
+  border: none;
+  background-color: #dbdbdb;
+  padding: 5px;
+}
+
+#file::-webkit-file-upload-button {
+  visibility: hidden;
+}
+
+#file::before {
+  content: 'Upload file';
+  position: absolute;
+  margin-left: 8px;
+  border-radius: 5px;
+  border: none;
+  background-color: #dbdbdb;
+  padding: 5px;
+  margin-top: -3px;
+}
+
+div fieldset legend {
+  font-weight: 900;
+}
+
+body div fieldset {
+  border-radius: 10px;
+  border: 2px solid #e3e3e3;
+}
+
+#loading-image-file::-webkit-file-upload-button {
+  visibility: hidden;
+}
+
+#loading-image-file::before {
+  content: 'Upload file';
+  position: absolute;
+  margin-left: 8px;
+  border-radius: 5px;
+  border: none;
+  background-color: #dbdbdb;
+  padding: 5px;
+  margin-top: -3px;
+}
+
+#title {
+  width: 200px;
+  position: absolute;
+  margin-left: 12px;
+  border-radius: 5px;
+  border: none;
+  background-color: #dbdbdb;
+  padding: 5px;
+}
+
+#username {
+  position: absolute;
+  margin-left: 12px;
+  border-radius: 5px;
+  border: none;
+  background-color: #dbdbdb;
+  padding: 5px;
+}
+
+ul.log {
+  background-color: #111;
+  color: #fff;
+  border-radius: 5px;
 }
