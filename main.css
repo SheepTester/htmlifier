@@ -81,10 +81,12 @@ a:hover {
 .log-error {
   background-color: none;
   color: red;
+  font-weight: 900;
 }
 .log-done {
   background-color: none;
   color: green;
+  font-weight: 900;
 }
 .log-progress {
   opacity: 0.5;
