@@ -130,7 +130,8 @@ log-error {
   background-color: #fff;
   padding-left: 22px;
   padding-right: 22px;
-  margin-bottom: 200px;
+  margin-bottom: 100px;
+  padding-bottom: 0px;
 }
 
 .htmlify {
