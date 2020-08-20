@@ -75,6 +75,10 @@ a:hover {
   opacity: 0.5;
 }
 
+#bott {
+  margin-bottom: 5px;
+}
+
 .header {
   font-size: 10px;
   position: sticky;
