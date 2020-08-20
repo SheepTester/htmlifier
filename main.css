@@ -66,12 +66,13 @@ a:hover {
 
 .log {
   color: #111;
-  background-color: #cccccc;
+  background-color: #dbdbdb;
   padding: 10px 0;
   font-family: "Courier New", Courier, monospace;
   height: 100px;
   resize: vertical;
   overflow: auto;
+  border-radius: 5px;
 }
 .log-entry {
   padding: 0 10px;
