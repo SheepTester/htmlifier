@@ -151,7 +151,7 @@ a:hover {
   border: none;
   background-color: #dbdbdb;
   padding: 5px;
-  margin-top: -3px;
+  margin-top: -5px;
 }
 
 div fieldset legend {
@@ -175,7 +175,7 @@ body div fieldset {
   border: none;
   background-color: #dbdbdb;
   padding: 5px;
-  margin-top: -3px;
+  margin-top: -5px;
 }
 
 #title {
