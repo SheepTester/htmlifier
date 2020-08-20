@@ -237,7 +237,7 @@ body div fieldset {
 }
 
 #height {
-  margin-left: 12px;
+  margin-left: 4px;
   border-radius: 5px;
   border: none;
   background-color: #dbdbdb;
@@ -246,7 +246,7 @@ body div fieldset {
 }
 
 #width {
-  margin-left: 12px;
+  margin-left: 4px;
   border-radius: 5px;
   border: none;
   background-color: #dbdbdb;
