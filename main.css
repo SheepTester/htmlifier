@@ -37,6 +37,19 @@ a:hover {
   text-decoration: underline;
 }
 
+button {
+  border-radius: 5px;
+  border: none;
+  background-color: #dbdbdb;
+  padding: 10px;
+  transition: .2s;
+}
+
+button:hover {
+  background-color: #ccc;
+  cursor: pointer;
+}
+
 #offlineify {
   border-radius: 5px;
   border: none;
