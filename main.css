@@ -92,11 +92,13 @@ button:hover {
   white-space: pre-wrap;
 }
 .log-error {
+  margin-top: 10px;
   background-color: none;
   color: red;
   font-weight: 900;
 }
 .log-done {
+  margin-top: 10px;
   background-color: none;
   color: green;
   font-weight: 900;
