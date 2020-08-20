@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>ScratcHTML</title>
-    <link rel="shortcut icon" href="https://stml.netlify.app/favicon.ico" type="image/x-icon">
+    <title>HTMLifier</title>
     <meta charset="UTF-8">
-    <meta name="description" content="Converts any Scratch project to HTML"/>
+    <meta name="description" content="Converts a Scratch project to HTML/JavaScript"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <!-- no-offline -->
     <link rel="stylesheet" type="text/css" href="../../sheep3.css">
@@ -50,22 +49,23 @@
     </style>
   </head>
   <body>
-    <base href="https://scratchtml.netlify.app" target="_blank">
-    <!-- <div class="header"> -->
-      <h1>Scratch to HTML</h1>
-      <button class="htmlify" style="display:none;" id="other-htmlify-btn">HTMLify</button>
-    <!-- </div> -->
+    <div class="header">
+      <h1>Project HTMLifier</h1>
+      <h3><em>Convert a Scratch project to HTML</em></h3>
+      <button class="htmlify" id="other-htmlify-btn">HTMLify</button>
+    </div>
     <div class="mainarea">
       <!-- no-offline -->
-      <p><button id="offlineify">Download offline version</button></p>
+      <p><button id="offlineify">Download offline version</button> (An HTML file that can be opened and used in the browser without an internet connection)</p>
       <!-- /no-offline -->
+      <p>This packages your Scratch project into a single HTML file that can run on its own in a web browser. The HTML file will be pretty big because it contains the entire Scratch engine (2.6 MB) and the costume and sound files used in the project. There is no direct translation between a Scratch block and a JavaScript equivalent because the two languages are fundamentally different, so you should not use the code in the generated file for learning HTML or JavaScript after Scratch.</p>
       <p>The project will automatically start, and there are no green flag or stop sign buttons.</p>
-      <p><label><input type="radio" name="upload-mode" value="id" checked> Project ID: <input type="number" placeholder="Project ID" value="381280770" id="id"></label></p>
+      <p><label><input type="radio" name="upload-mode" value="id" checked> Project ID: <input type="number" placeholder="Project ID" value="381280770" id="id"> (the ID of the project on the Scratch website)</label></p>
       <p><label><input type="radio" name="upload-mode" value="file"> Upload project file: <input type="file" id="file" accept=".sb,.sb2,.sb3"></label></p>
       <fieldset>
         <legend>Options</legend>
-        <p><label for="title">Project name: </label><input type="text" placeholder="Project name" value="Flashlight Hide and Seek" id="title"></p>
-        <p><label for="username">Username value: </label><input type="text" placeholder="Username" value="ScratchCat" id="username"></p>
+        <p><label for="title">Project name: </label><input type="text" placeholder="Project name" value="Flashlight Hide and Seek" id="title"> (the text displayed in the browser tab)</p>
+        <p><label for="username">Username value: </label><input type="text" placeholder="Username" value="ScratchCat" id="username"> (the value that the username block reports)</p>
         <p><label><input type="checkbox" id="fullscreen" checked> Show fullscreen button?</label></p>
         <p><label><input type="checkbox" id="turbo"> Enable <a href="https://en.scratch-wiki.info/wiki/Turbo_Mode">turbo mode</a>?</label></p>
         <p><label><input type="checkbox" id="progress" checked> Load progress indicator?</label></p>
@@ -85,18 +85,19 @@
         <fieldset>
           <legend>Cloud variable source</legend>
           <p><label><input type="radio" name="cloud-provider" value="localstorage" checked> Save cloud variables locally using localStorage</label><a id="ref-1" href="#note-1"><sup>1</sup></a></p>
-          <p><label><input type="radio" name="cloud-provider" value="ws"> Use a <a href="https://github.com/SheepTester/primitive-cloud-server">custom server</a>: <input type="url" id="cloud-ws" placeholder="ws://localhost:3000"></label></p>
+          <p><label><input type="radio" name="cloud-provider" value="ws"> Use a <a href="https://github.com/SheepTester/primitive-cloud-server">custom server</a>: <input type="url" id="cloud-ws" placeholder="ws://localhost:3000/"></label></p>
           <p><label><input type="checkbox" id="special-cloud"> Give certain cloud variables special behaviours depending on the name?</label><a id="ref-4" href="#note-4"><sup>4</sup></a></p>
         </fieldset>
         <p></p>
-        <fieldset id="bott">
-          <legend>Modded options</legend>
+        <fieldset>
+          <legend><a href="https://sheeptester.github.io/scratch-gui/">E羊icques</a> (modded) options</legend>
           <p><label><input type="checkbox" id="wider"> Does this project use a <a href="https://sheeptester.github.io/scratch-gui/?width=640&height=360">custom size</a>?</label> <label>Width: <input type="number" value="640" id="width"></label> <label>Height: <input type="number" value="360" id="height"></label></p>
-          <p><label>Load <a href="https://github.com/LLK/scratch-vm/blob/develop/docs/extensions.md#types-of-extensions">unofficial extension</a> from URL: <input placeholder="http://example.com" type="url" id="extension-url"></label></p>
+          <p><label>Load <a href="https://github.com/LLK/scratch-vm/blob/develop/docs/extensions.md#types-of-extensions">unofficial extension</a> from URL: <input type="url" id="extension-url"></label></p>
           <p><label><input type="checkbox" id="no-limits"> Remove limits such as clone and list length limits?</label></p>
         </fieldset>
       </fieldset>
-      <button id="load-no-minify">HTMLify</button>
+      <p>
+        <button id="load-no-minify">HTMLify</button>
         <label><input type="checkbox" id="autodownload" checked> Download automatically?</label>
       </p>
       <ul class="log" id="log"></ul>
@@ -105,8 +106,6 @@
       <p id="note-2"><a href="#ref-2"><sup>2</sup></a>Compatibility mode forces projects to run at 30 FPS, like in Scratch 2.0. Turning this off allows the project to run at a higher framerate (usually 60 FPS, depending on the computer screen's refresh rate).</p>
       <p id="note-3"><a href="#ref-3"><sup>3</sup></a>I think the implementation of this is poor. Maybe instead of setting mouse x/y, it can set a cloud variable with a certain name. You can leave feedback and suggestions on <a href="https://scratch.mit.edu/users/Sheep_maker/">my profile</a>.</p>
       <p id="note-4"><a href="#ref-4"><sup>4</sup></a>If a cloud variable with the name "☁ eval" is set, it'll run the variable value as JavaScript and store it in a cloud variable named "☁ eval output"; if there is an error, it'll be stored in "☁ eval error." If you're using a custom cloud server, then cloud variables whose names start with "☁ local storage" will store their values in localStorage instead of in the server.</p>
-
-      <!--
       <h2>Update history</h2>
       <p>See the code and previous versions on <a href="https://github.com/SheepTester/htmlifier/">Github</a>.</p>
       <h3>2020-06-13</h3>
@@ -191,9 +190,8 @@
       <ul>
         <li>Project start</li>
       </ul>
-!-->
       <p>Made by <a href="https://scratch.mit.edu/users/Sheep_maker/">Sheep_maker</a>, who used <a href="https://github.com/LLK/scratch-vm/">scratch-vm</a>, <a href="http://danml.com/download.html">download.js</a>, and their dependencies for this project.</p>
-      <p>CSS by <a target="_blank" href="https://github.com/vanceagher">Vanceagher</a></p>
+      <p>CSS by <a href="https://scratch.mit.edu/users/mrcringekidyt/">Mr. Cringe Kid</a>.</p>
     </div>
     <!-- VM relies on document.body existing oof -->
     <script src="https://sheeptester.github.io/scratch-vm/16-9/vm.min.js" charset="utf-8"></script>
