@@ -102,92 +102,9 @@
       <p id="note-2"><a href="#ref-2"><sup>2</sup></a>Compatibility mode forces projects to run at 30 FPS, like in Scratch 2.0. Turning this off allows the project to run at a higher framerate (usually 60 FPS, depending on the computer screen's refresh rate).</p>
       <p id="note-3"><a href="#ref-3"><sup>3</sup></a>I think the implementation of this is poor. Maybe instead of setting mouse x/y, it can set a cloud variable with a certain name. You can leave feedback and suggestions on <a href="https://scratch.mit.edu/users/Sheep_maker/">my profile</a>.</p>
       <p id="note-4"><a href="#ref-4"><sup>4</sup></a>If a cloud variable with the name "☁ eval" is set, it'll run the variable value as JavaScript and store it in a cloud variable named "☁ eval output"; if there is an error, it'll be stored in "☁ eval error." If you're using a custom cloud server, then cloud variables whose names start with "☁ local storage" will store their values in localStorage instead of in the server.</p>
-      <h2>Update history</h2>
-      <p>See the code and previous versions on <a href="https://github.com/SheepTester/htmlifier/">Github</a>.</p>
-      <h3>2020-06-13</h3>
-      <ul>
-        <li>More options for styling variable/list monitors</li>
-        <li>Option to generate a .zip of files</li>
-        <li>Option to preview the HTMLified project</li>
-        <li>Readded the option for a progress counter despite lack of demand</li>
-        <li>Warn if a file might be too large for JavaScript to HTMLify</li>
-        <li>Fixed HTMLifying 2.0 projects</li>
-      </ul>
-      <h3>2020-06-01</h3>
-      <ul>
-        <li>Option to remove clone/list length limits</li>
-        <li>Option to hide the cursor</li>
-        <li>Ability to distinguish between cloud variables for localStorage and the server (and run JavaScript using cloud variables)</li>
-        <li>Option for rudimentary pointer lock</li>
-        <li>Fixed mouse position and unresized lists not showing</li>
-        <li>Default project changed to one of <a href="https://scratch.mit.edu/users/ScratchCat/">ScratchCat</a>'s</li>
-        <li>Unfortunately, as part of these changes, I removed the option for a progress bar. If there's demand, I'll try to add it back.</li>
-      </ul>
-      <h3>2020-05-01</h3>
-      <ul>
-        <li>Support for custom extensions from a URL</li>
-        <li>CSS by <a href="https://scratch.mit.edu/users/mrcringekidyt/">Mr. Cringe Kid</a></li>
-      </ul>
-      <h3>2020-03-29</h3>
-      <ul>
-        <li>Fixed custom stage sizes</li>
-      </ul>
-      <h3>2020-03-27</h3>
-      <ul>
-        <li>Show an image such as a gif while loading</li>
-        <li>Fixed dragging sprites simulating another green flag click</li>
-      </ul>
-      <h3>2020-01-06</h3>
-      <ul>
-        <li>An offline version of the HTMLifier</li>
-      </ul>
-      <h3>2019-12-25</h3>
-      <ul>
-        <li>An option to use a custom cloud server for cloud variables instead of saving to localStorage</li>
-      </ul>
-      <h3>2019-11-23</h3>
-      <ul>
-        <li>A fullscreen button</li>
-        <li>An option to change monitor colours</li>
-      </ul>
-      <h3>2019-10-05</h3>
-      <ul>
-        <li>New ask box</li>
-      </ul>
-      <h3>2019-09-28</h3>
-      <ul>
-        <li>A status text that shows the assets loaded</li>
-        <li>Support the video extension</li>
-        <li>Support draggable sprites</li>
-      </ul>
-      <h3>2019-08-08</h3>
-      <ul>
-        <li>Removed "Scratch" from the name of this utility just in case</li>
-      </ul>
-      <h3>2019-07-27</h3>
-      <ul>
-        <li>Support 16:9 projects</li>
-        <li>Simplify the number of modes for HTMLification</li>
-      </ul>
-      <h3>2019-07-13</h3>
-      <ul>
-        <li>Cloud variables store in localStorage</li>
-      </ul>
-      <h3>2019-06-29</h3>
-      <ul>
-        <li>Upload project file instead of using project ID</li>
-        <li>Toggle compatibility and turbo mode</li>
-      </ul>
-      <h3>2019-03-31</h3>
-      <ul>
-        <li>Variable and list watchers</li>
-      </ul>
-      <h3>2019-02-09</h3>
-      <ul>
-        <li>Project start</li>
-      </ul>
+      
       <p>Made by <a href="https://scratch.mit.edu/users/Sheep_maker/">Sheep_maker</a>, who used <a href="https://github.com/LLK/scratch-vm/">scratch-vm</a>, <a href="http://danml.com/download.html">download.js</a>, and their dependencies for this project.</p>
-      <p>CSS by <a href="https://scratch.mit.edu/users/mrcringekidyt/">Mr. Cringe Kid</a>.</p>
+      <p>CSS by <a href="https://scratch.mit.edu/users/Vanceagher/">Vanceagher</a>.</p>
     </div>
     <!-- VM relies on document.body existing oof -->
     <script src="https://sheeptester.github.io/scratch-vm/16-9/vm.min.js" charset="utf-8"></script>
