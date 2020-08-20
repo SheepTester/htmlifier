@@ -65,10 +65,10 @@ a:hover {
 }
 
 .log {
-  color: #b93700;
-  background-color: #f0f0b4;
+  color: #111;
+  background-color: #cccccc;
   padding: 10px 0;
-  font-family: 'Exo', sans-serif;
+  font-family: "Courier New", Courier, monospace;
   height: 100px;
   resize: vertical;
   overflow: auto;
@@ -86,7 +86,7 @@ a:hover {
   color: white;
 }
 .log-progress {
-  opacity: 0.5;
+  opacity: 0.75;
 }
 
 #bott {
