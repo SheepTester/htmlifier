@@ -79,12 +79,12 @@ a:hover {
   white-space: pre-wrap;
 }
 .log-error {
-  background-color: red;
-  color: white;
+  background-color: none;
+  color: red;
 }
 .log-done {
-  background-color: #ffffff00;
-  color: white;
+  background-color: none;
+  color: green;
 }
 .log-progress {
   opacity: 0.5;
