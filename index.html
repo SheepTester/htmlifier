@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>HTMLifier</title>
+    <title>ScratcHTML</title>
     <meta charset="UTF-8">
-    <meta name="description" content="Converts a Scratch project to HTML/JavaScript"/>
+    <meta name="description" content="Converts any Scratch project to HTML"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <!-- no-offline -->
     <link rel="stylesheet" type="text/css" href="../../sheep3.css">
@@ -49,16 +49,12 @@
     </style>
   </head>
   <body>
-    <div class="header">
-      <h1>Project HTMLifier</h1>
-      <h3><em>Convert a Scratch project to HTML</em></h3>
-      <button class="htmlify" id="other-htmlify-btn">HTMLify</button>
-    </div>
+      <h1>Scratch to HTML</h1>
+      <button style="display:none;" class="htmlify" id="other-htmlify-btn">HTMLify</button>
     <div class="mainarea">
       <!-- no-offline -->
-      <p><button id="offlineify">Download offline version</button> (An HTML file that can be opened and used in the browser without an internet connection)</p>
+      <p><button id="offlineify">Download offline version</button></p>
       <!-- /no-offline -->
-      <p>This packages your Scratch project into a single HTML file that can run on its own in a web browser. The HTML file will be pretty big because it contains the entire Scratch engine (2.6 MB) and the costume and sound files used in the project. There is no direct translation between a Scratch block and a JavaScript equivalent because the two languages are fundamentally different, so you should not use the code in the generated file for learning HTML or JavaScript after Scratch.</p>
       <p>The project will automatically start, and there are no green flag or stop sign buttons.</p>
       <p><label><input type="radio" name="upload-mode" value="id" checked> Project ID: <input type="number" placeholder="Project ID" value="381280770" id="id"> (the ID of the project on the Scratch website)</label></p>
       <p><label><input type="radio" name="upload-mode" value="file"> Upload project file: <input type="file" id="file" accept=".sb,.sb2,.sb3"></label></p>
