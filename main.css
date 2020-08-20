@@ -130,6 +130,10 @@ a:hover {
   width: 20px;
 }
 
+input {
+  margin-top: -2px;
+}
+
 #id {
   position: absolute;
   margin-left: 12px;
@@ -151,7 +155,7 @@ a:hover {
   border: none;
   background-color: #dbdbdb;
   padding: 5px;
-  margin-top: -5px;
+  margin-top: -3px;
 }
 
 div fieldset legend {
@@ -175,7 +179,7 @@ body div fieldset {
   border: none;
   background-color: #dbdbdb;
   padding: 5px;
-  margin-top: -5px;
+  margin-top: -3px;
 }
 
 #title {
