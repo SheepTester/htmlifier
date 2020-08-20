@@ -252,6 +252,7 @@ body div fieldset {
   background-color: #dbdbdb;
   padding: 5px;
   width: 60px;
+  margin-right: 12px;
 }
 
 #cloud-ws {
