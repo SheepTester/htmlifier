@@ -237,7 +237,6 @@ body div fieldset {
 }
 
 #height {
-  position: absolute;
   margin-left: 12px;
   border-radius: 5px;
   border: none;
@@ -247,14 +246,12 @@ body div fieldset {
 }
 
 #width {
-  position: absolute;
   margin-left: 12px;
   border-radius: 5px;
   border: none;
   background-color: #dbdbdb;
   padding: 5px;
   width: 60px;
-  margin-right: 12px;
 }
 
 #cloud-ws {
