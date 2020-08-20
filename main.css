@@ -82,11 +82,11 @@ a:hover {
   color: white;
 }
 .log-done {
-  background-color: green;
+  background-color: #ffffff00;
   color: white;
 }
 .log-progress {
-  opacity: 0.75;
+  opacity: 0.5;
 }
 
 #bott {
