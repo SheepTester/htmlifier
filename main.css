@@ -41,7 +41,6 @@ button {
   border-radius: 5px;
   border: none;
   background-color: #dbdbdb;
-  padding: 10px;
   transition: .2s;
 }
 
@@ -91,14 +90,11 @@ button:hover {
   padding: 0 10px;
   white-space: pre-wrap;
 }
-.log-error {
-  margin-top: 10px;
   background-color: none;
   color: red;
   font-weight: 900;
 }
 .log-done {
-  margin-top: 10px;
   background-color: none;
   color: green;
   font-weight: 900;
