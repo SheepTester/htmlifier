@@ -201,6 +201,15 @@ body div fieldset {
   padding: 5px;
 }
 
+#cloud-ws {
+  position: absolute;
+  margin-left: 12px;
+  border-radius: 5px;
+  border: none;
+  background-color: #dbdbdb;
+  padding: 5px;
+}
+
 ul.log {
   background-color: #111;
   color: #fff;
