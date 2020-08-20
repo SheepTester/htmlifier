@@ -236,6 +236,16 @@ body div fieldset {
   padding: 5px;
 }
 
+#extension-url {
+  width: 300px;
+  position: absolute;
+  margin-left: 12px;
+  border-radius: 5px;
+  border: none;
+  background-color: #dbdbdb;
+  padding: 5px;
+}
+
 #height {
   margin-left: 4px;
   border-radius: 5px;
