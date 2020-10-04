@@ -15,6 +15,7 @@
     <script src="./download.js" charset="utf-8"></script>
     <script src="./jszip.min.js" charset="utf-8"></script>
     <!-- favicon -->
+    
     <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
@@ -25,7 +26,9 @@
     <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
     <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <!-- <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">-->
+    <!-- Base64 encoded Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,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">
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/manifest.json">
