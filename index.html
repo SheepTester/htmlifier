@@ -35,7 +35,7 @@
       ::-webkit-file-upload-button {
         cursor: pointer;
       }
-      #load-no-minify {
+      input[type=submit] {
         font-size: 1.2em;
       }
       .offline::after {
@@ -45,6 +45,9 @@
         right: 0;
         color: rgba(0, 0, 0, 0.5);
         margin: 10px;
+      }
+      fieldset {
+        margin: 1em 0;
       }
     </style>
   </head>
@@ -60,46 +63,7 @@
       <!-- /no-offline -->
       <p>This packages your Scratch project into a single HTML file that can run on its own in a web browser. The HTML file will be pretty big because it contains the entire Scratch engine (2.6 MB) and the costume and sound files used in the project. There is no direct translation between a Scratch block and a JavaScript equivalent because the two languages are fundamentally different, so you should not use the code in the generated file for learning HTML or JavaScript after Scratch.</p>
       <p>The project will automatically start, and there are no green flag or stop sign buttons.</p>
-      <p><label><input type="radio" name="upload-mode" value="id" checked> Project ID: <input type="number" placeholder="Project ID" value="381280770" id="id"> (the ID of the project on the Scratch website)</label></p>
-      <p><label><input type="radio" name="upload-mode" value="file"> Upload project file: <input type="file" id="file" accept=".sb,.sb2,.sb3"></label></p>
-      <fieldset>
-        <legend>Options</legend>
-        <p><label for="title">Project name: </label><input type="text" placeholder="Project name" value="Flashlight Hide and Seek" id="title"> (the text displayed in the browser tab)</p>
-        <p><label for="username">Username value: </label><input type="text" placeholder="Username" value="ScratchCat" id="username"> (the value that the username block reports)</p>
-        <p><label><input type="checkbox" id="fullscreen" checked> Show fullscreen button?</label></p>
-        <p><label><input type="checkbox" id="turbo"> Enable <a href="https://en.scratch-wiki.info/wiki/Turbo_Mode">turbo mode</a>?</label></p>
-        <p><label><input type="checkbox" id="progress" checked> Load progress indicator?</label></p>
-        <p><label><input type="checkbox" id="loading-image"> Loading image: <input type="file" id="loading-image-file" accept="image/*"></label></p>
-        <p><label><input type="checkbox" id="compatibility" checked> Enable compatibility mode?</label><a id="ref-2" href="#note-2"><sup>2</sup></a></p>
-        <p><label><input type="checkbox" id="stretch"> Stretch the canvas to fit (as opposed to maintaining the aspect ratio)?</label></p>
-        <p><label><input type="checkbox" id="no-cursor"> Hide cursor?</label></p>
-        <p><label><input type="checkbox" id="pointer-lock"> Lock the pointer on click? The mouse x/y blocks will report the mouse movement.</label><a id="ref-3" href="#note-3"><sup>3</sup></a></p>
-        <p><label><input type="checkbox" id="zip"> Output a .zip file? The .zip file will contain an index.html file and separate files for the project's assets.</label></p>
-        <fieldset>
-          <legend>Monitor style</legend>
-          <p><label><input type="checkbox" id="use-colour"> Use custom variable/list monitor colour: <input type="color" id="monitor-colour" value="#ff8c1a">? (If unchecked, a translucent black will be used.)</label></p>
-          <p><label>Monitor text colour: <input type="color" id="monitor-text" value="#ffffff"></label></p>
-          <p><label><input type="checkbox" id="transparent-monitor"> Hide the monitor background boxes?</label></p>
-        </fieldset>
-        <p></p>
-        <fieldset>
-          <legend>Cloud variable source</legend>
-          <p><label><input type="radio" name="cloud-provider" value="localstorage" checked> Save cloud variables locally using localStorage</label><a id="ref-1" href="#note-1"><sup>1</sup></a></p>
-          <p><label><input type="radio" name="cloud-provider" value="ws"> Use a <a href="https://github.com/SheepTester/primitive-cloud-server">custom server</a>: <input type="url" id="cloud-ws" placeholder="ws://localhost:3000/"></label></p>
-          <p><label><input type="checkbox" id="special-cloud"> Give certain cloud variables special behaviours depending on the name?</label><a id="ref-4" href="#note-4"><sup>4</sup></a></p>
-        </fieldset>
-        <p></p>
-        <fieldset>
-          <legend><a href="https://sheeptester.github.io/scratch-gui/">E羊icques</a> (modded) options</legend>
-          <p><label><input type="checkbox" id="wider"> Does this project use a <a href="https://sheeptester.github.io/scratch-gui/?width=640&height=360">custom size</a>?</label> <label>Width: <input type="number" value="640" id="width"></label> <label>Height: <input type="number" value="360" id="height"></label></p>
-          <p><label>Load <a href="https://github.com/LLK/scratch-vm/blob/develop/docs/extensions.md#types-of-extensions">unofficial extension</a> from URL: <input type="url" id="extension-url"></label></p>
-          <p><label><input type="checkbox" id="no-limits"> Remove limits such as clone and list length limits?</label></p>
-        </fieldset>
-      </fieldset>
-      <p>
-        <button id="load-no-minify">HTMLify</button>
-        <label><input type="checkbox" id="autodownload" checked> Download automatically?</label>
-      </p>
+      <form id="options"></form>
       <ul class="log" id="log"></ul>
       <p>If you want to view or edit the HTML file, you can use the specialized <a href="https://sheeptester.github.io/words-go-here/htmlifier/large-file-editor/">Large File Editor</a> to hide the long lines that may hang or crash normal text editors.</p>
       <p id="note-1"><a href="#ref-1"><sup>1</sup></a>You may have to deal with privacy laws around cookies outside of Scratch.</p>
@@ -243,6 +207,397 @@ function getProject() {
     return {id: id.value};
   }
 }
+// {https://link.com/ text to show}
+const parseLinksRegex = /{(\S+)\s([^>]+)}/g
+function parseLinksAndAddTo (parent, text) {
+  if (!text) return
+  let match
+  let lastIndex = 0
+  while ((match = parseLinksRegex.exec(text))) {
+    if (lastIndex < match.index) {
+      parent.appendChild(
+        document.createTextNode(text.slice(lastIndex, match.index))
+      )
+    }
+    const link = document.createElement('a')
+    link.href = match[1]
+    link.textContent = match[2]
+    parent.appendChild(link)
+    lastIndex = match.index + match[0].length
+  }
+  if (lastIndex < text.length - 1) {
+    parent.appendChild(
+      document.createTextNode(text.slice(lastIndex))
+    )
+  }
+}
+const notes = []
+function addNote (noteId, note) {
+  const ref = document.createElement('a')
+  ref.href = `#ref-${noteId}`
+
+  const paragraph = document.createElement('p')
+  paragraph.id = `note-${noteId}`
+  paragraph.appendChild(ref)
+  parseLinksAndAddTo(paragraph, note)
+  notes[noteId] = paragraph
+
+  const link = document.createElement('a')
+  link.id = `#ref-${noteId}`
+  link.href = `#note-${noteId}`
+  return link
+}
+class Option {
+  constructor () {
+    this.group = null
+  }
+
+  addTo (group) {
+    this.group = group
+    group.element.appendChild(this.element)
+  }
+}
+class Group extends Option {
+  constructor () {
+    super()
+
+    this._inputs = []
+  }
+
+  add (input) {
+    this._inputs.push(input)
+    input.addTo(this)
+    return this
+  }
+}
+class Form extends Group {
+  constructor (form = document.createElement('form')) {
+    super()
+
+    form.addEventListener('submit', this._handleSubmit.bind(this))
+    this._form = form
+
+    this.element = document.createDocumentFragment()
+  }
+
+  _handleSubmit (e) {
+    e.preventDefault()
+    console.log('submit')
+  }
+
+  done () {
+    const submitBtn = document.createElement('input')
+    submitBtn.type = 'submit'
+    this.element.appendChild(submitBtn)
+
+    this._form.appendChild(this.element)
+    this.element = this._form
+  }
+}
+class Fieldset extends Group {
+  constructor (label) {
+    super()
+
+    const labelElem = document.createElement('legend')
+    parseLinksAndAddTo(labelElem, label)
+
+    this.element = document.createElement('fieldset')
+    this.element.appendChild(labelElem)
+  }
+}
+class Input extends Option {
+  constructor (name, label, { noteId, note, ...properties } = {}) {
+    super()
+
+    this._input = document.createElement('input')
+    this._input.id = name
+    this._input.name = name
+    Object.assign(this._input, properties)
+
+    const [before, after] = label.split('%i')
+    this.label = document.createElement('label')
+    parseLinksAndAddTo(this.label, before)
+    this.label.appendChild(this._input)
+    parseLinksAndAddTo(this.label, after)
+
+    this.element = document.createElement('p')
+    this.element.appendChild(this.label)
+
+    if (noteId) {
+      this.element.appendChild(addNote(noteId, note))
+    }
+  }
+
+  get value () {
+    if (this._input.type === 'number') {
+      return +this._input.value
+    } else if (this._input.type === 'file') {
+      return this._input.files[0]
+    } else {
+      return this._input.value
+    }
+  }
+}
+class Radio extends Option {
+  constructor (name, selected) {
+    super()
+    this.type = 'radio'
+    this._name = name
+    this.inputs = []
+    this._selected = selected
+  }
+
+  _makeRadio (value) {
+    const radio = document.createElement('input')
+    radio.type = this.type
+    radio.name = this._name
+    if (value) radio.value = value
+    return radio
+  }
+
+  add (input, value = null) {
+    if (typeof input === 'string') {
+      input = { label: input }
+    }
+    if (!input.addTo) {
+      const { label, noteId, note } = input
+      input.label = document.createElement('label')
+      parseLinksAndAddTo(input.label, label)
+
+      input.paragraph = document.createElement('p')
+      input.paragraph.appendChild(input.label)
+
+      if (noteId) {
+        input.paragraph.appendChild(addNote(noteId, note))
+      }
+    }
+    const radio = this._makeRadio(value)
+    if (this._selected === value) {
+      radio.checked = true
+    }
+    const space = document.createTextNode(' ')
+    if (input.label.firstChild) {
+      input.label.insertBefore(space, input.label.firstChild)
+    } else {
+      input.label.appendChild(space)
+    }
+    input.label.insertBefore(radio, space)
+    this.inputs.push({ input, radio, value })
+    if (this.group && input.addTo) {
+      input.addTo(this.group)
+    }
+    return this
+  }
+
+  addTo (group) {
+    this.group = group
+    for (const { input } of this.inputs) {
+      if (input.addTo) {
+        input.addTo(group)
+      } else {
+        group.element.appendChild(input.paragraph)
+      }
+    }
+  }
+}
+class Checkbox extends Radio {
+  constructor (name, input, checked) {
+    super(name)
+    this.type = 'checkbox'
+    this.add(input)
+    this.inputs[0].radio.checked = checked
+  }
+}
+const form = new Form(document.getElementById('options'))
+  .add(
+    new Radio('upload-mode', 'id')
+      .add(new Input(
+        'id',
+        'Project ID: %i (the ID of the project on the Scratch website)',
+        {
+          type: 'number',
+          value: 276660763,
+          placeholder: 'Project ID'
+        }
+      ), 'id')
+      .add(new Input(
+        'file',
+        'Upload project file: %i',
+        {
+          type: 'file',
+          accept: '.sb,.sb2,.sb3'
+        }
+      ), 'file')
+  )
+  .add(
+    new Fieldset('Options')
+      .add(new Input(
+        'title',
+        'Project name: %i (the text displayed in the browser tab)',
+        {
+          type: 'text',
+          value: 'Scratch 3.0 is here!',
+          placeholder: 'Project name'
+        }
+      ))
+      .add(new Input(
+        'username',
+        'Username value: %i (the value that the username block reports)',
+        {
+          type: 'text',
+          value: 'ScratchCat',
+          placeholder: 'Username'
+        }
+      ))
+      .add(new Checkbox(
+        'fullscreen',
+        'Show fullscreen button?',
+        true
+      ))
+      .add(new Checkbox(
+        'turbo',
+        'Enable {https://en.scratch-wiki.info/wiki/Turbo_Mode turbo mode}?'
+      ))
+      .add(new Checkbox(
+        'progress',
+        'Load progress indicator?',
+        true
+      ))
+      .add(new Checkbox(
+        'loading-image',
+        new Input(
+          'loading-image-file',
+          'Loading image: %i',
+          {
+            type: 'file',
+            accept: 'image/*'
+          }
+        )
+      ))
+      .add(new Checkbox(
+        'compatibility',
+        {
+          label: 'Enable compatibility mode?',
+          noteId: 2,
+          note: 'Compatibility mode forces projects to run at 30 FPS, like in Scratch 2.0. Turning this off allows the project to run at a higher framerate (usually 60 FPS, depending on the computer screen\'s refresh rate).'
+        },
+        true
+      ))
+      .add(new Checkbox(
+        'stretch',
+        'Stretch the canvas to fit (as opposed to maintaining the aspect ratio)?'
+      ))
+      .add(new Checkbox(
+        'no-cursor',
+        'Hide cursor?'
+      ))
+      .add(new Checkbox(
+        'pointer-lock',
+        {
+          label: 'Lock the pointer on click? The mouse x/y blocks will report the mouse movement.',
+          noteId: 3,
+          note: 'I think the implementation of this is poor. Maybe instead of setting mouse x/y, it can set a cloud variable with a certain name. You can leave feedback and suggestions on {https://scratch.mit.edu/users/Sheep_maker/ my profile}.'
+        }
+      ))
+      .add(new Checkbox(
+        'zip',
+        'Output a .zip file? The .zip file will contain an index.html file and separate files for the project\'s assets.'
+      ))
+      .add(
+        new Fieldset('Monitor style')
+          .add(new Checkbox(
+            'use-colour',
+            new Input(
+              'monitor-colour',
+              'Use custom variable/list monitor colour: %i? (If unchecked, a translucent black will be used.)',
+              {
+                type: 'color',
+                value: '#ff8c1a'
+              }
+            )
+          ))
+          .add(new Input(
+            'monitor-text',
+            'Monitor text colour: %i',
+            {
+              type: 'color',
+              value: '#ffffff'
+            }
+          ))
+          .add(new Checkbox(
+            'transparent-monitor',
+            'Hide the monitor background boxes?'
+          ))
+      )
+      .add(
+        new Fieldset('Cloud variable source')
+          .add(
+            new Radio('cloud-provider', 'localstorage')
+              .add({
+                label: 'Save cloud variables locally using localStorage',
+                noteId: 1,
+                note: 'You may have to deal with privacy laws around cookies outside of Scratch.'
+              }, 'localstorage')
+              .add(new Input(
+                'cloud-ws',
+                'Use a {https://github.com/SheepTester/primitive-cloud-server custom server}: %i',
+                {
+                  type: 'url',
+                  placeholder: 'ws://localhost:3000/'
+                }
+              ), 'ws')
+          )
+          .add(new Checkbox(
+            'special-cloud',
+            {
+              label: 'Give certain cloud variables special behaviours depending on the name?',
+              noteId: 4,
+              note: 'If a cloud variable with the name "☁ eval" is set, it\'ll run the variable value as JavaScript and store it in a cloud variable named "☁ eval output"; if there is an error, it\'ll be stored in "☁ eval error." If you\'re using a custom cloud server, then cloud variables whose names start with "☁ local storage" will store their values in localStorage instead of in the server.'
+            }
+          ))
+      )
+      .add(
+        new Fieldset('{https://sheeptester.github.io/scratch-gui/ E羊icques} (modded) options')
+          .add(new Checkbox(
+            'wider',
+            'Does this project use a {https://sheeptester.github.io/scratch-gui/?width=640&height=360 custom size}?'
+          ))
+          // TODO: make inputs a group?
+          .add(new Input(
+            'width',
+            'Width: %i',
+            {
+              type: 'number',
+              value: '480'
+            }
+          ))
+          .add(new Input(
+            'height',
+            'Height: %i',
+            {
+              type: 'number',
+              value: '360'
+            }
+          ))
+          .add(new Input(
+            'extension-url',
+            'Load {https://github.com/LLK/scratch-vm/blob/develop/docs/extensions.md#types-of-extensions unofficial extension} from URL: %i',
+            {
+              type: 'url'
+            }
+          ))
+          .add(new Checkbox(
+            'no-limits',
+            'Remove limits such as clone and list length limits?'
+          ))
+      )
+  )
+  .add(new Checkbox(
+    'autodownload',
+    'Download automatically?',
+    true
+  ))
+  .done()
 function load() {
   loadNoMinifyBtn.disabled = true;
   otherHtmlifyBtn.disabled = true;
