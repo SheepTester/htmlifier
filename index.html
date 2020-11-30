@@ -63,6 +63,7 @@
       <!-- /no-offline -->
       <p>This packages your Scratch project into a single HTML file that can run on its own in a web browser. The HTML file will be pretty big because it contains the entire Scratch engine (2.6 MB) and the costume and sound files used in the project. There is no direct translation between a Scratch block and a JavaScript equivalent because the two languages are fundamentally different, so you should not use the code in the generated file for learning HTML or JavaScript after Scratch.</p>
       <p>The project will automatically start, and there are no green flag or stop sign buttons.</p>
+      <p><a href="?" id="options-link">Save options in link</a></p>
       <form id="options"></form>
       <ul class="log" id="log"></ul>
       <p>If you want to view or edit the HTML file, you can use the specialized <a href="https://sheeptester.github.io/words-go-here/htmlifier/large-file-editor/">Large File Editor</a> to hide the long lines that may hang or crash normal text editors.</p>
@@ -161,35 +162,9 @@
     <script src="https://sheeptester.github.io/scratch-vm/16-9/vm.min.js" charset="utf-8"></script>
     <script src="./hacky-file-getter.js" charset="utf-8"></script>
     <script type="text/javascript">
-const loadNoMinifyBtn = document.getElementById('load-no-minify');
 const otherHtmlifyBtn = document.getElementById('other-htmlify-btn')
-const title = document.getElementById('title');
-const id = document.getElementById('id');
-const username = document.getElementById('username');
-const file = document.getElementById('file');
-const logOutput = document.getElementById('log');
-const compatibility = document.getElementById('compatibility');
-const turbo = document.getElementById('turbo');
-const wider = document.getElementById('wider');
-const progressBar = document.getElementById('progress');
-const fullscreen = document.getElementById('fullscreen');
-const useColour = document.getElementById('use-colour');
-const monitorColour = document.getElementById('monitor-colour');
-const cloudServer = document.getElementById('cloud-ws');
-const useLoadingImage = document.getElementById('loading-image');
-const loadingImage = document.getElementById('loading-image-file');
-const width = document.getElementById('width');
-const height = document.getElementById('height');
-const extensionURL = document.getElementById('extension-url');
-const noLimits = document.getElementById('no-limits');
-const pointerLock = document.getElementById('pointer-lock');
-const stretch = document.getElementById('stretch');
-const noCursor = document.getElementById('no-cursor');
-const specialCloud = document.getElementById('special-cloud');
-const zip = document.getElementById('zip');
-const monitorText = document.getElementById('monitor-text');
-const transparentMonitors = document.getElementById('transparent-monitor');
-const autodownload = document.getElementById('autodownload')
+const optionsLink = document.getElementById('options-link')
+
 let scroll = false
 function log(text, style) {
   const entry = document.createElement('div')
@@ -199,6 +174,7 @@ function log(text, style) {
   if (scroll) logOutput.scrollTop = logOutput.scrollHeight
   return entry
 }
+
 function getProject() {
   if (document.querySelector('input[name="upload-mode"]:checked').value === 'file') {
     if (!file.files || !file.files[0]) return Promise.reject(new Error('No file selected'));
@@ -207,6 +183,7 @@ function getProject() {
     return {id: id.value};
   }
 }
+
 // {https://link.com/ text to show}
 const parseLinksRegex = /{(\S+)\s([^>]+)}/g
 function parseLinksAndAddTo (parent, text) {
@@ -247,6 +224,11 @@ function addNote (noteId, note) {
   link.href = `#note-${noteId}`
   return link
 }
+const params = new URL(window.location).searchParams
+function paramsUpdate () {
+  optionsLink.href = '?' + params.toString()
+}
+paramsUpdate()
 class Option {
   constructor () {
     this.group = null
@@ -261,13 +243,29 @@ class Group extends Option {
   constructor () {
     super()
 
-    this._inputs = []
+    this.children = []
   }
 
-  add (input) {
-    this._inputs.push(input)
-    input.addTo(this)
-    return this
+  add (child, returnChild = false) {
+    if (typeof child === 'string') {
+      child = { label: child }
+    }
+    this.children.push(child)
+    if (child.addTo) {
+      child.addTo(this)
+    } else {
+      const { label, noteId, note } = child
+      child.label = document.createElement('p')
+      parseLinksAndAddTo(child.label, label)
+      child.element = child.label
+
+      if (noteId) {
+        child.element.appendChild(addNote(noteId, note))
+      }
+
+      this.element.appendChild(child.element)
+    }
+    return returnChild ? child : this
   }
 }
 class Form extends Group {
@@ -282,7 +280,9 @@ class Form extends Group {
 
   _handleSubmit (e) {
     e.preventDefault()
-    console.log('submit')
+    if (this.onSubmit) {
+      this.onSubmit()
+    }
   }
 
   done () {
@@ -292,6 +292,8 @@ class Form extends Group {
 
     this._form.appendChild(this.element)
     this.element = this._form
+
+    return this
   }
 }
 class Fieldset extends Group {
@@ -309,10 +311,15 @@ class Input extends Option {
   constructor (name, label, { noteId, note, ...properties } = {}) {
     super()
 
+    this._name = name
     this._input = document.createElement('input')
     this._input.id = name
     this._input.name = name
     Object.assign(this._input, properties)
+    if (params.get(name)) {
+      this._input.value = params.get(name)
+    }
+    this._input.addEventListener('change', this._handleChange.bind(this))
 
     const [before, after] = label.split('%i')
     this.label = document.createElement('label')
@@ -337,14 +344,21 @@ class Input extends Option {
       return this._input.value
     }
   }
+
+  _handleChange () {
+    params.set(this._name, this._input.value)
+    paramsUpdate()
+  }
 }
-class Radio extends Option {
+class Radio extends Group {
   constructor (name, selected) {
     super()
+    this.element = document.createElement('div')
     this.type = 'radio'
     this._name = name
-    this.inputs = []
-    this._selected = selected
+    this._selected = params.get(name) || selected
+
+    this._handleChange = this._handleChange.bind(this)
   }
 
   _makeRadio (value) {
@@ -352,27 +366,26 @@ class Radio extends Option {
     radio.type = this.type
     radio.name = this._name
     if (value) radio.value = value
+    radio.addEventListener('change', this._handleChange)
     return radio
   }
 
+  _handleChange (e) {
+    if (e.target.checked) {
+      const value = e.target.value
+      this._selected = value
+      params.set(this._name, value)
+    } else {
+      this._selected = null
+      params.delete(this._name)
+    }
+    paramsUpdate()
+  }
+
   add (input, value = null) {
-    if (typeof input === 'string') {
-      input = { label: input }
-    }
-    if (!input.addTo) {
-      const { label, noteId, note } = input
-      input.label = document.createElement('label')
-      parseLinksAndAddTo(input.label, label)
-
-      input.paragraph = document.createElement('p')
-      input.paragraph.appendChild(input.label)
-
-      if (noteId) {
-        input.paragraph.appendChild(addNote(noteId, note))
-      }
-    }
+    input = super.add(input, true)
     const radio = this._makeRadio(value)
-    if (this._selected === value) {
+    if (value && this._selected === value) {
       radio.checked = true
     }
     const space = document.createTextNode(' ')
@@ -382,30 +395,15 @@ class Radio extends Option {
       input.label.appendChild(space)
     }
     input.label.insertBefore(radio, space)
-    this.inputs.push({ input, radio, value })
-    if (this.group && input.addTo) {
-      input.addTo(this.group)
-    }
+    input.radio = radio
     return this
-  }
-
-  addTo (group) {
-    this.group = group
-    for (const { input } of this.inputs) {
-      if (input.addTo) {
-        input.addTo(group)
-      } else {
-        group.element.appendChild(input.paragraph)
-      }
-    }
   }
 }
 class Checkbox extends Radio {
   constructor (name, input, checked) {
-    super(name)
+    super(name, checked ? 'on' : null)
     this.type = 'checkbox'
-    this.add(input)
-    this.inputs[0].radio.checked = checked
+    this.add(input, 'on')
   }
 }
 const form = new Form(document.getElementById('options'))
@@ -598,6 +596,7 @@ const form = new Form(document.getElementById('options'))
     true
   ))
   .done()
+
 function load() {
   loadNoMinifyBtn.disabled = true;
   otherHtmlifyBtn.disabled = true;
@@ -668,8 +667,8 @@ function load() {
       scroll = false;
     });
 }
-loadNoMinifyBtn.addEventListener('click', load);
-otherHtmlifyBtn.addEventListener('click', load);
+form.onSubmit = load
+otherHtmlifyBtn.addEventListener('click', load)
 let defaultTitle = true;
 title.addEventListener('change', e => {
   defaultTitle = false;
