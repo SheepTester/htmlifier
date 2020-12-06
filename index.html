@@ -163,25 +163,17 @@
     <script src="./hacky-file-getter.js" charset="utf-8"></script>
     <script type="text/javascript">
 const otherHtmlifyBtn = document.getElementById('other-htmlify-btn')
+const logOutput = document.getElementById('log')
 const optionsLink = document.getElementById('options-link')
 
 let scroll = false
-function log(text, style) {
+function log (text, style) {
   const entry = document.createElement('div')
   entry.className = `log-entry log-${style}`
   entry.textContent = text
   logOutput.appendChild(entry)
   if (scroll) logOutput.scrollTop = logOutput.scrollHeight
   return entry
-}
-
-function getProject() {
-  if (document.querySelector('input[name="upload-mode"]:checked').value === 'file') {
-    if (!file.files || !file.files[0]) return Promise.reject(new Error('No file selected'));
-    return { file: file.files[0] };
-  } else {
-    return {id: id.value};
-  }
 }
 
 // {https://link.com/ text to show}
@@ -238,6 +230,10 @@ class Option {
     this.group = group
     group.element.appendChild(this.element)
   }
+
+  addValuesTo (values) {
+    return
+  }
 }
 class Group extends Option {
   constructor () {
@@ -248,24 +244,17 @@ class Group extends Option {
 
   add (child, returnChild = false) {
     if (typeof child === 'string') {
-      child = { label: child }
+      child = new Label(child)
     }
     this.children.push(child)
-    if (child.addTo) {
-      child.addTo(this)
-    } else {
-      const { label, noteId, note } = child
-      child.label = document.createElement('p')
-      parseLinksAndAddTo(child.label, label)
-      child.element = child.label
-
-      if (noteId) {
-        child.element.appendChild(addNote(noteId, note))
-      }
-
-      this.element.appendChild(child.element)
-    }
+    child.addTo(this)
     return returnChild ? child : this
+  }
+
+  addValuesTo (values) {
+    for (const child of this.children) {
+      child.addValuesTo(values)
+    }
   }
 }
 class Form extends Group {
@@ -281,8 +270,14 @@ class Form extends Group {
   _handleSubmit (e) {
     e.preventDefault()
     if (this.onSubmit) {
-      this.onSubmit()
+      this.onSubmit(this.values)
     }
+  }
+
+  get values () {
+    const values = {}
+    this.addValuesTo(values)
+    return values
   }
 
   done () {
@@ -307,32 +302,77 @@ class Fieldset extends Group {
     this.element.appendChild(labelElem)
   }
 }
-class Input extends Option {
-  constructor (name, label, { noteId, note, ...properties } = {}) {
+class Paragraph extends Group {
+  constructor (checkableTarget, element, noteId, note) {
     super()
 
-    this._name = name
-    this._input = document.createElement('input')
-    this._input.id = name
-    this._input.name = name
-    Object.assign(this._input, properties)
-    if (params.get(name)) {
-      this._input.value = params.get(name)
-    }
-    this._input.addEventListener('change', this._handleChange.bind(this))
-
-    const [before, after] = label.split('%i')
-    this.label = document.createElement('label')
-    parseLinksAndAddTo(this.label, before)
-    this.label.appendChild(this._input)
-    parseLinksAndAddTo(this.label, after)
-
-    this.element = document.createElement('p')
-    this.element.appendChild(this.label)
+    this.element = element
+    this._checkableTarget = checkableTarget
+    this.checkable = null
 
     if (noteId) {
       this.element.appendChild(addNote(noteId, note))
     }
+  }
+
+  addCheckable (checkable) {
+    const space = document.createTextNode(' ')
+    if (this._checkableTarget.firstChild) {
+      this._checkableTarget.insertBefore(space, this._checkableTarget.firstChild)
+    } else {
+      this._checkableTarget.appendChild(space)
+    }
+    this._checkableTarget.insertBefore(checkable.element, space)
+
+    checkable.input = this
+    this.checkable = checkable
+
+    return this
+  }
+
+  addValuesTo (values) {
+    if (this.checkable) {
+      this.checkable.addValuesTo(values)
+    }
+    super.addValuesTo(values)
+  }
+}
+class Label extends Paragraph {
+  constructor (text, noteId, note) {
+    const label = document.createElement('label')
+    parseLinksAndAddTo(label, text)
+
+    const element = document.createElement('p')
+    element.appendChild(label)
+
+    super(label, element, noteId, note)
+  }
+}
+class Input extends Paragraph {
+  constructor (name, labelText, { noteId, note, ...properties } = {}) {
+    const input = document.createElement('input')
+    input.id = name
+    input.name = name
+    Object.assign(input, properties)
+    if (params.get(name)) {
+      input.value = params.get(name)
+    }
+
+    const [before, after] = labelText.split('%i')
+    const label = document.createElement('label')
+    parseLinksAndAddTo(label, before)
+    label.appendChild(input)
+    parseLinksAndAddTo(label, after)
+
+    const element = document.createElement('p')
+    element.appendChild(label)
+
+    super(label, element, noteId, note)
+
+    this._name = name
+    this._input = input
+
+    input.addEventListener('change', this._handleChange.bind(this))
   }
 
   get value () {
@@ -345,70 +385,110 @@ class Input extends Option {
     }
   }
 
+  addValuesTo (values) {
+    values[this._name] = this.value
+    super.addValuesTo(values)
+  }
+
   _handleChange () {
     params.set(this._name, this._input.value)
     paramsUpdate()
+    if (this.checkable) {
+      this.checkable.element.checked = true
+      this.checkable.handleChange()
+    }
+  }
+
+  addTo (group) {
+    if (group instanceof Paragraph) {
+      this.group = group
+      // Merge children of paragraphs
+      while (this.element.firstChild) {
+        group.element.appendChild(this.element.firstChild)
+      }
+      this.element = group.element
+    } else {
+      super.addTo(group)
+    }
   }
 }
-class Radio extends Group {
-  constructor (name, selected) {
+class Checkable extends Option {
+  constructor (type, name, value, checked = false) {
     super()
-    this.element = document.createElement('div')
-    this.type = 'radio'
-    this._name = name
-    this._selected = params.get(name) || selected
-
-    this._handleChange = this._handleChange.bind(this)
+    this.name = name
+    this.value = value
+    this.element = document.createElement('input')
+    this.element.type = type
+    this.element.name = name
+    this.element.id = value && value !== 'on' ? `${name}-${value}` : name
+    if (value) this.element.value = value
+    if (checked) {
+      this.element.checked = true
+    }
+    this.element.addEventListener('change', this.handleChange.bind(this))
   }
 
-  _makeRadio (value) {
-    const radio = document.createElement('input')
-    radio.type = this.type
-    radio.name = this._name
-    if (value) radio.value = value
-    radio.addEventListener('change', this._handleChange)
-    return radio
+  get checked () {
+    return this.element.checked
   }
 
-  _handleChange (e) {
-    if (e.target.checked) {
-      const value = e.target.value
-      this._selected = value
-      params.set(this._name, value)
+  handleChange () {
+    if (this.element.checked) {
+      params.set(this.name, this.value)
     } else {
-      this._selected = null
-      params.delete(this._name)
+      params.set(this.name, 'off')
     }
     paramsUpdate()
+  }
+}
+class Checkbox extends Checkable {
+  constructor (name, defaultValue) {
+    const urlParam = params.get(name)
+    super('checkbox', name, 'on', urlParam ? urlParam === 'on' : defaultValue)
+  }
+
+  addValuesTo (values) {
+    values[this.name] = this.checked
+  }
+}
+class _Radio extends Checkable {
+  constructor (group, value, checked) {
+    super('radio', group.name, value, checked)
+    this.group = group
+  }
+
+  handleChange () {
+    super.handleChange()
+    this.group.handleSelect(this.value)
+  }
+}
+class RadioGroup extends Group {
+  constructor (name, defaultValue) {
+    super()
+    this.element = document.createElement('div')
+    this.element.className = 'radio-group'
+    this.name = name
+    this.value = params.get(name) || defaultValue
   }
 
   add (input, value = null) {
     input = super.add(input, true)
-    const radio = this._makeRadio(value)
-    if (value && this._selected === value) {
-      radio.checked = true
-    }
-    const space = document.createTextNode(' ')
-    if (input.label.firstChild) {
-      input.label.insertBefore(space, input.label.firstChild)
-    } else {
-      input.label.appendChild(space)
-    }
-    input.label.insertBefore(radio, space)
-    input.radio = radio
+    input.addCheckable(new _Radio(this, value, this.value === value))
     return this
   }
-}
-class Checkbox extends Radio {
-  constructor (name, input, checked) {
-    super(name, checked ? 'on' : null)
-    this.type = 'checkbox'
-    this.add(input, 'on')
+
+  handleSelect (value) {
+    this.value = value
+  }
+
+  addValuesTo (values) {
+    values[this.name] = this.value
+    super.addValuesTo(values)
   }
 }
 const form = new Form(document.getElementById('options'))
   .add(
-    new Radio('upload-mode', 'id')
+    new RadioGroup('upload-mode', 'id')
       .add(new Input(
         'id',
         'Project ID: %i (the ID of the project on the Scratch website)',
@@ -447,22 +527,19 @@ const form = new Form(document.getElementById('options'))
           placeholder: 'Username'
         }
       ))
-      .add(new Checkbox(
-        'fullscreen',
-        'Show fullscreen button?',
-        true
-      ))
-      .add(new Checkbox(
-        'turbo',
-        'Enable {https://en.scratch-wiki.info/wiki/Turbo_Mode turbo mode}?'
-      ))
-      .add(new Checkbox(
-        'progress',
-        'Load progress indicator?',
-        true
-      ))
-      .add(new Checkbox(
-        'loading-image',
+      .add(
+        new Label('Show fullscreen button?')
+          .addCheckable(new Checkbox('fullscreen', true))
+      )
+      .add(
+        new Label('Enable {https://en.scratch-wiki.info/wiki/Turbo_Mode turbo mode}?')
+          .addCheckable(new Checkbox('turbo'))
+      )
+      .add(
+        new Label('Load progress indicator?')
+          .addCheckable(new Checkbox('progress', true))
+      )
+      .add(
         new Input(
           'loading-image-file',
           'Loading image: %i',
@@ -471,40 +548,39 @@ const form = new Form(document.getElementById('options'))
             accept: 'image/*'
           }
         )
-      ))
-      .add(new Checkbox(
-        'compatibility',
-        {
-          label: 'Enable compatibility mode?',
-          noteId: 2,
-          note: 'Compatibility mode forces projects to run at 30 FPS, like in Scratch 2.0. Turning this off allows the project to run at a higher framerate (usually 60 FPS, depending on the computer screen\'s refresh rate).'
-        },
-        true
-      ))
-      .add(new Checkbox(
-        'stretch',
-        'Stretch the canvas to fit (as opposed to maintaining the aspect ratio)?'
-      ))
-      .add(new Checkbox(
-        'no-cursor',
-        'Hide cursor?'
-      ))
-      .add(new Checkbox(
-        'pointer-lock',
-        {
-          label: 'Lock the pointer on click? The mouse x/y blocks will report the mouse movement.',
-          noteId: 3,
-          note: 'I think the implementation of this is poor. Maybe instead of setting mouse x/y, it can set a cloud variable with a certain name. You can leave feedback and suggestions on {https://scratch.mit.edu/users/Sheep_maker/ my profile}.'
-        }
-      ))
-      .add(new Checkbox(
-        'zip',
-        'Output a .zip file? The .zip file will contain an index.html file and separate files for the project\'s assets.'
-      ))
+          .addCheckable(new Checkbox('loading-image'))
+      )
+      .add(
+        new Label(
+          'Enable compatibility mode?',
+          2,
+          'Compatibility mode forces projects to run at 30 FPS, like in Scratch 2.0. Turning this off allows the project to run at a higher framerate (usually 60 FPS, depending on the computer screen\'s refresh rate).'
+        )
+          .addCheckable(new Checkbox('compatibility', true))
+      )
+      .add(
+        new Label('Stretch the canvas to fit (as opposed to maintaining the aspect ratio)?')
+          .addCheckable(new Checkbox('stretch'))
+      )
+      .add(
+        new Label('Hide cursor?')
+          .addCheckable(new Checkbox('no-cursor'))
+      )
+      .add(
+        new Label(
+          'Lock the pointer on click? The mouse x/y blocks will report the mouse movement.',
+          3,
+          'I think the implementation of this is poor. Maybe instead of setting mouse x/y, it can set a cloud variable with a certain name. You can leave feedback and suggestions on {https://scratch.mit.edu/users/Sheep_maker/ my profile}.'
+        )
+          .addCheckable(new Checkbox('pointer-lock'))
+      )
+      .add(
+        new Label('Output a .zip file? The .zip file will contain an index.html file and separate files for the project\'s assets.')
+          .addCheckable(new Checkbox('zip'))
+      )
       .add(
         new Fieldset('Monitor style')
-          .add(new Checkbox(
-            'use-colour',
+          .add(
             new Input(
               'monitor-colour',
               'Use custom variable/list monitor colour: %i? (If unchecked, a translucent black will be used.)',
@@ -513,7 +589,8 @@ const form = new Form(document.getElementById('options'))
                 value: '#ff8c1a'
               }
             )
-          ))
+              .addCheckable(new Checkbox('use-colour'))
+          )
           .add(new Input(
             'monitor-text',
             'Monitor text colour: %i',
@@ -522,20 +599,20 @@ const form = new Form(document.getElementById('options'))
               value: '#ffffff'
             }
           ))
-          .add(new Checkbox(
-            'transparent-monitor',
-            'Hide the monitor background boxes?'
-          ))
+          .add(
+            new Label('Hide the monitor background boxes?')
+              .addCheckable(new Checkbox('transparent-monitor'))
+          )
       )
       .add(
         new Fieldset('Cloud variable source')
           .add(
-            new Radio('cloud-provider', 'localstorage')
-              .add({
-                label: 'Save cloud variables locally using localStorage',
-                noteId: 1,
-                note: 'You may have to deal with privacy laws around cookies outside of Scratch.'
-              }, 'localstorage')
+            new RadioGroup('cloud-provider', 'localstorage')
+              .add(new Label(
+                'Save cloud variables locally using localStorage',
+                1,
+                'You may have to deal with privacy laws around cookies outside of Scratch.'
+              ), 'localstorage')
               .add(new Input(
                 'cloud-ws',
                 'Use a {https://github.com/SheepTester/primitive-cloud-server custom server}: %i',
@@ -545,38 +622,37 @@ const form = new Form(document.getElementById('options'))
                 }
               ), 'ws')
           )
-          .add(new Checkbox(
-            'special-cloud',
-            {
-              label: 'Give certain cloud variables special behaviours depending on the name?',
-              noteId: 4,
-              note: 'If a cloud variable with the name "☁ eval" is set, it\'ll run the variable value as JavaScript and store it in a cloud variable named "☁ eval output"; if there is an error, it\'ll be stored in "☁ eval error." If you\'re using a custom cloud server, then cloud variables whose names start with "☁ local storage" will store their values in localStorage instead of in the server.'
-            }
-          ))
+          .add(
+            new Label(
+              'Give certain cloud variables special behaviours depending on the name?',
+              4,
+              'If a cloud variable with the name "☁ eval" is set, it\'ll run the variable value as JavaScript and store it in a cloud variable named "☁ eval output"; if there is an error, it\'ll be stored in "☁ eval error." If you\'re using a custom cloud server, then cloud variables whose names start with "☁ local storage" will store their values in localStorage instead of in the server.'
+            )
+              .addCheckable(new Checkbox('special-cloud'))
+          )
       )
       .add(
         new Fieldset('{https://sheeptester.github.io/scratch-gui/ E羊icques} (modded) options')
-          .add(new Checkbox(
-            'wider',
-            'Does this project use a {https://sheeptester.github.io/scratch-gui/?width=640&height=360 custom size}?'
-          ))
-          // TODO: make inputs a group?
-          .add(new Input(
-            'width',
-            'Width: %i',
-            {
-              type: 'number',
-              value: '480'
-            }
-          ))
-          .add(new Input(
-            'height',
-            'Height: %i',
-            {
-              type: 'number',
-              value: '360'
-            }
-          ))
+          .add(
+            new Label('Does this project use a {https://sheeptester.github.io/scratch-gui/?width=640&height=360 custom size}?')
+              .addCheckable(new Checkbox('wider'))
+              .add(new Input(
+                'width',
+                'Width: %i',
+                {
+                  type: 'number',
+                  value: '480'
+                }
+              ))
+              .add(new Input(
+                'height',
+                'Height: %i',
+                {
+                  type: 'number',
+                  value: '360'
+                }
+              ))
+          )
           .add(new Input(
             'extension-url',
             'Load {https://github.com/LLK/scratch-vm/blob/develop/docs/extensions.md#types-of-extensions unofficial extension} from URL: %i',
@@ -584,47 +660,63 @@ const form = new Form(document.getElementById('options'))
               type: 'url'
             }
           ))
-          .add(new Checkbox(
-            'no-limits',
-            'Remove limits such as clone and list length limits?'
-          ))
+          .add(
+            new Label('Remove limits such as clone and list length limits?')
+              .addCheckable(new Checkbox('no-limits'))
+          )
       )
   )
-  .add(new Checkbox(
-    'autodownload',
-    'Download automatically?',
-    true
-  ))
+  .add(
+    new Label('Download automatically?')
+      .addCheckable(new Checkbox('autodownload', true))
+  )
   .done()
 
-function load() {
-  loadNoMinifyBtn.disabled = true;
-  otherHtmlifyBtn.disabled = true;
-  logOutput.innerHTML = '';
-  scroll = true;
-  downloadAsHTML(getProject(), {
-    title: title.value,
-    username: username.value,
-    log,
-    progressBar: progressBar.checked,
-    fullscreen: fullscreen.checked,
-    monitorColour: useColour.checked ? monitorColour.value : null,
-    cloudServer: document.querySelector('input[name="cloud-provider"]:checked').value === 'ws'
-      ? cloudServer.value : null,
-    projectId: id.value,
-    loadingImage: useLoadingImage ? loadingImage.files[0] : null,
-    customRatio: wider.checked,
-    width: wider.checked ? width.value : 480,
-    height: wider.checked ? height.value : 360,
-    extension: extensionURL.value || null,
-    noLimits: noLimits.checked,
-    pointerLock: pointerLock.checked,
-    stretch: stretch.checked,
-    noCursor: noCursor.checked,
-    specialCloud: specialCloud.checked,
-    zip: zip.checked,
-    monitorText: monitorText.value,
-    transparentMonitors: transparentMonitors.checked,
+function load () {
+  const { values } = form
+  console.log(values);
+  form.disable()
+  otherHtmlifyBtn.disabled = true
+  logOutput.innerHTML = ''
+  scroll = true
+  const project = values['upload-mode'] === 'file'
+    ? { file: values.file }
+    : { id: values.id + '' }
+  downloadAsHTML(project, {
+    projectId: values.id + '',
+
+    title: values.title,
+    username: values.username,
+    fullscreen: values.fullscreen,
+    turboMode: values.turbo,
+    progressBar: values.progress,
+    loadingImage: values['loading-image']
+      ? values['loading-image-file']
+      : null,
+    compatibilityMode: values.compatibility,
+    stretch: values.stretch,
+    noCursor: values['no-cursor'],
+    pointerLock: values['pointer-lock'],
+    zip: values.zip,
+
+    monitorColour: values['use-colour']
+      ? values['monitor-colour']
+      : null,
+    monitorText: values['monitor-text'],
+    transparentMonitors: values['transparent-monitor'],
+
+    cloudServer: values['cloud-provider'] === 'ws'
+      ? values['cloud-ws']
+      : null,
+    specialCloud: values['special-cloud'],
+
+    customRatio: values.wider,
+    width: values.wider ? values.width : 480,
+    height: values.wider ? values.height : 360,
+    extension: values['extension-url'] || null,
+    noLimits: values['no-limits'],
+
+    log
   })
     .then(blob => {
       function downloadBlob () {
@@ -669,33 +761,17 @@ function load() {
 }
 form.onSubmit = load
 otherHtmlifyBtn.addEventListener('click', load)
+/*
+
 let defaultTitle = true;
 title.addEventListener('change', e => {
   defaultTitle = false;
 });
-file.addEventListener('change', e => {
-  if (file.files[0]) {
-    document.querySelector('input[name="upload-mode"][value="file"]').checked = true;
-    if (defaultTitle) {
-      title.value = file.files[0].name.replace(/\.\w+$/, '').replace(/_/g, ' ')
-    }
-  }
-});
-cloudServer.addEventListener('change', e => {
-  document.querySelector('input[name="cloud-provider"][value="ws"]').checked = true;
-})
-width.addEventListener('change', e => {
-  wider.checked = true;
-});
-height.addEventListener('change', e => {
-  wider.checked = true;
-});
-monitorColour.addEventListener('change', e => {
-  useColour.checked = true;
-});
-loadingImage.addEventListener('change', e => {
-  useLoadingImage.checked = true;
-});
+
+if (defaultTitle) {
+  title.value = file.files[0].name.replace(/\.\w+$/, '').replace(/_/g, ' ')
+}
+*/
 /* no-offline */
 const offlineifyBtn = document.getElementById('offlineify');
 offlineifyBtn.addEventListener('click', e => {

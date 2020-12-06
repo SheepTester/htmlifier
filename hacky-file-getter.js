@@ -134,6 +134,8 @@ function downloadAsHTML(projectSrc, {
   zip: outputZip = false,
   monitorText = 'white',
   transparentMonitors = false,
+  compatibilityMode = true,
+  turboMode = false,
 } = {}) {
   const modded = true
   // Otherwise, the modded NotVirtualMachine will not get width and height
@@ -249,7 +251,7 @@ function downloadAsHTML(projectSrc, {
   ]).then(([preface, scripts, template, loadingImageURL]) => {
     scripts = preface
       + `DESIRED_USERNAME = ${JSON.stringify(username)},\n`
-      + `COMPAT = ${compatibility.checked},\nTURBO = ${turbo.checked},\n`
+      + `COMPAT = ${compatibilityMode},\nTURBO = ${turboMode},\n`
       + `PROJECT_ID = ${JSON.stringify(projectId)},\n`
       + `WIDTH = ${width},\nHEIGHT = ${height},\n`
       + `EXTENSION_URL = ${JSON.stringify(extension)},\n`
