@@ -55,7 +55,7 @@
     <div class="header">
       <h1>Project HTMLifier</h1>
       <h3><em>Convert a Scratch project to HTML</em></h3>
-      <button class="htmlify" id="other-htmlify-btn">HTMLify</button>
+      <button class="htmlify" id="other-htmlify-btn" form="options" type="submit">HTMLify</button>
     </div>
     <div class="mainarea">
       <!-- no-offline -->
@@ -158,9 +158,6 @@
       <p>Made by <a href="https://scratch.mit.edu/users/Sheep_maker/">Sheep_maker</a>, who used <a href="https://github.com/LLK/scratch-vm/">scratch-vm</a>, <a href="http://danml.com/download.html">download.js</a>, and their dependencies for this project.</p>
       <p>CSS by <a href="https://scratch.mit.edu/users/mrcringekidyt/">Mr. Cringe Kid</a>.</p>
     </div>
-    <!-- VM relies on document.body existing oof -->
-    <script src="https://sheeptester.github.io/scratch-vm/16-9/vm.min.js" charset="utf-8"></script>
-    <script src="./hacky-file-getter.js" charset="utf-8"></script>
     <script type="text/javascript">
 const otherHtmlifyBtn = document.getElementById('other-htmlify-btn')
 const logOutput = document.getElementById('log')
@@ -724,7 +721,7 @@ function load () {
   logOutput.innerHTML = ''
   scroll = true
   const project = values['upload-mode'] === 'file'
-    ? { file: values.file }
+    ? { file: values.file || Promise.reject(new Error('You did not select a project file.')) }
     : { id: values.id + '' }
   downloadAsHTML(project, {
     projectId: values.id + '',
@@ -804,7 +801,6 @@ function load () {
     });
 }
 form.onSubmit = load
-otherHtmlifyBtn.addEventListener('click', load)
 /*
 
 let defaultTitle = true;
@@ -837,5 +833,8 @@ offlineifyBtn.addEventListener('click', e => {
 })
 /* /no-offline */
     </script>
+    <!-- VM relies on document.body existing oof -->
+    <script src="https://sheeptester.github.io/scratch-vm/16-9/vm.min.js" charset="utf-8"></script>
+    <script src="./hacky-file-getter.js" charset="utf-8"></script>
   </body>
 </html>
