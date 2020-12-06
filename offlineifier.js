@@ -60,7 +60,7 @@ function offlineify ({
     css
   ]) => {
     html = html
-      .replace('<body>', '<body class="offline">')
+      .replace('<body', `<body class="offline" data-offlineified="${new Date()}"`)
       // Using functions to avoid $ substitution
       .replace('<script src="./hacky-file-getter.js" charset="utf-8"></script>', () => `<script>${hackyFileGetter}</script>`)
       .replace('<script src="./jszip.min.js" charset="utf-8"></script>', () => `<script>${jszip}</script>`)

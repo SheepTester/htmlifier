@@ -43,7 +43,7 @@
         position: fixed;
         bottom: 0;
         right: 0;
-        color: rgba(0, 0, 0, 0.5);
+        color: rgba(255, 255, 255, 0.5);
         margin: 10px;
       }
       fieldset {
@@ -234,6 +234,18 @@ class Option {
   addValuesTo (values) {
     return
   }
+
+  setDisabledState (disabled) {
+    return
+  }
+
+  disable () {
+    this.setDisabledState(true)
+  }
+
+  enable () {
+    this.setDisabledState(false)
+  }
 }
 class Group extends Option {
   constructor () {
@@ -254,6 +266,12 @@ class Group extends Option {
   addValuesTo (values) {
     for (const child of this.children) {
       child.addValuesTo(values)
+    }
+  }
+
+  setDisabledState (disabled) {
+    for (const child of this.children) {
+      child.setDisabledState(disabled)
     }
   }
 }
@@ -284,11 +302,17 @@ class Form extends Group {
     const submitBtn = document.createElement('input')
     submitBtn.type = 'submit'
     this.element.appendChild(submitBtn)
+    this._submitBtn = submitBtn
 
     this._form.appendChild(this.element)
     this.element = this._form
 
     return this
+  }
+
+  setDisabledState (disabled) {
+    this._submitBtn.disabled = disabled
+    super.setDisabledState(disabled)
   }
 }
 class Fieldset extends Group {
@@ -300,6 +324,11 @@ class Fieldset extends Group {
 
     this.element = document.createElement('fieldset')
     this.element.appendChild(labelElem)
+  }
+
+  setDisabledState (disabled) {
+    // A disabled fieldset disables its children :D
+    this.element.disabled = disabled
   }
 }
 class Paragraph extends Group {
@@ -335,6 +364,13 @@ class Paragraph extends Group {
       this.checkable.addValuesTo(values)
     }
     super.addValuesTo(values)
+  }
+
+  setDisabledState (disabled) {
+    if (this.checkable) {
+      this.checkable.setDisabledState(disabled)
+    }
+    super.setDisabledState(disabled)
   }
 }
 class Label extends Paragraph {
@@ -411,6 +447,11 @@ class Input extends Paragraph {
       super.addTo(group)
     }
   }
+
+  setDisabledState (disabled) {
+    this._input.disabled = disabled
+    super.setDisabledState(disabled)
+  }
 }
 class Checkable extends Option {
   constructor (type, name, value, checked = false) {
@@ -439,6 +480,10 @@ class Checkable extends Option {
       params.set(this.name, 'off')
     }
     paramsUpdate()
+  }
+
+  setDisabledState (disabled) {
+    this.element.disabled = disabled
   }
 }
 class Checkbox extends Checkable {
@@ -674,7 +719,6 @@ const form = new Form(document.getElementById('options'))
 
 function load () {
   const { values } = form
-  console.log(values);
   form.disable()
   otherHtmlifyBtn.disabled = true
   logOutput.innerHTML = ''
@@ -721,7 +765,7 @@ function load () {
     .then(blob => {
       function downloadBlob () {
         log('Attempting to download file.', 'status');
-        download(blob, title.value + (blob.type === 'application/zip' ? '.zip' : '.html'), blob.type);
+        download(blob, values.title + (blob.type === 'application/zip' ? '.zip' : '.html'), blob.type);
       }
       if (autodownload.checked) {
         downloadBlob();
@@ -747,16 +791,16 @@ function load () {
         })
         entry.appendChild(previewBtn);
       }
-      loadNoMinifyBtn.disabled = false;
-      otherHtmlifyBtn.disabled = false;
+      form.enable()
+      otherHtmlifyBtn.disabled = false
     }).catch(err => {
       console.error(err);
       if (err.message !== 'error logged') {
         log('Unexpected error:\n' + err.stack, 'error');
       }
-      loadNoMinifyBtn.disabled = false;
-      otherHtmlifyBtn.disabled = false;
-      scroll = false;
+      form.enable()
+      otherHtmlifyBtn.disabled = false
+      scroll = false
     });
 }
 form.onSubmit = load
@@ -769,7 +813,7 @@ title.addEventListener('change', e => {
 });
 
 if (defaultTitle) {
-  title.value = file.files[0].name.replace(/\.\w+$/, '').replace(/_/g, ' ')
+  title.value = file.files[0].name.split('.')[0].replace(/_/g, ' ')
 }
 */
 /* no-offline */

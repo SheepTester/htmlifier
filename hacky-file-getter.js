@@ -201,14 +201,14 @@ function downloadAsHTML(projectSrc, {
           if (extension) {
             const extensionWorkerMatch = vmCode.match(extensionWorkerGet)
             if (extensionWorkerMatch) {
-              log('Getting extension worker', status)
+              log('Getting extension worker', 'status')
               /* no-offline */
               const workerCode = await fetch('https://sheeptester.github.io/scratch-vm/16-9/' + extensionWorkerMatch[1])
                 .catch(problemFetching('the extension worker'))
                 .then(r => r.text())
               /* /no-offline */
               // [offline-extension-worker-src]
-              log('Getting custom extension script', status)
+              log('Getting custom extension script', 'status')
               const extensionScript = await fetch(extension)
                 .catch(problemFetching('the custom extension'))
                 .then(r => {
