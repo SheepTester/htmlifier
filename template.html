@@ -470,6 +470,14 @@ class VideoProvider {
 const Scratch = window.Scratch = window.Scratch || {};
 
 const CLOUD_PREFIX = '\u2601 ';
+window.setCloud = (name, value) => {
+  Scratch.vm.postIOData('cloud', {
+    varUpdate: {
+      name: CLOUD_PREFIX + name,
+      value
+    }
+  });
+}
 
 const runBenchmark = function () {
   const vm = new window.NotVirtualMachine(% custom-ratio % WIDTH, HEIGHT % /custom-ratio %);
@@ -556,25 +564,42 @@ const runBenchmark = function () {
   function onClose() {
     setTimeout(openConnection, 500);
   }
+  % special-cloud %
+  function postError(err) {
+    vm.postIOData('cloud', {
+      varUpdate: {
+        name: CLOUD_PREFIX + 'eval error',
+        value: err.toString()
+      }
+    });
+  }
+  % /special-cloud %
   const cloudProvider = {
     updateVariable(name, value) {
       % special-cloud %
       if (name === CLOUD_PREFIX + 'eval') {
         try {
-          vm.postIOData('cloud', {
-            varUpdate: {
-              name: CLOUD_PREFIX + 'eval output',
-              value: eval(value)
-            }
-          });
+          Promise.resolve(eval(value))
+            .then(output => {
+              vm.postIOData('cloud', {
+                varUpdate: {
+                  name: CLOUD_PREFIX + 'eval output',
+                  value: output
+                }
+              });
+            })
+            .catch(postError);
         } catch (err) {
-          vm.postIOData('cloud', {
-            varUpdate: {
-              name: CLOUD_PREFIX + 'eval error',
-              value: err.toString()
-            }
-          });
+          postError(err);
         }
+      } else if (name === CLOUD_PREFIX + 'open link') {
+        try {
+          window.open(value, '_blank');
+        } catch (err) {
+          postError(err);
+        }
+      } else if (name === CLOUD_PREFIX + 'redirect') {
+        window.location = value;
       } else % cloud-ws % if (name.startsWith(CLOUD_PREFIX + 'local storage')) % /cloud-ws % {
         % /special-cloud %
         % cloud-localstorage %
@@ -732,6 +757,10 @@ const runBenchmark = function () {
   }
   function mousedown(e) {
     mouseDown = true;
+    vm.postIOData('keyboard', {
+      key: 'Mouse' + e.which,
+      isDown: true
+    });
     % pointer-lock %
     if (pointerLocked()) {
       vm.postIOData('mouse', {
@@ -771,6 +800,10 @@ const runBenchmark = function () {
       dragOffset = null;
       dragId = null;
     }
+    vm.postIOData('keyboard', {
+      key: 'Mouse' + e.which,
+      isDown: false
+    });
     % pointer-lock %
     if (pointerLocked()) {
       vm.postIOData('mouse', {
@@ -807,6 +840,9 @@ const runBenchmark = function () {
     e.preventDefault();
   });
   window.addEventListener('resize', resize);
+  canvas.addEventListener('contextmenu', e => {
+    e.preventDefault();
+  })
   % pointer-lock %
   canvas.requestPointerLock = canvas.requestPointerLock ||
     canvas.mozRequestPointerLock;
