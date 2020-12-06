@@ -5,6 +5,10 @@
  * https://github.com/SheepTester/words-go-here/commits/master/htmlifier/main.css
  */
 
+html {
+  /* https://stackoverflow.com/a/56467997 */
+  scroll-padding-top: 120px;
+}
 body {
   font-family: 'Roboto', sans-serif;
   background-color: #37373c;
@@ -12,12 +16,48 @@ body {
   margin: 0px;
   padding: 0px;
 }
+.offline::after {
+  content: 'Offline edition';
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 10px;
+}
+
+code {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  padding: 0 5px;
+}
+
 a {
   text-decoration: none;
   color: #00d755;
 }
 a:hover {
   text-decoration: underline;
+}
+
+:target {
+  animation: flash 3s;
+}
+@keyframes flash {
+  0% {
+    background-color: rgba(255, 255, 0, 0.5);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+button,
+input[type=file],
+::-webkit-file-upload-button {
+  cursor: pointer;
+}
+input[type=submit] {
+  font-size: 1.2em;
 }
 
 .log {
@@ -107,8 +147,8 @@ fieldset {
   background-color: #19191e;
   box-shadow: none;
   transition: box-shadow 0.25s, border 0.25s;
+  margin: 1em 0;
 }
-
 fieldset:hover {
   box-shadow: rgb(255, 255, 255, 0.8) 0px 0px 10px;
   /* Fieldsets have this really weird bug on Chrome where translucent border
@@ -116,6 +156,7 @@ fieldset:hover {
   border: solid rgba(255, 255, 255, 0.99) 1px;
   transition: box-shadow 0.25s, border 0.25s;
 }
+
 .slideframe {
   margin: 0px;
   position: relative;
@@ -124,7 +165,6 @@ fieldset:hover {
   border: none;
   transition: filter 0.25s, -webkit-filter 0.25s;
 }
-
 .slideframewrapper {
   width: 100%;
   height: 42.86vw;
