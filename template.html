@@ -754,13 +754,17 @@ const runBenchmark = function () {
     return document.pointerLockElement === canvas ||
       document.mozPointerLockElement === canvas;
   }
+  let accumulativeX = 0
+  let accumulativeY = 0
   % /pointer-lock %
   function mousemove(e) {
     % pointer-lock %
     if (pointerLocked()) {
+      accumulativeX += e.movementX
+      accumulativeY += e.movementY
       vm.postIOData('mouse', {
-        x: e.movementX + WIDTH / 2,
-        y: e.movementY + HEIGHT / 2,
+        x: accumulativeX + WIDTH / 2,
+        y: accumulativeY + HEIGHT / 2,
         canvasWidth: WIDTH,
         canvasHeight: HEIGHT
       });

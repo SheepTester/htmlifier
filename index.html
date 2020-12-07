@@ -171,6 +171,12 @@ function addFormattingTo (parent, text) {
         parent.appendChild(code)
         break
       }
+      case 'em': {
+        const em = document.createElement('em')
+        em.textContent = match[2]
+        parent.appendChild(em)
+        break
+      }
       default:
         const link = document.createElement('a')
         link.href = match[1]
@@ -676,7 +682,7 @@ const form = new Form(document.getElementById('options'))
           )
           .add(
             new Label(
-              'Lock the pointer on click? The mouse x/y blocks will report the mouse movement.',
+              'Lock the pointer on click? The mouse x/y blocks will report the {em accumulative} mouse position, which you can use to determine the change in position between frames.',
               3,
               'I think the implementation of this is poor. Maybe instead of setting mouse x/y, it can set a cloud variable with a certain name. You can leave feedback and suggestions on {https://scratch.mit.edu/users/Sheep_maker/ my profile}.'
             )
