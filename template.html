@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{TITLE}</title>
+% favicon %
+<link rel="shortcut icon" type="image/png" href="{FAVICON}">
+% /favicon %
 <style media="screen">
 html, body {
   height: 100%;
@@ -17,6 +20,14 @@ body {
   font-size: 0;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   overflow: hidden;
+  % background-image %
+  background-image: url({BACKGROUND});
+  background-position: center;
+  background-size: cover;
+  % /background-image %
+  % cursor %
+  cursor: url({CURSOR}), auto;
+  % /cursor %
 }
 #wrapper {
   display: block;
@@ -67,6 +78,10 @@ body {
   position: fixed;
   max-width: 100%;
   max-height: 100%;
+  % stretch-loading-image %
+  width: 100%;
+  height: 100%;
+  % /stretch-loading-image %
   left: 0;
   right: 0;
   top: 0;
@@ -74,23 +89,42 @@ body {
   margin: auto;
 }
 % /loading-image %
-% fullscreen %
-#fullscreen-btn {
-  -webkit-appearance: none;
-  border: none;
-  background: none;
+.buttons {
   position: fixed;
   top: 0;
   right: 0;
-  width: 30px;
-  height: 30px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-bottom-left-radius: 12px;
+}
+.buttons button {
+  -webkit-appearance: none;
+  border: none;
+  background: none;
+  width: 48px;
+  height: 48px;
   cursor: pointer;
   background-repeat: no-repeat;
   background-position: center;
   background-size: 24px;
+}
+.buttons button:disabled {
+  cursor: auto;
+  opacity: 0.5;
+}
+% start-stop %
+#start-btn {
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"%3E%3Cpath d="M8 5v14l11-7z" fill="%23fff"/%3E%3C/svg%3E%0A');
+}
+.running #start-btn {
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"%3E%3Cpath d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" fill="%23fff"/%3E%3C/svg%3E');
+}
+#stop-btn {
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"%3E%3Cpath d="M6 6h12v12H6z" fill="%23fff"/%3E%3C/svg%3E%0A');
+}
+% /start-stop %
+% fullscreen %
+#fullscreen-btn {
   background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"%3E%3Cpath d="M14 28h-4v10h10v-4h-6v-6zm-4-8h4v-6h6v-4H10v10zm24 14h-6v4h10V28h-4v6zm-6-24v4h6v6h4V10H28z" fill="%23fff"/%3E%3C/svg%3E');
-  background-color: rgba(0, 0, 0, 0.5);
-  border-bottom-left-radius: 10px;
 }
 .fullscreen #fullscreen-btn {
   background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"%3E%3Cpath d="M10 32h6v6h4V28H10v4zm6-16h-6v4h10V10h-4v6zm12 22h4v-6h6v-4H28v10zm4-22v-6h-4v10h10v-4h-6z" fill="%23fff"/%3E%3C/svg%3E');
@@ -246,9 +280,15 @@ if (true % loading-image % && false % /loading-image %) {
 % loading-image %
 <img src="{LOADING_IMAGE}" id="loading-image">
 % /loading-image %
+<div class="buttons">
+% start-stop %
+<button id="start-btn" aria-label="Start project"></button>
+<button id="stop-btn" aria-label="Stop project" disabled></button>
+% /start-stop %
 % fullscreen %
-<button id="fullscreen-btn"></button>
+<button id="fullscreen-btn" aria-label="Enter/exit fullscreen"></button>
 % /fullscreen %
+</div>
 <script type="text/javascript">
 {SCRIPTS}
 
@@ -688,13 +728,13 @@ const runBenchmark = function () {
   }
   // https://github.com/LLK/scratch-gui/blob/develop/src/containers/stage.jsx#L337-L366
   function onStartDrag() {
-    if (dragId) return;
+    if (dragId || !mouseDownPosition) return;
     const drawableId = renderer.pick(...mouseDownPosition);
     if (drawableId === null) return;
     const targetId = vm.getTargetIdForDrawableId(drawableId);
     if (targetId === null) return;
     const target = vm.runtime.getTargetById(targetId);
-    if (!target.draggable) return;
+    if (!target || !target.draggable) return;
     target.goToFront();
     const drawableData = renderer.extractDrawable(drawableId, ...mouseDownPosition);
     vm.startDrag(targetId);
@@ -1036,7 +1076,34 @@ const runBenchmark = function () {
   document.body.classList.remove('loading');
   % /loading-image %
 
+  % start-stop %
+  const greenFlag = document.getElementById('start-btn');
+  const stopSign = document.getElementById('stop-btn');
+  greenFlag.addEventListener('click', e => {
+    greenFlag.blur();
+    vm.greenFlag();
+  });
+  stopSign.addEventListener('click', e => {
+    stopSign.blur();
+    vm.stopAll();
+  });
+  % /start-stop %
+  vm.on('PROJECT_RUN_START', () => {
+    document.body.classList.add('running');
+    % start-stop %
+    stopSign.disabled = false;
+    % /start-stop %
+  });
+  vm.on('PROJECT_RUN_STOP', () => {
+    document.body.classList.remove('running');
+    % start-stop %
+    stopSign.disabled = true;
+    % /start-stop %
+  });
+
+  % autostart %
   vm.greenFlag();
+  % /autostart %
 
     });
 };

@@ -60,6 +60,16 @@ input[type=submit] {
   font-size: 1.2em;
 }
 
+.radio-group {
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+  padding-left: 2px;
+  margin-left: -4px;
+  transition: border-left-color 0.2s;
+}
+.radio-group:hover {
+  border-left-color: white;
+}
+
 .log {
   color: #b93700;
   background-color: #f0f0b4;
@@ -141,7 +151,6 @@ legend {
 
 fieldset {
   padding: 10px;
-  padding-left: 2%;
   border: solid rgba(255, 255, 255, 0.2) 1px;
   border-radius: 5px;
   background-color: #19191e;
@@ -153,8 +162,18 @@ fieldset:hover {
   box-shadow: rgb(255, 255, 255, 0.8) 0px 0px 10px;
   /* Fieldsets have this really weird bug on Chrome where translucent border
   /* colours result in a thicker border-top. */
-  border: solid rgba(255, 255, 255, 0.99) 1px;
+  border: solid rgba(255, 255, 255, 0.5) 1px;
   transition: box-shadow 0.25s, border 0.25s;
+}
+
+fieldset > p:nth-child(2),
+fieldset > .radio-group > p:first-child,
+fieldset > fieldset:nth-child(2) {
+  margin-top: 0;
+}
+fieldset > p:last-child,
+fieldset > fieldset:last-child {
+  margin-bottom: 0;
 }
 
 .slideframe {

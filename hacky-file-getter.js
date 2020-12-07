@@ -129,13 +129,18 @@ function downloadAsHTML(projectSrc, {
   loadingImage = null,
   noLimits = false,
   pointerLock = false,
-  stretch = false,
+  stretch = 'none',
   noCursor = false,
   zip: outputZip = false,
   monitorText = 'white',
   transparentMonitors = false,
   compatibilityMode = true,
   turboMode = false,
+  favicon = null,
+  backgroundImage = null,
+  autoStart = true,
+  showStartStop = false,
+  cursor = null,
 } = {}) {
   const modded = true
   // Otherwise, the modded NotVirtualMachine will not get width and height
@@ -177,7 +182,11 @@ function downloadAsHTML(projectSrc, {
             return preface;
           }
         })
-      : Promise.resolve(projectSrc.file)
+      : Promise.resolve(
+        projectSrc.url
+          ? fetch(projectSrc.url).then(r => r.blob())
+          : projectSrc.file
+      )
         .then(async blob => {
           if (outputZip) {
             zip = await JSZip.loadAsync(blob)
@@ -246,9 +255,20 @@ function downloadAsHTML(projectSrc, {
 
     // fetch image data for loading gif
     loadingImage
-      ? getDataURL(loadingImage)
+      ? (typeof loadingImage === 'string'
+        ? loadingImage
+        : getDataURL(loadingImage))
+      : '',
+    favicon
+      ? getDataURL(favicon)
+      : '',
+    backgroundImage
+      ? getDataURL(backgroundImage)
+      : '',
+    cursor
+      ? getDataURL(cursor)
       : ''
-  ]).then(([preface, scripts, template, loadingImageURL]) => {
+  ]).then(([preface, scripts, template, loadingImageURL, faviconURL, backgroundImageURL, cursorURL]) => {
     scripts = preface
       + `DESIRED_USERNAME = ${JSON.stringify(username)},\n`
       + `COMPAT = ${compatibilityMode},\nTURBO = ${turboMode},\n`
@@ -272,8 +292,9 @@ function downloadAsHTML(projectSrc, {
     else template = removePercentSection(template, 'monitor-colour');
     if (!noLimits) template = removePercentSection(template, 'limits');
     if (!pointerLock) template = removePercentSection(template, 'pointer-lock');
-    if (stretch) template = removePercentSection(template, 'fit');
+    if (stretch === 'stage') template = removePercentSection(template, 'fit');
     else template = removePercentSection(template, 'stretch');
+    if (stretch !== 'loading-image') template = removePercentSection(template, 'stretch-loading-image');
     if (!noCursor) template = removePercentSection(template, 'no-cursor');
     if (!specialCloud) {
       template = removePercentSection(template, 'special-cloud');
@@ -288,6 +309,11 @@ function downloadAsHTML(projectSrc, {
       template = removePercentSection(template, 'cloud-ws');
     }
     if (transparentMonitors) template = removePercentSection(template, 'monitor-box');
+    if (!favicon) template = removePercentSection(template, 'favicon');
+    if (!backgroundImage) template = removePercentSection(template, 'background-image');
+    if (!autoStart) template = removePercentSection(template, 'autostart');
+    if (!showStartStop) template = removePercentSection(template, 'start-stop');
+    if (!cursor) template = removePercentSection(template, 'cursor');
     const html = template
       .replace(/% \/?[a-z0-9-]+ %/g, '')
       // .replace(/\s*\r?\n\s*/g, '')
@@ -297,6 +323,9 @@ function downloadAsHTML(projectSrc, {
       .replace(/\{PROJECT_RATIO\}/g, () => `${width}/${height}`)
       .replace(/\{MONITOR_TEXT\}/g, () => monitorText)
       .replace(/\{LOADING_IMAGE\}/g, () => loadingImageURL.replace(/&/g, '&amp;').replace(/"/g, '&quot;'))
+      .replace(/\{FAVICON\}/g, () => faviconURL.replace(/&/g, '&amp;').replace(/"/g, '&quot;'))
+      .replace(/\{BACKGROUND\}/g, () => JSON.stringify(backgroundImageURL))
+      .replace(/\{CURSOR\}/g, () => JSON.stringify(cursorURL))
       .replace(/\{SCRIPTS\}/g, () => scripts);
     if (outputZip) {
       zip.file('index.html', html);

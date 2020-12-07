@@ -33,7 +33,7 @@
       <div id="notes"></div>
       <h2 id="updates">Update history</h2>
       <p>See the code and previous versions on <a href="https://github.com/SheepTester/htmlifier/">Github</a>.</p>
-      <h3>2020-06-13</h3>
+      <h3>2020-06-13 (<a href="https://github.com/SheepTester/htmlifier/releases/download/2020-06-13/htmlifier-offline.html">download</a>)</h3>
       <ul>
         <li>More options for styling variable/list monitors</li>
         <li>Option to generate a .zip of files</li>
@@ -42,7 +42,7 @@
         <li>Warn if a file might be too large for JavaScript to HTMLify</li>
         <li>Fixed HTMLifying 2.0 projects</li>
       </ul>
-      <h3>2020-06-01</h3>
+      <h3>2020-06-01 (<a href="https://github.com/SheepTester/htmlifier/releases/download/2020-06-01/htmlifier-offline.html">download</a>)</h3>
       <ul>
         <li>Option to remove clone/list length limits</li>
         <li>Option to hide the cursor</li>
@@ -57,7 +57,7 @@
         <li>Support for custom extensions from a URL</li>
         <li>CSS by <a href="https://scratch.mit.edu/users/mrcringekidyt/">Mr. Cringe Kid</a></li>
       </ul>
-      <h3>2020-03-29</h3>
+      <h3>2020-03-29 (<a href="https://github.com/SheepTester/words-go-here/releases/download/htmlifier-2020-03-29/htmlifier-offline.html">download</a>)</h3>
       <ul>
         <li>Fixed custom stage sizes</li>
       </ul>
@@ -420,8 +420,10 @@ class Input extends Paragraph {
   }
 
   _handleChange () {
-    params.set(this._name, this._input.value)
-    paramsUpdate()
+    if (this._input.type !== 'file') {
+      params.set(this._name, this._input.value)
+      paramsUpdate()
+    }
     if (this.checkable) {
       this.checkable.element.checked = true
       this.checkable.handleChange()
@@ -545,6 +547,17 @@ const form = new Form(document.getElementById('options'))
           accept: '.sb,.sb2,.sb3'
         }
       ), 'file')
+      .add(new Input(
+        'project-url',
+        'Project file from URL: %i',
+        {
+          type: 'url'
+        }
+      ), 'url')
+  )
+  .add(
+    new Label('Include the project data in the HTML file? This will make the file larger, but it will work offline. (Must be checked if uploading a file.)')
+      .addCheckable(new Checkbox('include-file', true))
   )
   .add(
     new Fieldset('Options')
@@ -567,29 +580,6 @@ const form = new Form(document.getElementById('options'))
         }
       ))
       .add(
-        new Label('Show fullscreen button?')
-          .addCheckable(new Checkbox('fullscreen', true))
-      )
-      .add(
-        new Label('Enable {https://en.scratch-wiki.info/wiki/Turbo_Mode turbo mode}?')
-          .addCheckable(new Checkbox('turbo'))
-      )
-      .add(
-        new Label('Load progress indicator?')
-          .addCheckable(new Checkbox('progress', true))
-      )
-      .add(
-        new Input(
-          'loading-image-file',
-          'Loading image: %i',
-          {
-            type: 'file',
-            accept: 'image/*'
-          }
-        )
-          .addCheckable(new Checkbox('loading-image'))
-      )
-      .add(
         new Label(
           'Enable compatibility mode?',
           2,
@@ -598,24 +588,100 @@ const form = new Form(document.getElementById('options'))
           .addCheckable(new Checkbox('compatibility', true))
       )
       .add(
-        new Label('Stretch the canvas to fit (as opposed to maintaining the aspect ratio)?')
-          .addCheckable(new Checkbox('stretch'))
+        new Label('Enable {https://en.scratch-wiki.info/wiki/Turbo_Mode turbo mode}?')
+          .addCheckable(new Checkbox('turbo'))
       )
       .add(
-        new Label('Hide cursor?')
-          .addCheckable(new Checkbox('no-cursor'))
+        new Input(
+          'favicon-file',
+          'Favicon (the tab icon): %i',
+          {
+            type: 'file',
+            accept: 'image/*'
+          }
+        )
+      )
+      .add(
+        new Input(
+          'background-file',
+          'Background image (shows black bars by default): %i',
+          {
+            type: 'file',
+            accept: 'image/*'
+          }
+        )
+      )
+      .add(
+        new Label('Show loading progress bar?')
+          .addCheckable(new Checkbox('progress', true))
+      )
+      .add(
+        new RadioGroup('loading-image', 'file')
+          .add(new Input(
+            'loading-image-file',
+            'Loading image file: %i',
+            {
+              type: 'file',
+              accept: 'image/*'
+            }
+          ), 'file')
+          .add(new Input(
+            'loading-image-url',
+            'Loading image URL: %i',
+            {
+              type: 'url'
+            }
+          ), 'url')
       )
       .add(
         new Label(
-          'Lock the pointer on click? The mouse x/y blocks will report the mouse movement.',
-          3,
-          'I think the implementation of this is poor. Maybe instead of setting mouse x/y, it can set a cloud variable with a certain name. You can leave feedback and suggestions on {https://scratch.mit.edu/users/Sheep_maker/ my profile}.'
+          'Start project immediately on load?',
+          5,
+          'Browsers do not let websites automatically play audio until the user interacts with the website by clicking/tapping somewhere.'
         )
-          .addCheckable(new Checkbox('pointer-lock'))
+          .addCheckable(new Checkbox('autostart', true))
+      )
+      .add(
+        new Label('Show fullscreen button?')
+          .addCheckable(new Checkbox('fullscreen', true))
+      )
+      .add(
+        new Label('Show start/stop buttons?')
+          .addCheckable(new Checkbox('start-stop-controls'))
+      )
+      .add(
+        new RadioGroup('stretch', 'none')
+          .add('Stretch the stage to fit', 'stage')
+          .add('Stretch only the loading image', 'loading-image')
+          .add('Maintain aspect ratio', 'none')
       )
       .add(
         new Label('Output a .zip file? The .zip file will contain an index.html file and separate files for the project\'s assets.')
           .addCheckable(new Checkbox('zip'))
+      )
+      .add(
+        new Fieldset('Mouse pointers')
+          .add(
+            new RadioGroup('cursor', 'default')
+              .add('Use default mouse pointer', 'default')
+              .add('Hide cursor', 'none')
+              .add(new Input(
+                'cursor-file',
+                'Custom cursor (for best results, use a PNG of at most 32 by 32): %i',
+                {
+                  type: 'file',
+                  accept: 'image/*'
+                }
+              ), 'file')
+          )
+          .add(
+            new Label(
+              'Lock the pointer on click? The mouse x/y blocks will report the mouse movement.',
+              3,
+              'I think the implementation of this is poor. Maybe instead of setting mouse x/y, it can set a cloud variable with a certain name. You can leave feedback and suggestions on {https://scratch.mit.edu/users/Sheep_maker/ my profile}.'
+            )
+              .addCheckable(new Checkbox('pointer-lock'))
+          )
       )
       .add(
         new Fieldset('Monitor style')
@@ -725,23 +791,34 @@ function load () {
   scroll = true
   const project = values['upload-mode'] === 'file'
     ? { file: values.file || Promise.reject(new Error('You did not select a project file.')) }
+    : values['upload-mode'] === 'url'
+    ? { url: values['project-url'] }
     : { id: values.id + '' }
   downloadAsHTML(project, {
     projectId: values.id + '',
+    // TODO: values['include-file']
 
     title: values.title,
     username: values.username,
-    fullscreen: values.fullscreen,
-    turboMode: values.turbo,
-    progressBar: values.progress,
-    loadingImage: values['loading-image']
-      ? values['loading-image-file']
-      : null,
     compatibilityMode: values.compatibility,
+    turboMode: values.turbo,
+    favicon: values['favicon-file'],
+    backgroundImage: values['background-file'],
+    progressBar: values.progress,
+    loadingImage: values['loading-image'] === 'file'
+      ? values['loading-image-file']
+      : values['loading-image-url'],
+    autoStart: values.autostart,
+    fullscreen: values.fullscreen,
+    showStartStop: values['start-stop-controls'],
     stretch: values.stretch,
-    noCursor: values['no-cursor'],
-    pointerLock: values['pointer-lock'],
     zip: values.zip,
+
+    noCursor: values.cursor === 'none',
+    cursor: values.cursor === 'file'
+      ? values['cursor-file']
+      : null,
+    pointerLock: values['pointer-lock'],
 
     monitorColour: values['use-colour']
       ? values['monitor-colour']
