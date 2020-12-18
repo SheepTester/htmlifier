@@ -732,6 +732,10 @@ const runBenchmark = function () {
   }
   function mousedown(e) {
     mouseDown = true;
+    vm.postIOData('keyboard', {
+      key: 'Mouse' + e.which,
+      isDown: true
+    });
     % pointer-lock %
     if (pointerLocked()) {
       vm.postIOData('mouse', {
@@ -771,6 +775,10 @@ const runBenchmark = function () {
       dragOffset = null;
       dragId = null;
     }
+    vm.postIOData('keyboard', {
+      key: 'Mouse' + e.which,
+      isDown: false
+    });
     % pointer-lock %
     if (pointerLocked()) {
       vm.postIOData('mouse', {

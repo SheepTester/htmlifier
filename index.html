@@ -108,6 +108,11 @@
       <p id="note-4"><a href="#ref-4"><sup>4</sup></a>If a cloud variable with the name "☁ eval" is set, it'll run the variable value as JavaScript and store it in a cloud variable named "☁ eval output"; if there is an error, it'll be stored in "☁ eval error." If you're using a custom cloud server, then cloud variables whose names start with "☁ local storage" will store their values in localStorage instead of in the server.</p>
       <h2>Update history</h2>
       <p>See the code and previous versions on <a href="https://github.com/SheepTester/htmlifier/">Github</a>.</p>
+      <h3>2020-12-18</h3>
+      <ul>
+        <li>Specific mouse buttons can now be detected using <code>&lt;key (join [MouseN] []) pressed?&gt;</code>, where <code>N</code> can be 1 for left click, 2 for middle click, 3 for right click, and 0 for touch/pen.</li>
+        <li>Fixed an issue where Scratch 2.0 projects with bitmap projects wouldn't work.</li>
+      </ul>
       <h3>2020-06-13</h3>
       <ul>
         <li>More options for styling variable/list monitors</li>
