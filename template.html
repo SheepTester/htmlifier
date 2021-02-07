@@ -66,11 +66,32 @@ body {
 }
 % loading-progress %
 #loading-progress {
-  color: #0ff;
   position: fixed;
-  bottom: 0;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  border-radius: 20px;
+  --progress: 0%;
+  border: 1px solid {PROGRESS_COLOUR};
+}
+#loading-progress::before {
+  content: attr(data-progress);
+  position: absolute;
+  bottom: 100%;
   left: 0;
-  font-size: 16px;
+  right: 0;
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: {PROGRESS_COLOUR};
+}
+#loading-progress::after {
+  content: '';
+  display: block;
+  height: 16px;
+  border-radius: 20px;
+  width: var(--progress);
+  background-color: {PROGRESS_COLOUR};
 }
 % /loading-progress %
 % loading-image %
@@ -253,11 +274,6 @@ body {
 </style>
 </head>
 <body class="loading">
-<script type="text/javascript">
-if (true % loading-image % && false % /loading-image %) {
-  document.body.classList.remove('loading');
-}
-</script>
 <div id="wrapper">
 <canvas id="stage"></canvas>
 <div id="monitors"></div>
@@ -275,7 +291,7 @@ if (true % loading-image % && false % /loading-image %) {
 % /modded %
 % /no-vm %
 % loading-progress %
-<span id="loading-progress">...</span>
+<div id="loading-progress" data-progress="0/0"></div>
 % /loading-progress %
 % loading-image %
 <img src="{LOADING_IMAGE}" id="loading-image">
@@ -522,6 +538,8 @@ window.setCloud = (name, value) => {
 const runBenchmark = function () {
   const vm = new window.NotVirtualMachine(% custom-ratio % WIDTH, HEIGHT % /custom-ratio %);
   Scratch.vm = vm;
+  // Compatibility with Eyangicques plugins
+  window.vm = vm;
 
   const storage = new ScratchStorage();
   Scratch.storage = storage;
@@ -692,10 +710,12 @@ const runBenchmark = function () {
   storage.webHelper.load = function (...args) {
     const result = _load.call(this, ...args);
     total += 1;
-    progress.textContent = complete + '/' + total;
+    progress.dataset.progress = complete + '/' + total;
+    progress.style.setProperty('--progress', complete / total * 100 + '%');
     result.then(() => {
       complete += 1;
-      progress.textContent = complete + '/' + total;
+      progress.dataset.progress = complete + '/' + total;
+      progress.style.setProperty('--progress', complete / total * 100 + '%');
     });
     return result;
   };
@@ -870,11 +890,11 @@ const runBenchmark = function () {
       canvasHeight: rect.height
     });
   }
+  // mousedown event listeners have been moved to only start listening when the
+  // project loads
   document.addEventListener('mousemove', mousemove);
-  canvas.addEventListener('mousedown', mousedown);
   document.addEventListener('mouseup', mouseup);
   document.addEventListener('touchmove', mousemove);
-  canvas.addEventListener('touchstart', mousedown, {passive: false});
   document.addEventListener('touchend', mouseup, {passive: false});
   canvas.addEventListener('wheel', e => {
     vm.postIOData('mouseWheel', {
@@ -904,6 +924,10 @@ const runBenchmark = function () {
       key: key,
       isDown: true
     });
+    vm.postIOData('keyboard', {
+      key: 'code_' + e.code,
+      isDown: true
+    });
     if (e.keyCode === 32 || e.keyCode >= 37 && e.keyCode <= 40) {
       e.preventDefault();
     }
@@ -912,6 +936,10 @@ const runBenchmark = function () {
     const key = !e.key || e.key === 'Dead' ? e.keyCode : e.key;
     vm.postIOData('keyboard', {
       key: key,
+      isDown: false
+    });
+    vm.postIOData('keyboard', {
+      key: 'code_' + e.code,
       isDown: false
     });
     if (e.target !== document && e.target !== document.body) {
@@ -1077,8 +1105,8 @@ const runBenchmark = function () {
   if (loadingImage.parentNode) {
   loadingImage.parentNode.removeChild(loadingImage);
   }
-  document.body.classList.remove('loading');
   % /loading-image %
+  document.body.classList.remove('loading');
 
   % start-stop %
   const greenFlag = document.getElementById('start-btn');
@@ -1108,6 +1136,10 @@ const runBenchmark = function () {
   % autostart %
   vm.greenFlag();
   % /autostart %
+
+  // Only detect mousedown events once project loads
+  canvas.addEventListener('mousedown', mousedown);
+  canvas.addEventListener('touchstart', mousedown, {passive: false});
 
     });
 };

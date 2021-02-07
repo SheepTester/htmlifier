@@ -36,9 +36,9 @@
       <h3>2020-12-18</h3>
       <ul>
         <li>Specific mouse buttons can now be detected using <code>&lt;key (join [MouseN] []) pressed?&gt;</code>, where <code>N</code> can be 1 for left click, 2 for middle click, 3 for right click, and 0 for touch/pen.</li>
-        <li>Fixed an issue where Scratch 2.0 projects with bitmap projects wouldn't work.</li>
+        <li>Fixed an issue where Scratch 2.0 projects with bitmap costumes wouldn't work.</li>
       </ul>
-      <h3>2020-06-13 (<a href="https://github.com/SheepTester/htmlifier/releases/download/2020-06-13/htmlifier-offline.html">download</a></h3>
+      <h3>2020-06-13 (<a href="https://github.com/SheepTester/htmlifier/releases/download/2020-06-13/htmlifier-offline.html">download</a>)</h3>
       <ul>
         <li>More options for styling variable/list monitors</li>
         <li>Option to generate a .zip of files</li>
@@ -156,6 +156,7 @@ function log (text, style) {
   return entry
 }
 
+// == DYNAMIC OPTIONS RENDERER ==
 // {https://link.com/ text to show}
 // Except the URL can be something like `code` (but this doesn't nest).
 const parseLinksRegex = /{([^\s}]+)\s([^>}]+)}/g
@@ -538,6 +539,8 @@ class RadioGroup extends Group {
     super.addValuesTo(values)
   }
 }
+
+// == OPTIONS ==
 const form = new Form(document.getElementById('options'))
   .add(
     new RadioGroup('upload-mode', 'id')
@@ -623,7 +626,14 @@ const form = new Form(document.getElementById('options'))
         )
       )
       .add(
-        new Label('Show loading progress bar?')
+        new Input(
+          'progress-colour',
+          'Show loading progress bar? Colour: %i',
+          {
+            type: 'color',
+            value: '#00ffff'
+          }
+        )
           .addCheckable(new Checkbox('progress', true))
       )
       .add(
@@ -815,7 +825,7 @@ function load () {
     turboMode: values.turbo,
     favicon: values['favicon-file'],
     backgroundImage: values['background-file'],
-    progressBar: values.progress,
+    progressBarColour: values.progress ? values['progress-colour'] : null,
     loadingImage: values['loading-image'] === 'file'
       ? values['loading-image-file']
       : values['loading-image-url'],

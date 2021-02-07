@@ -115,7 +115,7 @@ function downloadAsHTML(projectSrc, {
   title = 'Project',
   username = 'griffpatch',
   customRatio = false,
-  progressBar = true,
+  progressBarColour = null,
   fullscreen = true,
   log = console.log,
   monitorColour = null,
@@ -285,7 +285,8 @@ function downloadAsHTML(projectSrc, {
     if (customRatio) template = removePercentSection(template, 'default-ratio');
     else template = removePercentSection(template, 'custom-ratio');
     if (!extension) template = removePercentSection(template, 'extension-url');
-    if (!progressBar) template = removePercentSection(template, 'loading-progress');
+    if (progressBarColour) template = template.replace(/\{PROGRESS_COLOUR\}/g, () => progressBarColour);
+    else template = removePercentSection(template, 'loading-progress');
     if (!loadingImage) template = removePercentSection(template, 'loading-image');
     if (!fullscreen) template = removePercentSection(template, 'fullscreen');
     if (monitorColour) template = template.replace(/\{COLOUR\}/g, () => monitorColour);
