@@ -314,7 +314,8 @@ function downloadAsHTML(projectSrc, {
       template = removePercentSection(template, 'cloud-localstorage-provider')
         .replace(/\{CLOUD_HOST\}/g, () => JSON.stringify(cloudServer));
     } else {
-      template = removePercentSection(template, 'cloud-ws');
+      template = removePercentSection(template, 'cloud-ws')
+        .replace(/\{CLOUD_HOST\}/g, 'null');
     }
     if (transparentMonitors) template = removePercentSection(template, 'monitor-box');
     if (!favicon) template = removePercentSection(template, 'favicon');

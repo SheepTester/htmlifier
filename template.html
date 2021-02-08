@@ -589,10 +589,11 @@ const runBenchmark = function () {
   vm.setVideoProvider(videoProvider);
 
   const noop = () => null;
+  let cloudHost = {CLOUD_HOST};
   let ws;
   function openConnection() {
     try {
-      ws = new WebSocket({CLOUD_HOST});
+      ws = new WebSocket(cloudHost);
     } catch (err) {
       console.warn(err);
       return;
@@ -658,13 +659,26 @@ const runBenchmark = function () {
         }
       } else if (name === CLOUD_PREFIX + 'redirect') {
         window.location = value;
+      } else if (name === CLOUD_PREFIX + 'set clipboard') {
+        try {
+          navigator.clipboard.writeText(value).catch(postError);
+        } catch (err) {
+          postError(err);
+        }
+      } else if (name === CLOUD_PREFIX + 'set server ip') {
+        cloudHost = value;
+        if (ws) {
+          ws.onclose = noop;
+          ws.close();
+        }
+        openConnection();
       } else % cloud-ws % if (name.startsWith(CLOUD_PREFIX + 'local storage')) % /cloud-ws % {
         % /special-cloud %
         % cloud-localstorage %
         try {
           localStorage.setItem('[s3] ' + name, value);
         } catch (e) {
-          console.error('Cannot use localStorage?', e);
+          postError(e);
         }
         % /cloud-localstorage %
         % special-cloud %
