@@ -37,6 +37,8 @@ function offlineify ({
       .catch(problemFetching('the Scratch engine'))
       .then(toText('the Scratch engine'))
       .then(async vmCode => {
+        // TODO: ??? What happened here, with `extensionWorkerGet` being
+        // undefined and `extensionWorker` being unused?
         let extensionWorker
         const extensionWorkerMatch = vmCode.match(extensionWorkerGet)
         if (!extensionWorkerMatch) throw new Error('Cannot find extension-worker.js')

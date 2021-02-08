@@ -981,6 +981,7 @@ const runBenchmark = function () {
 
   // KEY PRESSED?
   /* https://github.com/LLK/scratch-gui/blob/develop/src/lib/vm-listener-hoc.jsx#L86-L115 */
+  const keyToCode = new Map()
   document.addEventListener('keydown', e => {
     if (e.target !== document && e.target !== document.body) return;
     const key = !e.key || e.key === 'Dead' ? e.keyCode : e.key;
@@ -988,10 +989,20 @@ const runBenchmark = function () {
       key: key,
       isDown: true
     });
+    const prevCode = keyToCode.get(e.key);
+    if (prevCode) {
+      if (prevCode !== e.code) {
+        vm.postIOData('keyboard', {
+          key: 'code_' + prevCode,
+          isDown: false
+        });
+      }
+    }
     vm.postIOData('keyboard', {
       key: 'code_' + e.code,
       isDown: true
     });
+    keyToCode.set(e.key, e.code);
     if (e.keyCode === 32 || e.keyCode >= 37 && e.keyCode <= 40) {
       e.preventDefault();
     }
@@ -1006,6 +1017,7 @@ const runBenchmark = function () {
       key: 'code_' + e.code,
       isDown: false
     });
+    keyToCode.delete(e.key);
     if (e.target !== document && e.target !== document.body) {
       e.preventDefault();
     }
