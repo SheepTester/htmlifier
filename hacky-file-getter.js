@@ -24,13 +24,15 @@ class LoadingProgress {
         this.total = 0;
         this.complete = 0;
         this.callback = callback;
+        this._load = null;
+        this._storage = null;
     }
 
     on (storage) {
         const _this = this;
-        const _load = storage.webHelper.load;
+        this._load = storage.webHelper.load;
         storage.webHelper.load = function (...args) {
-            const result = _load.call(this, ...args);
+            const result = _this._load.call(this, ...args);
             _this.total += 1;
             _this.callback(_this);
             result.then(asset => {
@@ -39,6 +41,13 @@ class LoadingProgress {
             });
             return result;
         };
+        this._storage = storage;
+    }
+
+    off () {
+        if (this._storage) {
+            this._storage.webHelper.load = this._load;
+        }
     }
 }
 
@@ -79,9 +88,6 @@ storage.addWebStore([AssetType.Project], getProjectUrl);
 storage.addWebStore([AssetType.ImageVector, AssetType.ImageBitmap, AssetType.Sound], getAssetUrl);
 vm.attachStorage(storage);
 
-const loadingProgress = new LoadingProgress();
-loadingProgress.on(storage);
-
 // Run threads
 vm.start();
 
@@ -115,7 +121,7 @@ function downloadAsHTML(projectSrc, {
   title = 'Project',
   username = 'griffpatch',
   customRatio = false,
-  progressBar = true,
+  progressBarColour = null,
   fullscreen = true,
   log = console.log,
   monitorColour = null,
@@ -129,11 +135,18 @@ function downloadAsHTML(projectSrc, {
   loadingImage = null,
   noLimits = false,
   pointerLock = false,
-  stretch = false,
+  stretch = 'none',
   noCursor = false,
   zip: outputZip = false,
   monitorText = 'white',
   transparentMonitors = false,
+  compatibilityMode = true,
+  turboMode = false,
+  favicon = null,
+  backgroundImage = null,
+  autoStart = true,
+  showStartStop = false,
+  cursor = null,
 } = {}) {
   const modded = true
   // Otherwise, the modded NotVirtualMachine will not get width and height
@@ -147,9 +160,10 @@ function downloadAsHTML(projectSrc, {
     }
   }
   log('Getting project...', 'status');
-  loadingProgress.callback = ({complete, total}, file) => {
+  const loadingProgress = new LoadingProgress(({complete, total}, file) => {
     log(complete + '/' + total + (file ? ` (+ ${file.data.length / 1000} kB ${file.dataFormat})` : ''), 'progress')
-  };
+  });
+  loadingProgress.on(storage);
   let zip
   return Promise.all([
     // make preface variables
@@ -175,7 +189,11 @@ function downloadAsHTML(projectSrc, {
             return preface;
           }
         })
-      : Promise.resolve(projectSrc.file)
+      : Promise.resolve(
+        projectSrc.url
+          ? fetch(projectSrc.url).then(r => r.blob())
+          : projectSrc.file
+      )
         .then(async blob => {
           if (outputZip) {
             zip = await JSZip.loadAsync(blob)
@@ -199,14 +217,14 @@ function downloadAsHTML(projectSrc, {
           if (extension) {
             const extensionWorkerMatch = vmCode.match(extensionWorkerGet)
             if (extensionWorkerMatch) {
-              log('Getting extension worker', status)
+              log('Getting extension worker', 'status')
               /* no-offline */
               const workerCode = await fetch('https://sheeptester.github.io/scratch-vm/16-9/' + extensionWorkerMatch[1])
                 .catch(problemFetching('the extension worker'))
                 .then(r => r.text())
               /* /no-offline */
               // [offline-extension-worker-src]
-              log('Getting custom extension script', status)
+              log('Getting custom extension script', 'status')
               const extensionScript = await fetch(extension)
                 .catch(problemFetching('the custom extension'))
                 .then(r => {
@@ -244,12 +262,23 @@ function downloadAsHTML(projectSrc, {
 
     // fetch image data for loading gif
     loadingImage
-      ? getDataURL(loadingImage)
+      ? (typeof loadingImage === 'string'
+        ? loadingImage
+        : getDataURL(loadingImage))
+      : '',
+    favicon
+      ? getDataURL(favicon)
+      : '',
+    backgroundImage
+      ? getDataURL(backgroundImage)
+      : '',
+    cursor
+      ? getDataURL(cursor)
       : ''
-  ]).then(([preface, scripts, template, loadingImageURL]) => {
+  ]).then(([preface, scripts, template, loadingImageURL, faviconURL, backgroundImageURL, cursorURL]) => {
     scripts = preface
       + `DESIRED_USERNAME = ${JSON.stringify(username)},\n`
-      + `COMPAT = ${compatibility.checked},\nTURBO = ${turbo.checked},\n`
+      + `COMPAT = ${compatibilityMode},\nTURBO = ${turboMode},\n`
       + `PROJECT_ID = ${JSON.stringify(projectId)},\n`
       + `WIDTH = ${width},\nHEIGHT = ${height},\n`
       + `EXTENSION_URL = ${JSON.stringify(extension)},\n`
@@ -263,15 +292,17 @@ function downloadAsHTML(projectSrc, {
     if (customRatio) template = removePercentSection(template, 'default-ratio');
     else template = removePercentSection(template, 'custom-ratio');
     if (!extension) template = removePercentSection(template, 'extension-url');
-    if (!progressBar) template = removePercentSection(template, 'loading-progress');
+    if (progressBarColour) template = template.replace(/\{PROGRESS_COLOUR\}/g, () => progressBarColour);
+    else template = removePercentSection(template, 'loading-progress');
     if (!loadingImage) template = removePercentSection(template, 'loading-image');
     if (!fullscreen) template = removePercentSection(template, 'fullscreen');
     if (monitorColour) template = template.replace(/\{COLOUR\}/g, () => monitorColour);
     else template = removePercentSection(template, 'monitor-colour');
     if (!noLimits) template = removePercentSection(template, 'limits');
     if (!pointerLock) template = removePercentSection(template, 'pointer-lock');
-    if (stretch) template = removePercentSection(template, 'fit');
+    if (stretch === 'stage') template = removePercentSection(template, 'fit');
     else template = removePercentSection(template, 'stretch');
+    if (stretch !== 'loading-image') template = removePercentSection(template, 'stretch-loading-image');
     if (!noCursor) template = removePercentSection(template, 'no-cursor');
     if (!specialCloud) {
       template = removePercentSection(template, 'special-cloud');
@@ -283,9 +314,15 @@ function downloadAsHTML(projectSrc, {
       template = removePercentSection(template, 'cloud-localstorage-provider')
         .replace(/\{CLOUD_HOST\}/g, () => JSON.stringify(cloudServer));
     } else {
-      template = removePercentSection(template, 'cloud-ws');
+      template = removePercentSection(template, 'cloud-ws')
+        .replace(/\{CLOUD_HOST\}/g, 'null');
     }
     if (transparentMonitors) template = removePercentSection(template, 'monitor-box');
+    if (!favicon) template = removePercentSection(template, 'favicon');
+    if (!backgroundImage) template = removePercentSection(template, 'background-image');
+    if (!autoStart) template = removePercentSection(template, 'autostart');
+    if (!showStartStop) template = removePercentSection(template, 'start-stop');
+    if (!cursor) template = removePercentSection(template, 'cursor');
     const html = template
       .replace(/% \/?[a-z0-9-]+ %/g, '')
       // .replace(/\s*\r?\n\s*/g, '')
@@ -295,6 +332,9 @@ function downloadAsHTML(projectSrc, {
       .replace(/\{PROJECT_RATIO\}/g, () => `${width}/${height}`)
       .replace(/\{MONITOR_TEXT\}/g, () => monitorText)
       .replace(/\{LOADING_IMAGE\}/g, () => loadingImageURL.replace(/&/g, '&amp;').replace(/"/g, '&quot;'))
+      .replace(/\{FAVICON\}/g, () => faviconURL.replace(/&/g, '&amp;').replace(/"/g, '&quot;'))
+      .replace(/\{BACKGROUND\}/g, () => JSON.stringify(backgroundImageURL))
+      .replace(/\{CURSOR\}/g, () => JSON.stringify(cursorURL))
       .replace(/\{SCRIPTS\}/g, () => scripts);
     if (outputZip) {
       zip.file('index.html', html);
@@ -310,5 +350,7 @@ function downloadAsHTML(projectSrc, {
     } else {
       return new Blob([html], { type: 'text/html' });
     }
+  }).finally(() => {
+    loadingProgress.off(); // Stop tracking scratch-storage
   });
 }

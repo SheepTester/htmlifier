@@ -4,6 +4,45 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{TITLE}</title>
+<script type="text/javascript">
+window.errors = [];
+if (window.addEventListener) {
+  window.addEventListener('error', function(e) {
+    if (e.message) {
+      if (e.error && e.error.stack) {
+        if (e.message.indexOf('Uncaught SyntaxError') === 0) {
+          window.errors.push(e.message + ' at ' + e.filename + ':' + e.lineno + ':' + e.colno);
+        } else {
+          window.errors.push(e.error.stack);
+        }
+        if (window.onNewError) window.onNewError();
+      }
+    } else {
+      window.errors.push('Problem loading ' + (e.target.src || e.target.href));
+      if (window.onNewError) window.onNewError();
+    }
+    window.onerror = null;
+  }, true); // true so that errors bubble up to window
+  window.addEventListener('unhandledrejection', function(e) {
+    window.errors.push(e.reason && (e.reason.stack || e.reason.message || e.reason));
+    if (window.onNewError) window.onNewError();
+  }, false);
+}
+window.onerror = function(message, source, lineno, colno, error) {
+  if (colno) {
+    lineno += ':' + colno;
+  }
+  if (error && error.stack) {
+    window.errors.push(error.stack);
+  } else {
+    window.errors.push(message + ' at ' + source + ':' + lineno);
+  }
+  if (window.onNewError) window.onNewError();
+};
+</script>
+% favicon %
+<link rel="shortcut icon" type="image/png" href="{FAVICON}">
+% /favicon %
 <style media="screen">
 html, body {
   height: 100%;
@@ -17,6 +56,14 @@ body {
   font-size: 0;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   overflow: hidden;
+  % background-image %
+  background-image: url({BACKGROUND});
+  background-position: center;
+  background-size: cover;
+  % /background-image %
+  % cursor %
+  cursor: url({CURSOR}), auto;
+  % /cursor %
 }
 #wrapper {
   display: block;
@@ -55,11 +102,32 @@ body {
 }
 % loading-progress %
 #loading-progress {
-  color: #0ff;
   position: fixed;
-  bottom: 0;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  border-radius: 20px;
+  --progress: 0%;
+  border: 1px solid {PROGRESS_COLOUR};
+}
+#loading-progress::before {
+  content: attr(data-progress);
+  position: absolute;
+  bottom: 100%;
   left: 0;
-  font-size: 16px;
+  right: 0;
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: {PROGRESS_COLOUR};
+}
+#loading-progress::after {
+  content: '';
+  display: block;
+  height: 16px;
+  border-radius: 20px;
+  width: var(--progress);
+  background-color: {PROGRESS_COLOUR};
 }
 % /loading-progress %
 % loading-image %
@@ -67,6 +135,10 @@ body {
   position: fixed;
   max-width: 100%;
   max-height: 100%;
+  % stretch-loading-image %
+  width: 100%;
+  height: 100%;
+  % /stretch-loading-image %
   left: 0;
   right: 0;
   top: 0;
@@ -74,23 +146,42 @@ body {
   margin: auto;
 }
 % /loading-image %
-% fullscreen %
-#fullscreen-btn {
-  -webkit-appearance: none;
-  border: none;
-  background: none;
+.buttons {
   position: fixed;
   top: 0;
   right: 0;
-  width: 30px;
-  height: 30px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-bottom-left-radius: 12px;
+}
+.buttons button {
+  -webkit-appearance: none;
+  border: none;
+  background: none;
+  width: 48px;
+  height: 48px;
   cursor: pointer;
   background-repeat: no-repeat;
   background-position: center;
   background-size: 24px;
+}
+.buttons button:disabled {
+  cursor: auto;
+  opacity: 0.5;
+}
+% start-stop %
+#start-btn {
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"%3E%3Cpath d="M8 5v14l11-7z" fill="%23fff"/%3E%3C/svg%3E%0A');
+}
+.running #start-btn {
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"%3E%3Cpath d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" fill="%23fff"/%3E%3C/svg%3E');
+}
+#stop-btn {
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"%3E%3Cpath d="M6 6h12v12H6z" fill="%23fff"/%3E%3C/svg%3E%0A');
+}
+% /start-stop %
+% fullscreen %
+#fullscreen-btn {
   background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"%3E%3Cpath d="M14 28h-4v10h10v-4h-6v-6zm-4-8h4v-6h6v-4H10v10zm24 14h-6v4h10V28h-4v6zm-6-24v4h6v6h4V10H28z" fill="%23fff"/%3E%3C/svg%3E');
-  background-color: rgba(0, 0, 0, 0.5);
-  border-bottom-left-radius: 10px;
 }
 .fullscreen #fullscreen-btn {
   background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"%3E%3Cpath d="M10 32h6v6h4V28H10v4zm6-16h-6v4h10V10h-4v6zm12 22h4v-6h6v-4H28v10zm4-22v-6h-4v10h10v-4h-6z" fill="%23fff"/%3E%3C/svg%3E');
@@ -216,14 +307,22 @@ body {
 #answer:focus {
   outline: none;
 }
+#errors {
+  -webkit-appearance: none;
+  border: none;
+  background: rgba(255, 0, 0, 0.7);
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: none;
+}
 </style>
 </head>
 <body class="loading">
-<script type="text/javascript">
-if (true % loading-image % && false % /loading-image %) {
-  document.body.classList.remove('loading');
-}
-</script>
 <div id="wrapper">
 <canvas id="stage"></canvas>
 <div id="monitors"></div>
@@ -241,14 +340,21 @@ if (true % loading-image % && false % /loading-image %) {
 % /modded %
 % /no-vm %
 % loading-progress %
-<span id="loading-progress">...</span>
+<div id="loading-progress" data-progress="0/0"></div>
 % /loading-progress %
 % loading-image %
 <img src="{LOADING_IMAGE}" id="loading-image">
 % /loading-image %
+<div class="buttons">
+% start-stop %
+<button id="start-btn" aria-label="Start project"></button>
+<button id="stop-btn" aria-label="Stop project" disabled></button>
+% /start-stop %
 % fullscreen %
-<button id="fullscreen-btn"></button>
+<button id="fullscreen-btn" aria-label="Enter/exit fullscreen"></button>
 % /fullscreen %
+</div>
+<textarea id="errors" readonly></textarea>
 <script type="text/javascript">
 {SCRIPTS}
 
@@ -470,10 +576,20 @@ class VideoProvider {
 const Scratch = window.Scratch = window.Scratch || {};
 
 const CLOUD_PREFIX = '\u2601 ';
+window.setCloud = (name, value) => {
+  Scratch.vm.postIOData('cloud', {
+    varUpdate: {
+      name: CLOUD_PREFIX + name,
+      value
+    }
+  });
+}
 
 const runBenchmark = function () {
   const vm = new window.NotVirtualMachine(% custom-ratio % WIDTH, HEIGHT % /custom-ratio %);
   Scratch.vm = vm;
+  // Compatibility with Eyangicques plugins
+  window.vm = vm;
 
   const storage = new ScratchStorage();
   Scratch.storage = storage;
@@ -523,10 +639,11 @@ const runBenchmark = function () {
   vm.setVideoProvider(videoProvider);
 
   const noop = () => null;
+  let cloudHost = {CLOUD_HOST};
   let ws;
   function openConnection() {
     try {
-      ws = new WebSocket({CLOUD_HOST});
+      ws = new WebSocket(cloudHost);
     } catch (err) {
       console.warn(err);
       return;
@@ -556,32 +673,62 @@ const runBenchmark = function () {
   function onClose() {
     setTimeout(openConnection, 500);
   }
+  % special-cloud %
+  function postError(err) {
+    vm.postIOData('cloud', {
+      varUpdate: {
+        name: CLOUD_PREFIX + 'eval error',
+        value: err.toString()
+      }
+    });
+  }
+  % /special-cloud %
   const cloudProvider = {
     updateVariable(name, value) {
       % special-cloud %
       if (name === CLOUD_PREFIX + 'eval') {
         try {
-          vm.postIOData('cloud', {
-            varUpdate: {
-              name: CLOUD_PREFIX + 'eval output',
-              value: eval(value)
-            }
-          });
+          Promise.resolve(eval(value))
+            .then(output => {
+              vm.postIOData('cloud', {
+                varUpdate: {
+                  name: CLOUD_PREFIX + 'eval output',
+                  value: output
+                }
+              });
+            })
+            .catch(postError);
         } catch (err) {
-          vm.postIOData('cloud', {
-            varUpdate: {
-              name: CLOUD_PREFIX + 'eval error',
-              value: err.toString()
-            }
-          });
+          postError(err);
         }
+      } else if (name === CLOUD_PREFIX + 'open link') {
+        try {
+          window.open(value, '_blank');
+        } catch (err) {
+          postError(err);
+        }
+      } else if (name === CLOUD_PREFIX + 'redirect') {
+        window.location = value;
+      } else if (name === CLOUD_PREFIX + 'set clipboard') {
+        try {
+          navigator.clipboard.writeText(value).catch(postError);
+        } catch (err) {
+          postError(err);
+        }
+      } else if (name === CLOUD_PREFIX + 'set server ip') {
+        cloudHost = value;
+        if (ws) {
+          ws.onclose = noop;
+          ws.close();
+        }
+        openConnection();
       } else % cloud-ws % if (name.startsWith(CLOUD_PREFIX + 'local storage')) % /cloud-ws % {
         % /special-cloud %
         % cloud-localstorage %
         try {
           localStorage.setItem('[s3] ' + name, value);
         } catch (e) {
-          console.error('Cannot use localStorage?', e);
+          postError(e);
         }
         % /cloud-localstorage %
         % special-cloud %
@@ -627,10 +774,12 @@ const runBenchmark = function () {
   storage.webHelper.load = function (...args) {
     const result = _load.call(this, ...args);
     total += 1;
-    progress.textContent = complete + '/' + total;
+    progress.dataset.progress = complete + '/' + total;
+    progress.style.setProperty('--progress', complete / total * 100 + '%');
     result.then(() => {
       complete += 1;
-      progress.textContent = complete + '/' + total;
+      progress.dataset.progress = complete + '/' + total;
+      progress.style.setProperty('--progress', complete / total * 100 + '%');
     });
     return result;
   };
@@ -663,13 +812,13 @@ const runBenchmark = function () {
   }
   // https://github.com/LLK/scratch-gui/blob/develop/src/containers/stage.jsx#L337-L366
   function onStartDrag() {
-    if (dragId) return;
+    if (dragId || !mouseDownPosition) return;
     const drawableId = renderer.pick(...mouseDownPosition);
     if (drawableId === null) return;
     const targetId = vm.getTargetIdForDrawableId(drawableId);
     if (targetId === null) return;
     const target = vm.runtime.getTargetById(targetId);
-    if (!target.draggable) return;
+    if (!target || !target.draggable) return;
     target.goToFront();
     const drawableData = renderer.extractDrawable(drawableId, ...mouseDownPosition);
     vm.startDrag(targetId);
@@ -689,13 +838,17 @@ const runBenchmark = function () {
     return document.pointerLockElement === canvas ||
       document.mozPointerLockElement === canvas;
   }
+  let accumulativeX = 0
+  let accumulativeY = 0
   % /pointer-lock %
   function mousemove(e) {
     % pointer-lock %
     if (pointerLocked()) {
+      accumulativeX += e.movementX
+      accumulativeY += e.movementY
       vm.postIOData('mouse', {
-        x: e.movementX + WIDTH / 2,
-        y: e.movementY + HEIGHT / 2,
+        x: accumulativeX + WIDTH / 2,
+        y: accumulativeY + HEIGHT / 2,
         canvasWidth: WIDTH,
         canvasHeight: HEIGHT
       });
@@ -801,11 +954,11 @@ const runBenchmark = function () {
       canvasHeight: rect.height
     });
   }
+  // mousedown event listeners have been moved to only start listening when the
+  // project loads
   document.addEventListener('mousemove', mousemove);
-  canvas.addEventListener('mousedown', mousedown);
   document.addEventListener('mouseup', mouseup);
   document.addEventListener('touchmove', mousemove);
-  canvas.addEventListener('touchstart', mousedown, {passive: false});
   document.addEventListener('touchend', mouseup, {passive: false});
   canvas.addEventListener('wheel', e => {
     vm.postIOData('mouseWheel', {
@@ -815,6 +968,9 @@ const runBenchmark = function () {
     e.preventDefault();
   });
   window.addEventListener('resize', resize);
+  canvas.addEventListener('contextmenu', e => {
+    e.preventDefault();
+  })
   % pointer-lock %
   canvas.requestPointerLock = canvas.requestPointerLock ||
     canvas.mozRequestPointerLock;
@@ -825,6 +981,7 @@ const runBenchmark = function () {
 
   // KEY PRESSED?
   /* https://github.com/LLK/scratch-gui/blob/develop/src/lib/vm-listener-hoc.jsx#L86-L115 */
+  const keyToCode = new Map()
   document.addEventListener('keydown', e => {
     if (e.target !== document && e.target !== document.body) return;
     const key = !e.key || e.key === 'Dead' ? e.keyCode : e.key;
@@ -832,6 +989,20 @@ const runBenchmark = function () {
       key: key,
       isDown: true
     });
+    const prevCode = keyToCode.get(e.key);
+    if (prevCode) {
+      if (prevCode !== e.code) {
+        vm.postIOData('keyboard', {
+          key: 'code_' + prevCode,
+          isDown: false
+        });
+      }
+    }
+    vm.postIOData('keyboard', {
+      key: 'code_' + e.code,
+      isDown: true
+    });
+    keyToCode.set(e.key, e.code);
     if (e.keyCode === 32 || e.keyCode >= 37 && e.keyCode <= 40) {
       e.preventDefault();
     }
@@ -842,6 +1013,11 @@ const runBenchmark = function () {
       key: key,
       isDown: false
     });
+    vm.postIOData('keyboard', {
+      key: 'code_' + e.code,
+      isDown: false
+    });
+    keyToCode.delete(e.key);
     if (e.target !== document && e.target !== document.body) {
       e.preventDefault();
     }
@@ -906,6 +1082,8 @@ const runBenchmark = function () {
           slider.min = record.sliderMin;
           slider.max = record.sliderMax;
           slider.step = record.isDiscrete ? 1 : 0.01;
+          // See #54; this might be a bad idea because it deviates from Scratch
+          slider.tabIndex = -1;
           slider.addEventListener('input', e => {
             getVariable(record.targetId, id).value = slider.value;
           });
@@ -1005,10 +1183,41 @@ const runBenchmark = function () {
   if (loadingImage.parentNode) {
   loadingImage.parentNode.removeChild(loadingImage);
   }
-  document.body.classList.remove('loading');
   % /loading-image %
+  document.body.classList.remove('loading');
 
+  % start-stop %
+  const greenFlag = document.getElementById('start-btn');
+  const stopSign = document.getElementById('stop-btn');
+  greenFlag.addEventListener('click', e => {
+    greenFlag.blur();
+    vm.greenFlag();
+  });
+  stopSign.addEventListener('click', e => {
+    stopSign.blur();
+    vm.stopAll();
+  });
+  % /start-stop %
+  vm.on('PROJECT_RUN_START', () => {
+    document.body.classList.add('running');
+    % start-stop %
+    stopSign.disabled = false;
+    % /start-stop %
+  });
+  vm.on('PROJECT_RUN_STOP', () => {
+    document.body.classList.remove('running');
+    % start-stop %
+    stopSign.disabled = true;
+    % /start-stop %
+  });
+
+  % autostart %
   vm.greenFlag();
+  % /autostart %
+
+  // Only detect mousedown events once project loads
+  canvas.addEventListener('mousedown', mousedown);
+  canvas.addEventListener('touchstart', mousedown, {passive: false});
 
     });
 };
@@ -1050,6 +1259,24 @@ document.addEventListener('mozfullscreenchange', onFullscreenChange);
 document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 document.addEventListener('msfullscreenchange', onFullscreenChange);
 % /fullscreen %
+
+const errorsTextarea = document.getElementById('errors');
+function onHashChange() {
+  if (window.location.hash === '#show-errors-%E7%BE%8A') {
+    if (!window.onNewError) {
+      window.onNewError = () => {
+        errorsTextarea.value = `${window.errors.length} error(s)\n${window.errors.join('\n')}`;
+      };
+      window.onNewError();
+    }
+    errorsTextarea.style.display = 'block';
+  } else if (window.onNewError) {
+    window.onNewError = null;
+    errorsTextarea.style.display = 'none';
+  }
+}
+window.addEventListener('hashchange', onHashChange);
+onHashChange();
 </script>
 </body>
 </html>

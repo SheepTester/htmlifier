@@ -5,6 +5,10 @@
  * https://github.com/SheepTester/words-go-here/commits/master/htmlifier/main.css
  */
 
+html {
+  /* https://stackoverflow.com/a/56467997 */
+  scroll-padding-top: 120px;
+}
 body {
   font-family: 'Roboto', sans-serif;
   background-color: #37373c;
@@ -12,12 +16,82 @@ body {
   margin: 0px;
   padding: 0px;
 }
+.offline::after {
+  content: 'Offline edition';
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 10px;
+}
+#bookmarklet-link {
+  font-size: 0;
+}
+#bookmarklet-link::after {
+  content: 'Bookmarklet';
+  font-size: 1rem;
+}
+#errors {
+  display: none;
+}
+#errors:target {
+  -webkit-appearance: none;
+  display: block;
+  border: none;
+  background: rgba(255, 0, 0, 0.7);
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  animation: none;
+}
+
+code {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  padding: 0 5px;
+}
+
 a {
   text-decoration: none;
   color: #00d755;
 }
 a:hover {
   text-decoration: underline;
+}
+
+:target {
+  animation: flash 3s;
+}
+@keyframes flash {
+  0% {
+    background-color: rgba(255, 255, 0, 0.5);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+button,
+input[type=file],
+::-webkit-file-upload-button {
+  cursor: pointer;
+}
+input[type=submit] {
+  font-size: 1.2em;
+}
+
+.radio-group {
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+  padding-left: 2px;
+  margin-left: -4px;
+  transition: border-left-color 0.2s;
+}
+.radio-group:hover {
+  border-left-color: white;
 }
 
 .log {
@@ -48,14 +122,15 @@ a:hover {
 .header {
   font-size: 10px;
   position: sticky;
-  background-color: white;
+  background-color: rgba(50, 50, 50, 0.7);
   top: 0px;
-  color: #0f0f14;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0px;
   padding: 10px;
   padding-left: 15px;
   z-index: 100;
-  box-shadow: black 5px 5px 10px;
+  -webkit-backdrop-filter: blur(50px);
+  backdrop-filter: blur(50px);
 }
 
 .mainarea {
@@ -73,18 +148,69 @@ a:hover {
 }
 .htmlify {
   position: relative;
-  top: -83px;
+  top: -85px;
   padding: 15px;
   float: right;
-  background-color: #78ffc3;
+  background-color: rgba(100,250,150,0.5);
   border: 0px;
   border-radius: 5px;
   font-family: 'Roboto', sans-serif;
   height: 90px;
   transition: background-color 0.25s, border-radius 0.25s;
+  -webkit-backdrop-filter: blur(50px);
+  backdrop-filter: blur(50px);
+  box-shadow: rgba(0, 0, 0, 0.4) 5px 5px 10px;
 }
 .htmlify:hover {
   background-color: #78c3ff;
-  border-radius: 0px;
-  transition: background-color 0.25s, border-radius 0.25s;
+  transition: background-color 0.25s;
+}
+
+legend {
+  border: solid rgba(255, 255, 255, 0.5) 1px;
+  border-radius: 10px;
+  padding: 5px;
+  background-color: #19191e;
+}
+
+fieldset {
+  padding: 10px;
+  border: solid rgba(255, 255, 255, 0.2) 1px;
+  border-radius: 5px;
+  background-color: #19191e;
+  box-shadow: none;
+  transition: box-shadow 0.25s, border 0.25s;
+  margin: 1em 0;
+}
+fieldset:hover {
+  box-shadow: rgb(255, 255, 255, 0.8) 0px 0px 10px;
+  /* Fieldsets have this really weird bug on Chrome where translucent border
+  /* colours result in a thicker border-top. */
+  border: solid rgba(255, 255, 255, 0.5) 1px;
+  transition: box-shadow 0.25s, border 0.25s;
+}
+
+fieldset > p:nth-child(2),
+fieldset > .radio-group > p:first-child,
+fieldset > fieldset:nth-child(2) {
+  margin-top: 0;
+}
+fieldset > p:last-child,
+fieldset > fieldset:last-child {
+  margin-bottom: 0;
+}
+
+.slideframe {
+  margin: 0px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: none;
+  transition: filter 0.25s, -webkit-filter 0.25s;
+}
+.slideframewrapper {
+  width: 100%;
+  height: 42.86vw;
+  transition: filter 0.25s, -webkit-filter 0.1s;
+  background-color: rgba(0, 0, 0, 0.9);
 }

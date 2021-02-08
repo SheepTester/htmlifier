@@ -37,6 +37,8 @@ function offlineify ({
       .catch(problemFetching('the Scratch engine'))
       .then(toText('the Scratch engine'))
       .then(async vmCode => {
+        // TODO: ??? What happened here, with `extensionWorkerGet` being
+        // undefined and `extensionWorker` being unused?
         let extensionWorker
         const extensionWorkerMatch = vmCode.match(extensionWorkerGet)
         if (!extensionWorkerMatch) throw new Error('Cannot find extension-worker.js')
@@ -60,7 +62,7 @@ function offlineify ({
     css
   ]) => {
     html = html
-      .replace('<body>', '<body class="offline">')
+      .replace('<body', `<body class="offline" data-offlineified="${new Date()}"`)
       // Using functions to avoid $ substitution
       .replace('<script src="./hacky-file-getter.js" charset="utf-8"></script>', () => `<script>${hackyFileGetter}</script>`)
       .replace('<script src="./jszip.min.js" charset="utf-8"></script>', () => `<script>${jszip}</script>`)
