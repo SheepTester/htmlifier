@@ -12,8 +12,45 @@
     <!-- /no-offline -->
     <link href="https://fonts.googleapis.com/css2?family=Exo:wght@500&family=Roboto:wght@300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./main.css">
+    <script type="text/javascript">
+window.errors = [];
+if (window.addEventListener) {
+  window.addEventListener('error', function(e) {
+    if (e.message) {
+      if (e.error && e.error.stack) {
+        if (e.message.indexOf('Uncaught SyntaxError') === 0) {
+          window.errors.push(e.message + ' at ' + e.filename + ':' + e.lineno + ':' + e.colno);
+        } else {
+          window.errors.push(e.error.stack);
+        }
+        if (window.onNewError) window.onNewError();
+      }
+    } else {
+      window.errors.push('Problem loading ' + (e.target.src || e.target.href));
+      if (window.onNewError) window.onNewError();
+    }
+    window.onerror = null;
+  }, true); // true so that errors bubble up to window
+  window.addEventListener('unhandledrejection', function(e) {
+    window.errors.push(e.reason && (e.reason.stack || e.reason.message || e.reason));
+    if (window.onNewError) window.onNewError();
+  }, false);
+}
+window.onerror = function(message, source, lineno, colno, error) {
+  if (colno) {
+    lineno += ':' + colno;
+  }
+  if (error && error.stack) {
+    window.errors.push(error.stack);
+  } else {
+    window.errors.push(message + ' at ' + source + ':' + lineno);
+  }
+  if (window.onNewError) window.onNewError();
+};
+    </script>
   </head>
   <body>
+    <textarea id="errors" readonly></textarea>
     <div class="header">
       <h1>Project HTMLifier</h1>
       <h3><em>Convert a Scratch project to HTML</em></h3>
@@ -487,7 +524,7 @@ class Checkable extends Option {
     this.element = document.createElement('input')
     this.element.type = type
     this.element.name = name
-    this.element.id = value && value !== 'on' ? `${name}-${value}` : name
+    this.element.id = value && value !== 'on' ? `${name}--${value}` : name
     if (value) this.element.value = value
     if (checked) {
       this.element.checked = true
@@ -949,8 +986,22 @@ offlineifyBtn.addEventListener('click', e => {
       offlineifyBtn.disabled = false;
       scroll = false;
     });
-})
+});
 /* /no-offline */
+
+const errorsTextarea = document.getElementById('errors');
+function onHashChange() {
+  if (window.location.hash === '#errors') {
+    if (!window.onNewError) {
+      window.onNewError = () => {
+        errorsTextarea.value = `${window.errors.length} error(s)\n${window.errors.join('\n')}`;
+      };
+      window.onNewError();
+    }
+  }
+}
+window.addEventListener('hashchange', onHashChange);
+onHashChange();
     </script>
     <script src="./download.js" charset="utf-8"></script>
     <script src="./jszip.min.js" charset="utf-8"></script>
