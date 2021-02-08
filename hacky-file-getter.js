@@ -24,13 +24,15 @@ class LoadingProgress {
         this.total = 0;
         this.complete = 0;
         this.callback = callback;
+        this._load = null;
+        this._storage = null;
     }
 
     on (storage) {
         const _this = this;
-        const _load = storage.webHelper.load;
+        this._load = storage.webHelper.load;
         storage.webHelper.load = function (...args) {
-            const result = _load.call(this, ...args);
+            const result = _this._load.call(this, ...args);
             _this.total += 1;
             _this.callback(_this);
             result.then(asset => {
@@ -39,6 +41,13 @@ class LoadingProgress {
             });
             return result;
         };
+        this._storage = storage;
+    }
+
+    off () {
+        if (this._storage) {
+            this._storage.webHelper.load = this._load;
+        }
     }
 }
 
@@ -78,9 +87,6 @@ const AssetType = storage.AssetType;
 storage.addWebStore([AssetType.Project], getProjectUrl);
 storage.addWebStore([AssetType.ImageVector, AssetType.ImageBitmap, AssetType.Sound], getAssetUrl);
 vm.attachStorage(storage);
-
-const loadingProgress = new LoadingProgress();
-loadingProgress.on(storage);
 
 // Run threads
 vm.start();
@@ -154,9 +160,10 @@ function downloadAsHTML(projectSrc, {
     }
   }
   log('Getting project...', 'status');
-  loadingProgress.callback = ({complete, total}, file) => {
+  const loadingProgress = new LoadingProgress(({complete, total}, file) => {
     log(complete + '/' + total + (file ? ` (+ ${file.data.length / 1000} kB ${file.dataFormat})` : ''), 'progress')
-  };
+  });
+  loadingProgress.on(storage);
   let zip
   return Promise.all([
     // make preface variables
@@ -342,5 +349,7 @@ function downloadAsHTML(projectSrc, {
     } else {
       return new Blob([html], { type: 'text/html' });
     }
+  }).finally(() => {
+    loadingProgress.off(); // Stop tracking scratch-storage
   });
 }

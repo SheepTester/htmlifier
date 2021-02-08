@@ -1006,6 +1006,8 @@ const runBenchmark = function () {
           slider.min = record.sliderMin;
           slider.max = record.sliderMax;
           slider.step = record.isDiscrete ? 1 : 0.01;
+          // See #54; this might be a bad idea because it deviates from Scratch
+          slider.tabIndex = -1;
           slider.addEventListener('input', e => {
             getVariable(record.targetId, id).value = slider.value;
           });
