@@ -684,6 +684,26 @@ const runBenchmark = function () {
       }
     });
   }
+  // URLs
+  const handleUrlChange = () => {
+    vm.postIOData('cloud', {
+      varUpdate: {
+        name: CLOUD_PREFIX + 'url',
+        value: window.location.href
+      }
+    });
+  };
+  window.addEventListener('hashchange', handleUrlChange);
+  window.addEventListener('popstate', handleUrlChange);
+  // Paste output
+  window.addEventListener('paste', e => {
+    vm.postIOData('cloud', {
+      varUpdate: {
+        name: CLOUD_PREFIX + 'pasted',
+        value: (e.clipboardData || window.clipboardData).getData('text')
+      }
+    });
+  });
   % /special-cloud %
   const cloudProvider = {
     updateVariable(name, value) {
@@ -724,6 +744,8 @@ const runBenchmark = function () {
           ws.close();
         }
         openConnection();
+      } else if (name === CLOUD_PREFIX + 'username') {
+        vm.postIOData('userData', {username: value});
       } else % cloud-ws % if (name.startsWith(CLOUD_PREFIX + 'local storage')) % /cloud-ws % {
         % /special-cloud %
         % cloud-localstorage %
@@ -1172,6 +1194,15 @@ const runBenchmark = function () {
     }
   });
   % /cloud-localstorage %
+  % special-cloud %
+  // Set initial URL
+  vm.postIOData('cloud', {
+    varUpdate: {
+      name: CLOUD_PREFIX + 'url',
+      value: window.location.href
+    }
+  });
+  % special-cloud %
   % cloud-ws %
   openConnection();
   % /cloud-ws %
