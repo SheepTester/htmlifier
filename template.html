@@ -632,7 +632,7 @@ const runBenchmark = function () {
   Scratch.svgRenderer = svgRenderer;
   vm.attachV2SVGAdapter(svgRenderer);
 
-  const bitmapAdapter = new ScratchSVGRenderer.BitmapAdapter(% custom-ratio % WIDTH, HEIGHT % /custom-ratio %, null, null);
+  const bitmapAdapter = new ScratchSVGRenderer.BitmapAdapter(null, null, % custom-ratio % WIDTH, HEIGHT % /custom-ratio %);
   Scratch.bitmapAdapter = bitmapAdapter;
   vm.attachV2BitmapAdapter(bitmapAdapter);
 
