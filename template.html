@@ -643,7 +643,11 @@ const runBenchmark = function () {
   const noop = () => null;
   let cloudHost = {CLOUD_HOST};
   let ws;
+  let connectionAttempts = 0;
+  let queuedData = {};
+  window.queuedData = queuedData;
   function openConnection() {
+    connectionAttempts++;
     try {
       ws = new WebSocket(cloudHost);
     } catch (err) {
@@ -667,13 +671,28 @@ const runBenchmark = function () {
   function sendData(data) {
     data.user = DESIRED_USERNAME;
     data.project_id = PROJECT_ID;
-    ws.send(JSON.stringify(data) + '\n');
+    // https://github.com/LLK/scratch-gui/blob/develop/src/lib/cloud-provider.js#L141-L148
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(data) + '\n');
+    } else {
+      // This way, multiple changes to the same variable only are changed once
+      queuedData[`${data.method}:${data.name}`] = data;
+    }
   }
   function onOpen() {
+    connectionAttempts = 1;
     sendData({method: 'handshake'});
+    // https://github.com/LLK/scratch-gui/blob/develop/src/lib/cloud-provider.js#L79-L85
+    for (const data of Object.values(queuedData)) {
+      ws.send(JSON.stringify(data) + '\n');
+    }
+    queuedData = [];
   }
   function onClose() {
-    setTimeout(openConnection, 500);
+    // https://github.com/LLK/scratch-gui/blob/develop/src/lib/cloud-provider.js#L90-L100
+    const randomizedTimeout = Math.random() * (Math.pow(2, Math.min(connectionAttempts, 5)) - 1) * 1000;
+    setTimeout(openConnection, randomizedTimeout);
+    console.log(`Reconnecting in ${(randomizedTimeout / 1000).toFixed(1)}s (attempt #${connectionAttempts})`);
   }
   % special-cloud %
   function postError(err) {
