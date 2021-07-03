@@ -48,7 +48,6 @@ body,
   border-radius: 20px;
   --progress: 0%;
   z-index: 100;
-  border: 1px solid var(--progress-colour);
 }
 .show-loading-progress #loading-progress {
   display: block;
@@ -62,7 +61,6 @@ body,
   text-align: center;
   font-size: 1.5rem;
   margin-bottom: 15px;
-  color: var(--progress-colour);
 }
 #loading-progress::after {
   content: '';
@@ -70,7 +68,6 @@ body,
   height: 16px;
   border-radius: 20px;
   width: var(--progress);
-  background-color: var(--progress-colour);
 }
 #loading-image {
   position: fixed;
@@ -136,7 +133,6 @@ body,
   font-size: 0.75rem;
   overflow: hidden;
   padding: 3px;
-  color: var(--monitor-text);
   white-space: pre;
 }
 .show-monitor-box .monitor {
@@ -213,12 +209,6 @@ body,
 .show-monitor-box .row {
   border-color: rgba(0, 0, 0, 0.2);
   background-color: rgba(0, 0, 0, 0.5);
-}
-.custom-monitor-colour .default .monitor-value,
-.custom-monitor-colour .slider .monitor-value,
-.custom-monitor-colour .large,
-.custom-monitor-colour .row {
-  background-color: var(--monitor-colour);
 }
 .slider input {
   display: block;

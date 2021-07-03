@@ -60,9 +60,9 @@
         if (window.onNewError) window.onNewError()
       }
     </script>
-    {FAVICON} {CSS} {WRAPPER_CSS}
+    {FAVICON} {CSS} {STYLES}
   </head>
-  <body class="loading {CLASSES}" {STYLES}>
+  <body class="loading {CLASSES}">
     <div id="wrapper">
       <canvas id="stage"></canvas>
       <div id="monitors"></div>
@@ -79,6 +79,6 @@
       <button id="fullscreen-btn" aria-label="Enter/exit fullscreen"></button>
     </div>
     <textarea id="errors" readonly></textarea>
-    {VM} {SCRIPTS}
+    {VM} {JS}
   </body>
 </html>

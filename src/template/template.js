@@ -32,9 +32,10 @@ function postError (err) {
 }
 
 class CloudProvider {
-  constructor (serverUrl, specialBehaviours) {
-    this._serverUrl = serverUrl
-    this._specialBehaviours = specialBehaviours
+  constructor (options) {
+    this._serverUrl = options.cloud.serverUrl
+    this._specialBehaviours = options.cloud.specialBehaviours
+    this._options = options
 
     this._ws = null
 
@@ -88,8 +89,8 @@ class CloudProvider {
   }
 
   _sendData (data) {
-    data.user = options.username
-    data.project_id = options.projectId
+    data.user = this._options.username
+    data.project_id = this._options.cloud.projectId
     this._ws.send(JSON.stringify(data) + '\n')
   }
 
@@ -128,6 +129,7 @@ class CloudProvider {
         }
         openConnection()
       } else if (name === CLOUD_PREFIX + 'username') {
+        this._options.username = value
         vm.postIOData('userData', { username: value })
       } else {
         matched = false
@@ -756,7 +758,10 @@ async function init ({ width, height, ...options }) {
   await vm.loadProject(
     options.assets.file
       ? await fetch(options.assets.file).then(r => r.arrayBuffer())
-      : await storage.load(storage.AssetType.Project).then(asset => asset.data)
+      : typeof options.assets.project === 'string'
+      ? await storage.load(storage.AssetType.Project).then(asset => asset.data)
+      : // project.json was included as parsed JSON
+        await vm.loadProject(JSON.stringify(options.assets.project))
   )
 
   const cloudProvider = new CloudProvider(

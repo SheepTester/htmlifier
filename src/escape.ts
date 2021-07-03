@@ -40,3 +40,8 @@ export function escapeCss (string: string): string {
     }
   })
 }
+
+/** Escapes `</script>` to safely insert a string inside a script tag */
+export function escapeScript (string: string): string {
+  return string.replace(/<\/script>/g, '<\\/script>')
+}

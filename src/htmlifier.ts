@@ -2,7 +2,7 @@ import JSZip from '../lib/jszip.ts'
 import { ProjectSource, getProject } from './get-project.ts'
 import getDataUrl from './get-data-url.ts'
 import getFileExtension from './get-file-extension.ts'
-import { escapeCss, escapeHtml } from './escape.ts'
+import { escapeCss, escapeHtml, escapeScript } from './escape.ts'
 
 /** A CSS colour */
 type Colour = string
@@ -148,6 +148,9 @@ type HtmlifyOptions = {
      * @see https://github.com/SheepTester/htmlifier/wiki/Special-cloud-behaviours
      */
     specialBehaviours: boolean
+
+    /** The project ID used to identify the project to the cloud server */
+    projectId: string
   }
 }
 
@@ -190,7 +193,7 @@ export default class Htmlifier {
       },
       buttons: { startStop: startStopBtns, fullscreen: fullscreenBtns },
       monitors: { background: monitorBackground, text: monitorText },
-      cloud: { serverUrl, specialBehaviours }
+      cloud
     }: HtmlifyOptions
   ): Promise<Blob> {
     const project = await getProject(projectSource, log)
@@ -235,24 +238,20 @@ export default class Htmlifier {
     }
 
     let html = await this._template
-    const classes = []
-    const styles: Record<string, string> = {}
+    const classes: string[] = []
+    const styles: string[] = []
+    const bodyStyles: string[] = []
 
-    html = html.replace('{TITLE}', title)
+    html = html.replace('{TITLE}', escapeHtml(title))
     if (stretchStage) {
       classes.push('stretch-stage')
       html = html.replace('{WRAPPER_CSS}', '')
     } else {
-      html = html.replace(
-        '{WRAPPER_CSS}',
-        [
-          '<style>',
-          `#wrapper { width: 100vw; height: ${(height / width) * 100}vw; }`,
-          `@media (min-aspect-ratio: ${width}/${height}}) {`,
-          `#wrapper { height: 100vh; width: ${(width / height) * 100}vh; }`,
-          '}',
-          '</style>'
-        ].join('\n')
+      styles.push(
+        `#wrapper { width: 100vw; height: ${(height / width) * 100}vw; }`,
+        `@media (min-aspect-ratio: ${width}/${height}}) {`,
+        `#wrapper { height: 100vh; width: ${(width / height) * 100}vh; }`,
+        '}'
       )
     }
     if (cursor === 'hidden') {
@@ -262,7 +261,7 @@ export default class Htmlifier {
         'cursor' + getFileExtension(cursor),
         cursor
       )
-      styles.cursor = `url("${escapeCss(cursorUrl)}"), auto`
+      bodyStyles.push(`cursor: url("${escapeCss(cursorUrl)}"), auto;`)
     }
     if (favicon) {
       const faviconUrl = await registerFile(
@@ -283,12 +282,22 @@ export default class Htmlifier {
         'favicon' + getFileExtension(backgroundImage),
         backgroundImage
       )
-      styles['background-image'] = `url("${escapeCss(imageUrl)}")`
+      bodyStyles.push(`background-image: url("${escapeCss(imageUrl)}");`)
     }
     // TODO: extensions
     if (progressBar) {
       classes.push('show-loading-progress')
-      styles['--progress-colour'] = progressBar
+      styles.push(
+        '#loading-progress {',
+        `border: 1px solid ${progressBar};`,
+        '}',
+        '#loading-progress::before {',
+        `color: ${progressBar};`,
+        '}',
+        '#loading-progress::after',
+        `background-color: ${progressBar};`,
+        '}'
+      )
     }
     if (loadingImage) {
       const imageUrl =
@@ -315,21 +324,51 @@ export default class Htmlifier {
     if (monitorBackground === null || monitorBackground !== 'none') {
       classes.push('show-monitor-box')
       if (monitorBackground) {
-        styles['--monitor-colour'] = monitorBackground
+        styles.push(
+          '.custom-monitor-colour .default .monitor-value,',
+          '.custom-monitor-colour .slider .monitor-value,',
+          '.custom-monitor-colour .large,',
+          '.custom-monitor-colour .row {',
+          `background-color: ${monitorBackground};`,
+          '}'
+        )
       }
     }
-    styles['--monitor-text'] = monitorText
+    styles.push('.monitor {', `color: ${monitorText};`, '}')
 
-    html = html.replace('{CLASSES}', classes.join(' ')).replace(
-      '{STYLES}',
-      Object.keys(styles).length > 0
-        ? `style="\n${Object.entries(styles)
-            .map(([prop, value]) => `${prop}: ${escapeHtml(value)};`)
-            .join('\n')}\n"`
-        : ''
-    )
+    styles.push('body {', ...bodyStyles, '}')
+    html = html
+      .replace('{CLASSES}', classes.join(' '))
+      .replace(
+        '{STYLES}',
+        styles.length > 0 ? `<style>\n${styles.join('\n')}\n</style>` : ''
+      )
+      .replace(
+        '{DATA}',
+        `<script>init(${escapeScript(
+          JSON.stringify(
+            {
+              width,
+              height,
+              stretchStage,
+              fps,
+              turbo,
+              limits,
+              pointerLock,
+              autoStart,
+              username,
+              loadingProgress: !!progressBar,
+              cloud,
+              assets
+            },
+            null,
+            2
+          )
+        )})</script>`
+      )
+      .replace('{VM}', await this._vm)
 
-    // TODO: {CSS}, {VM}, {SCRIPTS}
+    // TODO: {CSS}, {JS}
 
     if (outputZip) {
       const zip = new JSZip()
