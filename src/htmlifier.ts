@@ -4,6 +4,10 @@ import getDataUrl from './get-data-url.ts'
 import getFileExtension from './get-file-extension.ts'
 import { escapeCss, escapeHtml, escapeScript } from './escape.ts'
 
+const VM_URL = 'https://sheeptester.github.io/scratch-vm/16-9/vm.min.js'
+const EXTENSION_WORKER_URL =
+  'https://sheeptester.github.io/scratch-vm/16-9/extension-worker.js'
+
 /** A CSS colour */
 type Colour = string
 
@@ -23,7 +27,7 @@ type HtmlifyOptions = {
    */
   zip: boolean
 
-  /** Whether to include the VM inside the HTML file */
+  /** Whether to include the VM inside the HTML file. Recommended: true */
   includeVm: boolean
 
   /** The page title of the resulting HTML file */
@@ -156,9 +160,11 @@ type HtmlifyOptions = {
 
 /** Converts a project to HTML */
 export default class Htmlifier {
-  private _vm: Promise<string> = fetch(
-    'https://sheeptester.github.io/scratch-vm/16-9/vm.min.js'
-  ).then(r => r.text())
+  private _vm: Promise<string> = fetch(VM_URL).then(r => r.text())
+
+  private _extensionWorker: Promise<string> = fetch(EXTENSION_WORKER_URL).then(
+    r => r.text()
+  )
 
   private _template: Promise<string> =
     typeof Deno !== 'undefined'
@@ -237,6 +243,34 @@ export default class Htmlifier {
       assets.file = await registerFile('project', project.file)
     }
 
+    let extensionWorker: { url: string } | { script: string } = {
+      url: EXTENSION_WORKER_URL
+    }
+    if (extensions.length > 0 && includeVm) {
+      const extensionScripts: Record<string, string> = {}
+      for (const url of extensions) {
+        extensionScripts[url] = outputZip
+          ? await registerFile(
+              'extension.worker.js',
+              await fetch(url).then(r => r.blob())
+            )
+          : await fetch(url).then(r => r.text())
+      }
+      // Prepend an override on importScripts to map extension URLs to locally
+      // stored ones
+      const workerScript = [
+        `const scripts = ${JSON.stringify(extensionScripts, null, '\t')}`,
+        'const oldImportScripts = window.importScripts',
+        outputZip
+          ? 'window.importScripts = (...urls) => oldImportScripts(...urls.map(url => scripts[url] || url))'
+          : 'window.importScripts = (...urls) => urls.forEach(url => scripts[url] ? eval(scripts[url]) : oldImportScripts(url))',
+        await this._extensionWorker
+      ].join('\n')
+      extensionWorker = outputZip
+        ? { url: await registerFile('extension.worker.js', workerScript) }
+        : { script: workerScript }
+    }
+
     let html = await this._template
     const classes: string[] = []
     const styles: string[] = []
@@ -284,7 +318,6 @@ export default class Htmlifier {
       )
       bodyStyles.push(`background-image: url("${escapeCss(imageUrl)}");`)
     }
-    // TODO: extensions
     if (progressBar) {
       classes.push('show-loading-progress')
       styles.push(
@@ -354,19 +387,32 @@ export default class Htmlifier {
               fps,
               turbo,
               limits,
+              fencing,
               pointerLock,
               autoStart,
               username,
               loadingProgress: !!progressBar,
               cloud,
+              extensionWorker,
+              extensions,
               assets
             },
             null,
-            2
+            '\t'
           )
         )})</script>`
       )
-      .replace('{VM}', await this._vm)
+    if (!includeVm) {
+      html = html.replace('{VM}', `<script src="${VM_URL}"></script>`)
+    } else if (outputZip) {
+      files.set('vm.js', await this._vm)
+      html = html.replace('{VM}', '<script src="./vm.js"></script>')
+    } else {
+      html = html.replace(
+        '{VM}',
+        `<script>\n${escapeScript(await this._vm)}\n</script>`
+      )
+    }
 
     // TODO: {CSS}, {JS}
 

@@ -303,7 +303,7 @@ class VideoProvider {
 
         try {
           this._video.srcObject = stream
-        } catch (error) {
+        } catch (_error) {
           this._video.src = window.URL.createObjectURL(stream)
         }
         this._video.play()
@@ -373,7 +373,7 @@ function isFullscreen () {
     document.msFullscreenElement
   )
 }
-fullscreenBtn.addEventListener('click', e => {
+fullscreenBtn.addEventListener('click', () => {
   fullscreenBtn.blur()
   if (isFullscreen()) {
     exitFullscreen()
@@ -397,7 +397,7 @@ async function init ({ width, height, ...options }) {
   window.vm = new window.NotVirtualMachine(width, height)
   vm.setCompatibilityMode(options.fps)
   vm.setTurboMode(options.turbo)
-  vm.requireLimits(options.limits)
+  vm.requireLimits(options.limits, options.fencing)
 
   const storage = new ScratchStorage()
   const AssetType = storage.AssetType
@@ -457,6 +457,34 @@ async function init ({ width, height, ...options }) {
   vm.setVideoProvider(new VideoProvider(width, height))
   vm.start()
 
+  if (extensions.length > 0) {
+    const OldWorker = window.Worker
+    window.Worker = class extends OldWorker {
+      // deno-lint-ignore constructor-super
+      constructor (...args) {
+        if (args[0].endsWith('extension.worker.js')) {
+          if (options.extensionWorker.url) {
+            super(options.extensionWorker.url, ...args.slice(1))
+          } else {
+            super(
+              URL.createObjectURL(
+                new Blob([options.extensionWorker.script], {
+                  type: 'application/json'
+                })
+              ),
+              ...args.slice(1)
+            )
+          }
+        } else {
+          super(...args)
+        }
+      }
+    }
+    for (const extension of extensions) {
+      await vm.loadExtensionURL(extension)
+    }
+  }
+
   /* https://github.com/LLK/scratch-gui/blob/develop/src/containers/stage.jsx#L176-L300 */
   const getEventXY = e => {
     if (e.touches && e.touches[0]) {
@@ -498,7 +526,7 @@ async function init ({ width, height, ...options }) {
     dragId = targetId
     dragOffset = drawableData.scratchOffset
   }
-  let accumulative = { x: 0, y: 0 }
+  const accumulative = { x: 0, y: 0 }
   function postIfPointerLocked (e, isDown) {
     if (
       document.pointerLockElement === canvas ||
