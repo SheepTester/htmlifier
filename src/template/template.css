@@ -25,14 +25,15 @@ body,
 .loading #wrapper {
   visibility: hidden;
 }
+.stretch-stage #wrapper {
+  width: 100vw;
+  height: 100vh;
+}
+/* CSS for proportional wrapper scaling is added dynamically by htmlifier.ts */
 #monitors {
   position: absolute;
   top: 0;
   left: 0;
-}
-.stretch-stage #wrapper {
-  width: 100vw;
-  height: 100vh;
 }
 #stage {
   width: 100%;
@@ -49,7 +50,7 @@ body,
   z-index: 100;
   border: 1px solid var(--progress-colour);
 }
-.loading-progress #loading-progress {
+.show-loading-progress #loading-progress {
   display: block;
 }
 #loading-progress::before {
@@ -93,6 +94,7 @@ body,
   border-bottom-left-radius: 12px;
 }
 .buttons button {
+  display: none;
   -webkit-appearance: none;
   border: none;
   background: none;
@@ -122,6 +124,11 @@ body,
 .fullscreen #fullscreen-btn {
   background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"%3E%3Cpath d="M10 32h6v6h4V28H10v4zm6-16h-6v4h10V10h-4v6zm12 22h4v-6h6v-4H28v10zm4-22v-6h-4v10h10v-4h-6z" fill="%23fff"/%3E%3C/svg%3E');
 }
+.show-start-stop-btns #start-btn,
+.show-start-stop-btns #stop-btn,
+.show-fullscreen-btn #fullscreen-btn {
+  display: inline-block;
+}
 .monitor {
   position: absolute;
   border: 1px solid transparent;
@@ -132,7 +139,7 @@ body,
   color: var(--monitor-text);
   white-space: pre;
 }
-.monitor-box .monitor {
+.show-monitor-box .monitor {
   border-color: rgba(0, 0, 0, 0.2);
   background-color: rgba(0, 0, 0, 0.3);
 }
@@ -156,15 +163,15 @@ body,
   margin: 0 5px;
   padding: 1px 3px;
 }
-.monitor-box .default .monitor-value,
-.monitor-box .slider .monitor-value {
+.show-monitor-box .default .monitor-value,
+.show-monitor-box .slider .monitor-value {
   background-color: rgba(0, 0, 0, 0.5);
 }
 .large {
   padding: 0.1rem 0.25rem;
   min-width: 3rem;
 }
-.monitor-box .large {
+.show-monitor-box .large {
   background-color: rgba(0, 0, 0, 0.6);
 }
 .large .monitor-label {
@@ -203,14 +210,14 @@ body,
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.monitor-box .row {
+.show-monitor-box .row {
   border-color: rgba(0, 0, 0, 0.2);
   background-color: rgba(0, 0, 0, 0.5);
 }
-.monitor-colour .default .monitor-value,
-.monitor-colour .slider .monitor-value,
-.monitor-colour .large,
-.monitor-colour .row {
+.custom-monitor-colour .default .monitor-value,
+.custom-monitor-colour .slider .monitor-value,
+.custom-monitor-colour .large,
+.custom-monitor-colour .row {
   background-color: var(--monitor-colour);
 }
 .slider input {

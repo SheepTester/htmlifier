@@ -1,6 +1,8 @@
 import JSZip from '../lib/jszip.ts'
 import { ProjectSource, getProject } from './get-project.ts'
 import getDataUrl from './get-data-url.ts'
+import getFileExtension from './get-file-extension.ts'
+import { escapeCss, escapeHtml } from './escape.ts'
 
 /** A CSS colour */
 type Colour = string
@@ -47,6 +49,9 @@ type HtmlifyOptions = {
 
   /** Whether turbo mode is enabled */
   turbo: boolean
+
+  /** FPS of the project */
+  fps: number
 
   /**
    * Whether to enforce reasonable limits such as the maximum list length (on by
@@ -103,11 +108,11 @@ type HtmlifyOptions = {
 
   /** Customisation options for the buttons on the top right of the page */
   buttons: {
-    /** Fullscreen button */
-    fullscreen: boolean
-
     /** Start/stop buttons */
     startStop: boolean
+
+    /** Fullscreen button */
+    fullscreen: boolean
   }
 
   /** Customisation of monitor colours */
@@ -170,6 +175,7 @@ export default class Htmlifier {
       stretch: stretchStage,
       autoStart,
       turbo,
+      fps,
       limits,
       fencing,
       pointerLock,
@@ -182,7 +188,7 @@ export default class Htmlifier {
         image: loadingImage,
         stretch: stretchLoadingImage
       },
-      buttons: { fullscreen: fullscreenBtns, startStop: startStopBtns },
+      buttons: { startStop: startStopBtns, fullscreen: fullscreenBtns },
       monitors: { background: monitorBackground, text: monitorText },
       cloud: { serverUrl, specialBehaviours }
     }: HtmlifyOptions
@@ -228,7 +234,103 @@ export default class Htmlifier {
       assets.file = await registerFile('project', project.file)
     }
 
-    const html = 'wow'
+    let html = await this._template
+    const classes = []
+    const styles: Record<string, string> = {}
+
+    html = html.replace('{TITLE}', title)
+    if (stretchStage) {
+      classes.push('stretch-stage')
+      html = html.replace('{WRAPPER_CSS}', '')
+    } else {
+      html = html.replace(
+        '{WRAPPER_CSS}',
+        [
+          '<style>',
+          `#wrapper { width: 100vw; height: ${(height / width) * 100}vw; }`,
+          `@media (min-aspect-ratio: ${width}/${height}}) {`,
+          `#wrapper { height: 100vh; width: ${(width / height) * 100}vh; }`,
+          '}',
+          '</style>'
+        ].join('\n')
+      )
+    }
+    if (cursor === 'hidden') {
+      classes.push('no-cursor')
+    } else if (cursor) {
+      const cursorUrl = await registerFile(
+        'cursor' + getFileExtension(cursor),
+        cursor
+      )
+      styles.cursor = `url("${escapeCss(cursorUrl)}"), auto`
+    }
+    if (favicon) {
+      const faviconUrl = await registerFile(
+        'favicon' + getFileExtension(favicon),
+        favicon
+      )
+      html = html.replace(
+        '{FAVICON}',
+        `<link rel="shortcut icon" type="image/png" href="${escapeHtml(
+          faviconUrl
+        )}">`
+      )
+    } else {
+      html = html.replace('{FAVICON}', '')
+    }
+    if (backgroundImage) {
+      const imageUrl = await registerFile(
+        'favicon' + getFileExtension(backgroundImage),
+        backgroundImage
+      )
+      styles['background-image'] = `url("${escapeCss(imageUrl)}")`
+    }
+    // TODO: extensions
+    if (progressBar) {
+      classes.push('show-loading-progress')
+      styles['--progress-colour'] = progressBar
+    }
+    if (loadingImage) {
+      const imageUrl =
+        loadingImage instanceof File
+          ? await registerFile(
+              'loading' + getFileExtension(loadingImage),
+              loadingImage
+            )
+          : loadingImage
+      html = html.replace(
+        '{LOADING_IMAGE}',
+        `<img src="${escapeHtml(imageUrl)}" id="loading-image">`
+      )
+    }
+    if (stretchLoadingImage) {
+      classes.push('stretch-loading-image')
+    }
+    if (fullscreenBtns) {
+      classes.push('show-fullscreen-btn')
+    }
+    if (startStopBtns) {
+      classes.push('show-start-stop-btns')
+    }
+    if (monitorBackground === null || monitorBackground !== 'none') {
+      classes.push('show-monitor-box')
+      if (monitorBackground) {
+        styles['--monitor-colour'] = monitorBackground
+      }
+    }
+    styles['--monitor-text'] = monitorText
+
+    html = html.replace('{CLASSES}', classes.join(' ')).replace(
+      '{STYLES}',
+      Object.keys(styles).length > 0
+        ? `style="\n${Object.entries(styles)
+            .map(([prop, value]) => `${prop}: ${escapeHtml(value)};`)
+            .join('\n')}\n"`
+        : ''
+    )
+
+    // TODO: {CSS}, {VM}, {SCRIPTS}
+
     if (outputZip) {
       const zip = new JSZip()
       for (const [fileName, file] of files) {
