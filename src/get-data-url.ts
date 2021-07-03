@@ -8,7 +8,11 @@ export default function getDataUrl (blob: Blob): Promise<string> {
         }
         resolve(reader.result)
       } else {
-        reject(new RangeError('The file might be too large to store as a JavaScript string. (I could not generate a data URI from the file) Try generating a .zip instead?'))
+        reject(
+          new RangeError(
+            'The file might be too large to store as a JavaScript string. (I could not generate a data URI from the file) Try generating a .zip instead?'
+          )
+        )
       }
     })
     reader.onerror = reject

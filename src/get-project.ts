@@ -56,7 +56,9 @@ type Sb3ProjectJson = {
 }
 
 /** Returns a map of md5-extensions to the file name */
-function getAssetHashesFromProjectJson (json: Sb2ProjectJson | Sb3ProjectJson): Map<string, string> {
+function getAssetHashesFromProjectJson (
+  json: Sb2ProjectJson | Sb3ProjectJson
+): Map<string, string> {
   const assetHashes: Map<string, string> = new Map()
   if ('meta' in json) {
     for (const target of json.targets) {
@@ -69,7 +71,10 @@ function getAssetHashesFromProjectJson (json: Sb2ProjectJson | Sb3ProjectJson): 
     }
   } else if ('info' in json) {
     for (const { baseLayerMD5, baseLayerID } of json.costumes) {
-      assetHashes.set(baseLayerMD5, `${baseLayerID}.${baseLayerMD5.split('.')[1]}`)
+      assetHashes.set(
+        baseLayerMD5,
+        `${baseLayerID}.${baseLayerMD5.split('.')[1]}`
+      )
     }
     for (const { md5, soundID } of json.sounds) {
       assetHashes.set(md5, `${soundID}.${md5.split('.')[1]}`)
@@ -77,7 +82,10 @@ function getAssetHashesFromProjectJson (json: Sb2ProjectJson | Sb3ProjectJson): 
     for (const child of json.children) {
       if (child.costumes) {
         for (const { baseLayerMD5, baseLayerID } of child.costumes) {
-          assetHashes.set(baseLayerMD5, `${baseLayerID}.${baseLayerMD5.split('.')[1]}`)
+          assetHashes.set(
+            baseLayerMD5,
+            `${baseLayerID}.${baseLayerMD5.split('.')[1]}`
+          )
         }
         for (const { md5, soundID } of child.sounds) {
           assetHashes.set(md5, `${soundID}.${md5.split('.')[1]}`)
@@ -111,11 +119,15 @@ export type ScratchProject =
     }
 
 /** Get the Scratch project file given a source */
-export async function getProject (source: ProjectSource, log: Logger): Promise<ScratchProject> {
+export async function getProject (
+  source: ProjectSource,
+  log: Logger
+): Promise<ScratchProject> {
   if (source.type === 'id') {
     log('Getting project from scratch.mit.edu...', 'status')
-    const project = await fetch(`https://projects.scratch.mit.edu/${source.id}`)
-      .then(r => r.blob())
+    const project = await fetch(
+      `https://projects.scratch.mit.edu/${source.id}`
+    ).then(r => r.blob())
     let json: Sb2ProjectJson | Sb3ProjectJson
     try {
       json = JSON.parse(await project.text())
@@ -124,7 +136,7 @@ export async function getProject (source: ProjectSource, log: Logger): Promise<S
       log('.sb project obtained', 'status')
       return {
         type: 'file',
-        file: project,
+        file: project
       }
     }
 
@@ -133,30 +145,30 @@ export async function getProject (source: ProjectSource, log: Logger): Promise<S
     let done = 0
     log(`Fetching project assets... (0/${assetHashes.size})`, 'progress')
     await Promise.all(
-      Array.from(
-        assetHashes.keys(),
-        async hash => {
-          const blob = await fetch(`https://assets.scratch.mit.edu/internalapi/asset/${hash}/get/`)
-            .then(r => r.blob())
-          assets.set(hash, blob)
-          done++
-          log(`Fetching project assets... (${done}/${assetHashes.size})`, 'progress')
-        }
-      )
+      Array.from(assetHashes.keys(), async hash => {
+        const blob = await fetch(
+          `https://assets.scratch.mit.edu/internalapi/asset/${hash}/get/`
+        ).then(r => r.blob())
+        assets.set(hash, blob)
+        done++
+        log(
+          `Fetching project assets... (${done}/${assetHashes.size})`,
+          'progress'
+        )
+      })
     )
 
     return {
       type: 'assets',
       project: json,
-      assets,
+      assets
     }
   }
 
   let file: Blob
   if (source.type === 'url') {
     log('Getting project file from URL...', 'status')
-    file = await fetch(source.url)
-      .then(r => r.blob())
+    file = await fetch(source.url).then(r => r.blob())
   } else {
     file = source.file
   }
@@ -181,20 +193,26 @@ export async function getProject (source: ProjectSource, log: Logger): Promise<S
       }
       assets.set(hash, await file.async('blob'))
       done++
-      log(`Extracting project assets... (${done}/${assetHashes.size})`, 'progress')
+      log(
+        `Extracting project assets... (${done}/${assetHashes.size})`,
+        'progress'
+      )
     }
 
     return {
       type: 'assets',
       project: json,
-      assets,
+      assets
     }
   } catch {
     // Probably an .sb file or something
-    log('Couldn\'t extract project.json and assets from file, so will HTMLify as file.', 'status')
+    log(
+      "Couldn't extract project.json and assets from file, so will HTMLify as file.",
+      'status'
+    )
     return {
       type: 'file',
-      file,
+      file
     }
   }
 }

@@ -5,7 +5,10 @@ import getDataUrl from './get-data-url.ts'
 /** A CSS colour */
 type Colour = string
 
-export type Logger = (message: string, type: 'status' | 'progress' | 'error') => void
+export type Logger = (
+  message: string,
+  type: 'status' | 'progress' | 'error'
+) => void
 
 /** Options for HTMLification */
 type HtmlifyOptions = {
@@ -143,49 +146,47 @@ type HtmlifyOptions = {
   }
 }
 
-/** Convert a project to HTML */
+/** Converts a project to HTML */
 export default class Htmlifier {
-  private _vm: Promise<string> = fetch('https://sheeptester.github.io/scratch-vm/16-9/vm.min.js')
-    .then(r => r.text())
-  private _template: Promise<string> = fetch('https://sheeptester.github.io/htmlifier/template.html')
-    .then(r => r.text())
+  private _vm: Promise<string> = fetch(
+    'https://sheeptester.github.io/scratch-vm/16-9/vm.min.js'
+  ).then(r => r.text())
 
-  private async _createHtml (projectSource: ProjectSource, {
-    log,
-    zip: outputZip,
-    includeVm,
-    title,
-    username,
-    width,
-    height,
-    stretch: stretchStage,
-    autoStart,
-    turbo,
-    limits,
-    fencing,
-    pointerLock,
-    cursor,
-    favicon,
-    backgroundImage,
-    extensions,
-    loading: {
-      progressBar,
-      image: loadingImage,
-      stretch: stretchLoadingImage,
-    },
-    buttons: {
-      fullscreen: fullscreenBtns,
-      startStop: startStopBtns,
-    },
-    monitors: {
-      background: monitorBackground,
-      text: monitorText,
-    },
-    cloud: {
-      serverUrl,
-      specialBehaviours,
-    },
-  }: HtmlifyOptions) {
+  private _template: Promise<string> =
+    typeof Deno !== 'undefined'
+      ? Deno.readTextFile(new URL('./template.html', import.meta.url))
+      : fetch(new URL('./template.html', import.meta.url)).then(r => r.text())
+
+  private async _createHtml (
+    projectSource: ProjectSource,
+    {
+      log,
+      zip: outputZip,
+      includeVm,
+      title,
+      username,
+      width,
+      height,
+      stretch: stretchStage,
+      autoStart,
+      turbo,
+      limits,
+      fencing,
+      pointerLock,
+      cursor,
+      favicon,
+      backgroundImage,
+      extensions,
+      loading: {
+        progressBar,
+        image: loadingImage,
+        stretch: stretchLoadingImage
+      },
+      buttons: { fullscreen: fullscreenBtns, startStop: startStopBtns },
+      monitors: { background: monitorBackground, text: monitorText },
+      cloud: { serverUrl, specialBehaviours }
+    }: HtmlifyOptions
+  ): Promise<Blob> {
     const project = await getProject(projectSource, log)
 
     /** Files to externally include in the .zip file */
@@ -195,12 +196,17 @@ export default class Htmlifier {
      * Stores file in .zip if `outputZip` is enabled. Returns a URL (either a
      * replative path or a data URL) that can be fetched.
      */
-    async function registerFile (fileName: string, file: Blob | string): Promise<string> {
+    async function registerFile (
+      fileName: string,
+      file: Blob | string
+    ): Promise<string> {
       if (outputZip) {
         files.set(fileName, file)
         return `./${fileName}`
       } else {
-        return await getDataUrl(file instanceof Blob ? file : new Blob([file], { type: 'text/plain' }))
+        return await getDataUrl(
+          file instanceof Blob ? file : new Blob([file], { type: 'text/plain' })
+        )
       }
     }
 
@@ -211,16 +217,38 @@ export default class Htmlifier {
     const assets: Record<string, string | unknown> = {}
 
     if (project.type === 'assets') {
-      assets.project = await registerFile('project.json', JSON.stringify(project.project))
+      assets.project = await registerFile(
+        'project.json',
+        JSON.stringify(project.project)
+      )
       for (const [md5Ext, file] of project.assets) {
         assets[md5Ext] = await registerFile(md5Ext, file)
       }
     } else {
       assets.file = await registerFile('project', project.file)
     }
+
+    const html = 'wow'
+    if (outputZip) {
+      const zip = new JSZip()
+      for (const [fileName, file] of files) {
+        zip.file(fileName, file)
+      }
+      zip.file('index.html', html)
+      zip.file(
+        'README.txt',
+        "You can't just open the index.html directly in the browser, unfortunately. Read https://github.com/SheepTester/htmlifier/wiki/Downloading-as-a-.zip\n"
+      )
+      return await zip.generateAsync({ type: 'blob' })
+    } else {
+      return new Blob([html], { type: 'text/html' })
+    }
   }
 
-  async htmlify (): Promise<Blob> {
-    //
+  async htmlify (
+    project: ProjectSource,
+    options: HtmlifyOptions
+  ): Promise<Blob> {
+    return await this._createHtml(project, options)
   }
 }
