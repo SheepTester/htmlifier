@@ -3,10 +3,13 @@ import { ProjectSource, getProject } from './get-project.ts'
 import getDataUrl from './get-data-url.ts'
 import getFileExtension from './get-file-extension.ts'
 import { escapeCss, escapeHtml, escapeScript } from './escape.ts'
-
-const VM_URL = 'https://sheeptester.github.io/scratch-vm/16-9/vm.min.js'
-const EXTENSION_WORKER_URL =
-  'https://sheeptester.github.io/scratch-vm/16-9/extension-worker.js'
+import {
+  EXTENSION_WORKER_URL,
+  extensionWorker as extensionWorkerSource,
+  template,
+  VM_URL,
+  vm
+} from './dependencies.ts'
 
 /** A CSS colour */
 type Colour = string
@@ -160,18 +163,7 @@ type HtmlifyOptions = {
 
 /** Converts a project to HTML */
 export default class Htmlifier {
-  private _vm: Promise<string> = fetch(VM_URL).then(r => r.text())
-
-  private _extensionWorker: Promise<string> = fetch(EXTENSION_WORKER_URL).then(
-    r => r.text()
-  )
-
-  private _template: Promise<string> =
-    typeof Deno !== 'undefined'
-      ? Deno.readTextFile(new URL('./template.html', import.meta.url))
-      : fetch(new URL('./template.html', import.meta.url)).then(r => r.text())
-
-  private async _createHtml (
+  async #createHtml (
     projectSource: ProjectSource,
     {
       log,
@@ -264,14 +256,14 @@ export default class Htmlifier {
         outputZip
           ? 'window.importScripts = (...urls) => oldImportScripts(...urls.map(url => scripts[url] || url))'
           : 'window.importScripts = (...urls) => urls.forEach(url => scripts[url] ? eval(scripts[url]) : oldImportScripts(url))',
-        await this._extensionWorker
+        extensionWorkerSource
       ].join('\n')
       extensionWorker = outputZip
         ? { url: await registerFile('extension.worker.js', workerScript) }
         : { script: workerScript }
     }
 
-    let html = await this._template
+    let html = template
     const classes: string[] = []
     const styles: string[] = []
     const bodyStyles: string[] = []
@@ -405,13 +397,10 @@ export default class Htmlifier {
     if (!includeVm) {
       html = html.replace('{VM}', `<script src="${VM_URL}"></script>`)
     } else if (outputZip) {
-      files.set('vm.js', await this._vm)
+      files.set('vm.js', vm)
       html = html.replace('{VM}', '<script src="./vm.js"></script>')
     } else {
-      html = html.replace(
-        '{VM}',
-        `<script>\n${escapeScript(await this._vm)}\n</script>`
-      )
+      html = html.replace('{VM}', `<script>\n${escapeScript(vm)}\n</script>`)
     }
 
     // TODO: {CSS}, {JS}
@@ -436,6 +425,6 @@ export default class Htmlifier {
     project: ProjectSource,
     options: HtmlifyOptions
   ): Promise<Blob> {
-    return await this._createHtml(project, options)
+    return await this.#createHtml(project, options)
   }
 }
