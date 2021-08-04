@@ -24,13 +24,11 @@ const minifyProcess = Deno.run({
 await writeAll(
   minifyProcess.stdin,
   encoder.encode(`(async () => {
-  const dependencies = {
-    vm: '__VM__',
-    extensionWorker: '__EW__',
-    template: '__TEMP__',
-  }
-  ${bundle}
-})()`)
+    const dependencies_vm = '__htmlifier_VM__'
+    const dependencies_extensionWorker = '__htmlifier_EW__'
+    const dependencies_template = '__htmlifier_TEMP__'
+    ${bundle}
+  })()`)
 )
 minifyProcess.stdin.close()
 const minified = await minifyProcess.output()
@@ -46,7 +44,7 @@ Deno.writeTextFile(
   new URL('../src/main.bundle.min.js', import.meta.url),
   decoder
     .decode(minified)
-    .replace(/['"]__TEMP__['"]/, JSON.stringify(template))
-    .replace(/['"]__EW__['"]/, JSON.stringify(extensionWorker))
-    .replace(/['"]__VM__['"]/, JSON.stringify(vm))
+    .replace(/['"]__htmlifier_TEMP__['"]/, () => JSON.stringify(template))
+    .replace(/['"]__htmlifier_EW__['"]/, () => JSON.stringify(extensionWorker))
+    .replace(/['"]__htmlifier_VM__['"]/, () => JSON.stringify(vm))
 )
