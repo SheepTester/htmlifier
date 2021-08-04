@@ -33,7 +33,7 @@ if (minify) {
     stdin: 'piped',
     stdout: 'piped'
   })
-  await writeAll(minifyProcess.stdin, encoder.encode())
+  await writeAll(minifyProcess.stdin, encoder.encode(result))
   minifyProcess.stdin.close()
   result = decoder.decode(await minifyProcess.output())
   const status = await minifyProcess.status()
