@@ -376,9 +376,9 @@ function isFullscreen () {
 fullscreenBtn.addEventListener('click', () => {
   fullscreenBtn.blur()
   if (isFullscreen()) {
-    exitFullscreen()
+    exitFullscreen.call(document.body)
   } else {
-    requestFullscreen()
+    requestFullscreen.call(document.body)
   }
 })
 function handleFullscreenChange () {
@@ -393,7 +393,7 @@ document.addEventListener('mozfullscreenchange', handleFullscreenChange)
 document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
 document.addEventListener('msfullscreenchange', handleFullscreenChange)
 
-async function init ({ width, height, ...options }) {
+window.init = async ({ width, height, ...options }) => {
   window.vm = new window.NotVirtualMachine(width, height)
   vm.setCompatibilityMode(options.fps)
   vm.setTurboMode(options.turbo)
@@ -850,4 +850,17 @@ async function init ({ width, height, ...options }) {
 
   canvas.addEventListener('mousedown', handleMouseDown)
   canvas.addEventListener('touchstart', handleMouseDown, { passive: false })
+}
+
+// Not used by the template, but might be convenient for un-HTMLifying if I
+// remember this function exists
+window.download = (blob, name = 'download') => {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = name
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }

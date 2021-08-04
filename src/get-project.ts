@@ -1,4 +1,4 @@
-import JSZip from '../lib/jszip.ts'
+import { JSZip } from 'https://deno.land/x/jszip@0.10.0/mod.ts'
 import { Logger } from './htmlifier.ts'
 
 /** A source of the Scratch project's project.json and assets */
@@ -181,7 +181,7 @@ export async function getProject (
       'I shall try to unzip the project file; .sb2 and .sb3 files are just .zips.',
       'status'
     )
-    const zip = await JSZip.loadAsync(file)
+    const zip = await new JSZip().loadAsync(file)
     const projectJson = zip.file('project.json')
     if (!projectJson) {
       throw new Error(

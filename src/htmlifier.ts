@@ -1,4 +1,4 @@
-import JSZip from '../lib/jszip.ts'
+import { JSZip } from 'https://deno.land/x/jszip@0.10.0/mod.ts'
 import { ProjectSource, getProject } from './get-project.ts'
 import getDataUrl from './get-data-url.ts'
 import getFileExtension from './get-file-extension.ts'
@@ -391,7 +391,7 @@ export default class Htmlifier {
       .replace(
         '{DATA}',
         () =>
-          `<script>init(${escapeScript(
+          `<script>\nconst GENERATED = ${Date.now()}\nconst initOptions = ${escapeScript(
             JSON.stringify(
               {
                 width,
@@ -413,7 +413,7 @@ export default class Htmlifier {
               null,
               '\t'
             )
-          )})</script>`
+          )}\ninit(initOptions)\n</script>`
       )
     if (!includeVm) {
       html = html.replace('{VM}', () => `<script src="${VM_URL}"></script>`)
@@ -434,10 +434,15 @@ export default class Htmlifier {
       )
       const zip = new JSZip()
       for (const [fileName, file] of files) {
-        zip.file(fileName, file)
+        zip.addFile(
+          fileName,
+          typeof file === 'string'
+            ? file
+            : new Uint8Array(await file.arrayBuffer())
+        )
       }
-      zip.file('index.html', html)
-      zip.file(
+      zip.addFile('index.html', html)
+      zip.addFile(
         'README.txt',
         "You can't just open the index.html directly in the browser, unfortunately. Read https://github.com/SheepTester/htmlifier/wiki/Downloading-as-a-.zip\n"
       )
