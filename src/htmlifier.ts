@@ -163,7 +163,7 @@ type HtmlifyOptions = {
 
 /** Converts a project to HTML */
 export default class Htmlifier {
-  async #createHtml (
+  private async _createHtml (
     projectSource: ProjectSource,
     {
       log,
@@ -224,6 +224,12 @@ export default class Htmlifier {
     const assets: Record<string, string | unknown> = {}
 
     if (project.type === 'assets') {
+      if (!outputZip) {
+        log(
+          'Since you wanted a single HTML file, I need to represent the costume and sound files as text. This will make them take up 33% more space.',
+          'status'
+        )
+      }
       assets.project = await registerFile(
         'project.json',
         JSON.stringify(project.project)
@@ -232,6 +238,12 @@ export default class Htmlifier {
         assets[md5Ext] = await registerFile(md5Ext, file)
       }
     } else {
+      if (!outputZip) {
+        log(
+          'Since you wanted a single HTML file, I need to represent the project file as text. This will make it take up 33% more space.',
+          'status'
+        )
+      }
       assets.file = await registerFile('project', project.file)
     }
 
@@ -239,6 +251,10 @@ export default class Htmlifier {
       url: EXTENSION_WORKER_URL
     }
     if (extensions.length > 0 && includeVm) {
+      log(
+        'I shall start downloading each extension script file from their URL.',
+        'status'
+      )
       const extensionScripts: Record<string, string> = {}
       for (const url of extensions) {
         extensionScripts[url] = outputZip
@@ -263,19 +279,21 @@ export default class Htmlifier {
         : { script: workerScript }
     }
 
+    log('Now, I shall join everything together into an HTML file.', 'status')
+
     let html = template
     const classes: string[] = []
     const styles: string[] = []
     const bodyStyles: string[] = []
 
-    html = html.replace('{TITLE}', escapeHtml(title))
+    html = html.replace('{TITLE}', () => escapeHtml(title))
     if (stretchStage) {
       classes.push('stretch-stage')
       html = html.replace('{WRAPPER_CSS}', '')
     } else {
       styles.push(
         `#wrapper { width: 100vw; height: ${(height / width) * 100}vw; }`,
-        `@media (min-aspect-ratio: ${width}/${height}}) {`,
+        `@media (min-aspect-ratio: ${width}/${height}) {`,
         `#wrapper { height: 100vh; width: ${(width / height) * 100}vh; }`,
         '}'
       )
@@ -296,9 +314,10 @@ export default class Htmlifier {
       )
       html = html.replace(
         '{FAVICON}',
-        `<link rel="shortcut icon" type="image/png" href="${escapeHtml(
-          faviconUrl
-        )}">`
+        () =>
+          `<link rel="shortcut icon" type="image/png" href="${escapeHtml(
+            faviconUrl
+          )}">`
       )
     } else {
       html = html.replace('{FAVICON}', '')
@@ -334,8 +353,10 @@ export default class Htmlifier {
           : loadingImage
       html = html.replace(
         '{LOADING_IMAGE}',
-        `<img src="${escapeHtml(imageUrl)}" id="loading-image">`
+        () => `<img src="${escapeHtml(imageUrl)}" id="loading-image">`
       )
+    } else {
+      html = html.replace('{LOADING_IMAGE}', '')
     }
     if (stretchLoadingImage) {
       classes.push('stretch-loading-image')
@@ -363,49 +384,54 @@ export default class Htmlifier {
 
     styles.push('body {', ...bodyStyles, '}')
     html = html
-      .replace('{CLASSES}', classes.join(' '))
-      .replace(
-        '{STYLES}',
+      .replace('{CLASSES}', () => classes.join(' '))
+      .replace('{STYLES}', () =>
         styles.length > 0 ? `<style>\n${styles.join('\n')}\n</style>` : ''
       )
       .replace(
         '{DATA}',
-        `<script>init(${escapeScript(
-          JSON.stringify(
-            {
-              width,
-              height,
-              stretchStage,
-              fps,
-              turbo,
-              limits,
-              fencing,
-              pointerLock,
-              autoStart,
-              username,
-              loadingProgress: !!progressBar,
-              cloud,
-              extensionWorker,
-              extensions,
-              assets
-            },
-            null,
-            '\t'
-          )
-        )})</script>`
+        () =>
+          `<script>init(${escapeScript(
+            JSON.stringify(
+              {
+                width,
+                height,
+                stretchStage,
+                fps,
+                turbo,
+                limits,
+                fencing,
+                pointerLock,
+                autoStart,
+                username,
+                loadingProgress: !!progressBar,
+                cloud,
+                extensionWorker,
+                extensions,
+                assets
+              },
+              null,
+              '\t'
+            )
+          )})</script>`
       )
     if (!includeVm) {
-      html = html.replace('{VM}', `<script src="${VM_URL}"></script>`)
+      html = html.replace('{VM}', () => `<script src="${VM_URL}"></script>`)
     } else if (outputZip) {
       files.set('vm.js', vm)
-      html = html.replace('{VM}', '<script src="./vm.js"></script>')
+      html = html.replace('{VM}', () => '<script src="./vm.js"></script>')
     } else {
-      html = html.replace('{VM}', `<script>\n${escapeScript(vm)}\n</script>`)
+      html = html.replace(
+        '{VM}',
+        () => `<script>\n${escapeScript(vm)}\n</script>`
+      )
     }
 
-    // TODO: {CSS}, {JS}
-
     if (outputZip) {
+      log(
+        'I shall zip all the files into a ZIP file, as you requested.',
+        'status'
+      )
       const zip = new JSZip()
       for (const [fileName, file] of files) {
         zip.file(fileName, file)
@@ -425,6 +451,6 @@ export default class Htmlifier {
     project: ProjectSource,
     options: HtmlifyOptions
   ): Promise<Blob> {
-    return await this.#createHtml(project, options)
+    return await this._createHtml(project, options)
   }
 }

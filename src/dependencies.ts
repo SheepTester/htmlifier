@@ -19,13 +19,26 @@ export const extensionWorker =
     ? dependencies_extensionWorker
     : await fetch(EXTENSION_WORKER_URL).then(r => r.text())
 
+async function getTemplateHtml (
+  provider: (extension: string) => Promise<string>
+): Promise<string> {
+  const html = await provider('html')
+  const css = await provider('css')
+  const js = await provider('js')
+  return html.replace('{CSS}', () => `<style>${css}</style>`).replace('{JS}', () => `<script>${js}</script>`)
+}
+
 export const template =
   typeof dependencies_template !== 'undefined'
     ? dependencies_template
     : typeof Deno !== 'undefined'
-    ? await Deno.readTextFile(
-        new URL('./template/template.html', import.meta.url)
+    ? await getTemplateHtml(extension =>
+        Deno.readTextFile(
+          new URL(`./template/template.${extension}`, import.meta.url)
+        )
       )
-    : await fetch(new URL('./template/template.html', import.meta.url)).then(
-        r => r.text()
+    : await getTemplateHtml(extension =>
+        fetch(
+          new URL(`./template/template.${extension}`, import.meta.url)
+        ).then(r => r.text())
       )

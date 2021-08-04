@@ -124,7 +124,7 @@ export async function getProject (
   log: Logger
 ): Promise<ScratchProject> {
   if (source.type === 'id') {
-    log('Getting project from scratch.mit.edu...', 'status')
+    log('I shall start downloading the project from scratch.mit.edu.', 'status')
     const project = await fetch(
       `https://projects.scratch.mit.edu/${source.id}`
     ).then(r => r.blob())
@@ -133,7 +133,7 @@ export async function getProject (
       json = JSON.parse(await project.text())
     } catch {
       // Cannot parse as JSON, so it's probably a .sb file.
-      log('.sb project obtained', 'status')
+      log('I have obtained an .sb (Scratch 1.4) project', 'status')
       return {
         type: 'file',
         file: project
@@ -143,7 +143,10 @@ export async function getProject (
     const assetHashes = getAssetHashesFromProjectJson(json)
     const assets: Map<string, Blob> = new Map()
     let done = 0
-    log(`Fetching project assets... (0/${assetHashes.size})`, 'progress')
+    log(
+      `I shall start downloading the project's assets (the costumes and sounds). (0/${assetHashes.size})`,
+      'progress'
+    )
     await Promise.all(
       Array.from(assetHashes.keys(), async hash => {
         const blob = await fetch(
@@ -152,7 +155,7 @@ export async function getProject (
         assets.set(hash, blob)
         done++
         log(
-          `Fetching project assets... (${done}/${assetHashes.size})`,
+          `Still getting the assets... (${done}/${assetHashes.size})`,
           'progress'
         )
       })
@@ -167,25 +170,33 @@ export async function getProject (
 
   let file: Blob
   if (source.type === 'url') {
-    log('Getting project file from URL...', 'status')
+    log('I shall start downloading the project file from the URL.', 'status')
     file = await fetch(source.url).then(r => r.blob())
   } else {
     file = source.file
   }
 
   try {
-    log('Unzipping project file...', 'status')
+    log(
+      'I shall try to unzip the project file; .sb2 and .sb3 files are just .zips.',
+      'status'
+    )
     const zip = await JSZip.loadAsync(file)
     const projectJson = zip.file('project.json')
     if (!projectJson) {
-      throw new Error('No project.json')
+      throw new Error(
+        "There's no project.json in the project file. This probably means it's not a valid .sb2 or .sb3 file."
+      )
     }
     const json = JSON.parse(await projectJson.async('text'))
     const assetHashes = getAssetHashesFromProjectJson(json)
     const assets: Map<string, Blob> = new Map()
 
     let done = 0
-    log(`Extracting project assets... (0/${assetHashes.size})`, 'progress')
+    log(
+      `I shall extract the costumes and sounds from the file. (0/${assetHashes.size})`,
+      'progress'
+    )
     for (const [hash, fileName] of assetHashes) {
       const file = zip.file(fileName)
       if (!file) {
@@ -194,7 +205,7 @@ export async function getProject (
       assets.set(hash, await file.async('blob'))
       done++
       log(
-        `Extracting project assets... (${done}/${assetHashes.size})`,
+        `Still extracting the assets... (${done}/${assetHashes.size})`,
         'progress'
       )
     }
@@ -207,7 +218,7 @@ export async function getProject (
   } catch {
     // Probably an .sb file or something
     log(
-      "Couldn't extract project.json and assets from file, so will HTMLify as file.",
+      "I can't get the project.json and assets (costumes and sounds) from the file. It's probably an .sb file. I'll just include the file directly in the HTML file.",
       'status'
     )
     return {

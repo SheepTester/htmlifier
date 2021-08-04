@@ -63,7 +63,7 @@ class CloudProvider {
     this.handleUrlChange = () => {
       setCloud('url', window.location.href)
     }
-    if (specialBehaviours) {
+    if (this._specialBehaviours) {
       window.addEventListener('hashchange', this.handleUrlChange)
       window.addEventListener('popstate', this.handleUrlChange)
       // Paste output
@@ -457,7 +457,7 @@ async function init ({ width, height, ...options }) {
   vm.setVideoProvider(new VideoProvider(width, height))
   vm.start()
 
-  if (extensions.length > 0) {
+  if (options.extensions.length > 0) {
     const OldWorker = window.Worker
     window.Worker = class extends OldWorker {
       // deno-lint-ignore constructor-super
@@ -480,7 +480,7 @@ async function init ({ width, height, ...options }) {
         }
       }
     }
-    for (const extension of extensions) {
+    for (const extension of options.extensions) {
       await vm.loadExtensionURL(extension)
     }
   }
@@ -707,7 +707,6 @@ async function init ({ width, height, ...options }) {
     return target.variables[variableId]
   }
   const monitorStates = {}
-  let once = false
   vm.runtime.addListener('MONITORS_UPDATE', monitors => {
     monitors.forEach((record, id) => {
       if (!monitorStates[id]) {
@@ -792,10 +791,7 @@ async function init ({ width, height, ...options }) {
         await vm.loadProject(JSON.stringify(options.assets.project))
   )
 
-  const cloudProvider = new CloudProvider(
-    options.cloud.serverUrl,
-    options.cloud.specialBehaviours
-  )
+  const cloudProvider = new CloudProvider(options)
   vm.setCloudProvider(cloudProvider)
   if (options.cloud.specialBehaviours || !options.cloud.serverUrl) {
     const stageVariables = vm.runtime.getTargetForStage().variables

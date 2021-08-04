@@ -227,6 +227,7 @@ window.onerror = function(message, source, lineno, colno, error) {
         href="https://leopardjs.now.sh/">Leopard</a>
       </p>
     </div>
+    <script src="./src/main.bundle.min.js"></script>
     <script type="text/javascript">
 const otherHtmlifyBtn = document.getElementById('other-htmlify-btn')
 const logOutput = document.getElementById('log')
@@ -839,7 +840,7 @@ const form = new Form(document.getElementById('options'))
               .add(new Label(
                 'Save cloud variables locally using localStorage',
                 1,
-                'You may have to deal with privacy laws around cookies outside of Scratch.'
+                'You may have to deal with privacy laws regarding cookies outside of Scratch.'
               ), 'localstorage')
               .add(new Input(
                 'cloud-ws',
@@ -905,66 +906,83 @@ notes.forEach(paragraph => {
   notesWrapper.appendChild(paragraph)
 })
 
+const htmlifier = new Htmlifier()
+
 function load () {
-  if (typeof downloadAsHTML === 'undefined') return
   const { values } = form
   form.disable()
   otherHtmlifyBtn.disabled = true
   logOutput.innerHTML = ''
   scroll = true
   const project = values['upload-mode'] === 'file'
-    ? { file: values.file || Promise.reject(new Error('You did not select a project file.')) }
+    ? { type: 'file', file: values.file || Promise.reject(new Error('You did not select a project file.')) }
     : values['upload-mode'] === 'url'
-    ? { url: values['project-url'] }
-    : { id: values.id + '' }
-  downloadAsHTML(project, {
-    projectId: values.id + '',
-    // TODO: values['include-file']
+    ? { type: 'url', url: values['project-url'] }
+    : { type: 'id', id: values.id + '' }
+  // TODO: values['include-file']
+  htmlifier.htmlify(project, {
+    zip: values.zip,
+    includeVm: true,
 
     title: values.title,
     username: values.username,
-    compatibilityMode: values.compatibility,
-    turboMode: values.turbo,
-    favicon: values['favicon-file'],
-    backgroundImage: values['background-file'],
-    progressBarColour: values.progress ? values['progress-colour'] : null,
-    loadingImage: values['loading-image'] === 'file'
-      ? values['loading-image-file']
-      : values['loading-image-url'],
-    autoStart: values.autostart,
-    fullscreen: values.fullscreen,
-    showStartStop: values['start-stop-controls'],
-    stretch: values.stretch,
-    zip: values.zip,
 
-    noCursor: values.cursor === 'none',
-    cursor: values.cursor === 'file'
-      ? values['cursor-file']
-      : null,
-    pointerLock: values['pointer-lock'],
-
-    monitorColour: values['use-colour']
-      ? values['monitor-colour']
-      : null,
-    monitorText: values['monitor-text'],
-    transparentMonitors: values['transparent-monitor'],
-
-    cloudServer: values['cloud-provider'] === 'ws'
-      ? values['cloud-ws']
-      : null,
-    specialCloud: values['special-cloud'],
-
-    customRatio: values.wider,
     width: values.wider ? values.width : 480,
     height: values.wider ? values.height : 360,
-    extension: values['extension-url'] || null,
-    noLimits: values['no-limits'],
+    stretch: values.stretch === 'stage',
+
+    autoStart: values.autostart,
+    turbo: values.turbo,
+    fps: values.compatibility ? 60 : 30,
+    limits: !values['no-limits'],
+    fencing: !values['no-limits'],
+    pointerLock: values['pointer-lock'],
+
+    cursor: values.cursor === 'file'
+      ? values['cursor-file']
+      : values.cursor === 'none'
+      ? 'hidden'
+      : null,
+    favicon: values['favicon-file'],
+    backgroundImage: values['background-file'],
+
+    extensions: values['extension-url'] ? [values['extension-url']] : [],
+
+    loading: {
+      progressBar: values.progress ? values['progress-colour'] : null,
+      image: values['loading-image'] === 'file'
+        ? values['loading-image-file']
+        : values['loading-image-url'],
+      stretch: values.stretch !== 'none'
+    },
+
+    buttons: {
+      startStop: values['start-stop-controls'],
+      fullscreen: values.fullscreen
+    },
+
+    monitors: {
+      background: values['use-colour']
+        ? values['monitor-colour']
+        : values['transparent-monitor']
+        ? 'none'
+        : null,
+      monitorText: values['monitor-text'],
+    },
+
+    cloud: {
+      serverUrl: values['cloud-provider'] === 'ws'
+        ? values['cloud-ws']
+        : null,
+        specialBehaviours: values['special-cloud'],
+      projectId: values.id,
+    },
 
     log
   })
     .then(blob => {
       function downloadBlob () {
-        log('Attempting to download file.', 'status');
+        log('I shall try to download the file. If nothing happens, then click the "Download" button.', 'status');
         download(blob, values.title + (blob.type === 'application/zip' ? '.zip' : '.html'), blob.type);
       }
       if (autodownload.checked) {
@@ -1051,9 +1069,5 @@ window.addEventListener('hashchange', onHashChange);
 onHashChange();
     </script>
     <script src="./download.js" charset="utf-8"></script>
-    <script src="./jszip.min.js" charset="utf-8"></script>
-    <!-- VM relies on document.body existing oof -->
-    <script src="https://sheeptester.github.io/scratch-vm/16-9/vm.min.js" charset="utf-8"></script>
-    <script src="./hacky-file-getter.js" charset="utf-8"></script>
   </body>
 </html>
