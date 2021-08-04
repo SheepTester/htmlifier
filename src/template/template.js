@@ -788,7 +788,7 @@ window.init = async ({ width, height, ...options }) => {
       : typeof options.assets.project === 'string'
       ? await storage.load(storage.AssetType.Project).then(asset => asset.data)
       : // project.json was included as parsed JSON
-        await vm.loadProject(JSON.stringify(options.assets.project))
+        JSON.stringify(options.assets.project)
   )
 
   const cloudProvider = new CloudProvider(options)
@@ -851,6 +851,27 @@ window.init = async ({ width, height, ...options }) => {
   canvas.addEventListener('mousedown', handleMouseDown)
   canvas.addEventListener('touchstart', handleMouseDown, { passive: false })
 }
+
+const errorsTextarea = document.getElementById('errors')
+function handleHashChange () {
+  // #show-errors-<Han sheep>
+  if (window.location.hash === '#show-errors-%E7%BE%8A') {
+    if (!window.onNewError) {
+      window.onNewError = () => {
+        errorsTextarea.value = `${
+          window.errors.length
+        } error(s)\n${window.errors.join('\n')}`
+      }
+      window.onNewError()
+    }
+    errorsTextarea.style.display = 'block'
+  } else if (window.onNewError) {
+    window.onNewError = null
+    errorsTextarea.style.display = 'none'
+  }
+}
+window.addEventListener('hashchange', handleHashChange)
+handleHashChange()
 
 // Not used by the template, but might be convenient for un-HTMLifying if I
 // remember this function exists

@@ -1,4 +1,4 @@
-function offlineify ({ log = console.log } = {}) {
+window.offlineify = async ({ log = console.log } = {}) => {
   function toText (file) {
     return response => {
       if (response.ok) {
@@ -20,7 +20,7 @@ function offlineify ({ log = console.log } = {}) {
     }
   }
   log('I shall download the required files for the HTMLifier.', 'status')
-  return Promise.all([
+  const [html, bundle, downloader, css] = await Promise.all([
     fetch('./index.html')
       .catch(problemFetching('this web page'))
       .then(toText('this web page')),
@@ -37,34 +37,30 @@ function offlineify ({ log = console.log } = {}) {
     fetch('./main.css')
       .catch(problemFetching('the web page style'))
       .then(toText('the web page style'))
-  ]).then(([html, bundle, downloader, css]) => {
-    html = html
-      .replace(
-        '<body',
-        `<body class="offline" data-offlineified="${new Date()}"`
-      )
-      // . wildcard in regex doesn't include newlines lol
-      // https://stackoverflow.com/a/45981809
-      .replace(/<!-- no-offline -->[^]*?<!-- \/no-offline -->/g, '')
-      .replace(/\/\* no-offline \*\/[^]*?\/\* \/no-offline \*\//g, '')
-      // Using functions to avoid $ substitution
-      .replace(
-        '<link rel="stylesheet" href="./main.css">',
-        () => `<style>${css}</style>`
-      )
-      .replace(
-        '<script src="./download.js" charset="utf-8"></script>',
-        () => `<script>${downloader}</script>`
-      )
-      .replace(
-        '<script src="./src/main.bundle.min.js" charset="utf-8"></script>',
-        () => `<script>${bundle}</script>`
-      )
-    log(
-      "I shall attempt to download the HTML file. If you don't see anything, then maybe your browser is preventing me from downloading files.",
-      'status'
+  ])
+  const combined = html
+    .replace('<body', `<body class="offline" data-offlineified="${new Date()}"`)
+    // . wildcard in regex doesn't include newlines lol
+    // https://stackoverflow.com/a/45981809
+    .replace(/<!-- no-offline -->[^]*?<!-- \/no-offline -->/g, '')
+    .replace(/\/\* no-offline \*\/[^]*?\/\* \/no-offline \*\//g, '')
+    // Using functions to avoid $ substitution
+    .replace(
+      '<link rel="stylesheet" href="./main.css">',
+      () => `<style>${css}</style>`
     )
-    download(html, 'htmlifier-offline.html', 'text/html')
-    log("That's all!", 'done')
-  })
+    .replace(
+      '<script src="./download.js" charset="utf-8"></script>',
+      () => `<script>${downloader}</script>`
+    )
+    .replace(
+      '<script src="./src/main.bundle.min.js" charset="utf-8"></script>',
+      () => `<script>${bundle}</script>`
+    )
+  log(
+    "I shall attempt to download the HTML file. If you don't see anything, then maybe your browser is preventing me from downloading files.",
+    'status'
+  )
+  download(combined, 'htmlifier-offline.html', 'text/html')
+  log("That's all!", 'done')
 }

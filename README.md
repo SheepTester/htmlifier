@@ -30,3 +30,16 @@ Scratch to JavaScript compilers (best for speed):
 
 Scratch to JavaScript converter (best for learning JavaScript):
 [Leopard](https://leopardjs.now.sh/)
+
+## Development
+
+If modifying the files in src/, you'll have to re-bundle everything.
+
+```sh
+# Build once
+deno run --allow-run --allow-read=src --allow-write=src bin/build.ts
+
+# Automatically build when the files change (for development)
+nodemon --exec "deno run --allow-all" --watch src --ext ts,css,html,js \
+  --ignore src/main.bundle.min.js bin/build.ts -- dev
+```

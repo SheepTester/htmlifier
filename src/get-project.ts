@@ -199,10 +199,20 @@ export async function getProject (
     )
     for (const [hash, fileName] of assetHashes) {
       const file = zip.file(fileName)
-      if (!file) {
-        throw new Error(`Cannot get ${fileName}`)
+      if (file) {
+        assets.set(hash, await file.async('blob'))
+      } else {
+        // Scratch 2.0 project file ID was -1, so will have to fetch from
+        // assets.scratch.mit.edu. This shouldn't happen unless the project.json
+        // was taken directly from projects.scratch.mit.edu rather than
+        // downloaded from the editor.
+        assets.set(
+          hash,
+          await fetch(
+            `https://assets.scratch.mit.edu/internalapi/asset/${hash}/get/`
+          ).then(r => r.blob())
+        )
       }
-      assets.set(hash, await file.async('blob'))
       done++
       log(
         `Still extracting the assets... (${done}/${assetHashes.size})`,
