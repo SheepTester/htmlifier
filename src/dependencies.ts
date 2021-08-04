@@ -25,7 +25,9 @@ async function getTemplateHtml (
   const html = await provider('html')
   const css = await provider('css')
   const js = await provider('js')
-  return html.replace('{CSS}', () => `<style>${css}</style>`).replace('{JS}', () => `<script>${js}</script>`)
+  return html
+    .replace('{CSS}', () => `<style>\n${css}\n</style>`)
+    .replace('{JS}', () => `<script>\n${js}\n</script>`)
 }
 
 export const template =

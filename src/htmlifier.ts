@@ -327,7 +327,16 @@ export default class Htmlifier {
         'favicon' + getFileExtension(backgroundImage),
         backgroundImage
       )
-      bodyStyles.push(`background-image: url("${escapeCss(imageUrl)}");`)
+      // The background image is added separately to be loaded after the loading
+      // image
+      html = html.replace(
+        '{BACKGROUND_CSS}',
+        `<style>\nbody {\nbackground-image: url("${escapeCss(
+          imageUrl
+        )}");\n}\n</style>`
+      )
+    } else {
+      html = html.replace('{BACKGROUND_CSS}', '')
     }
     if (progressBar) {
       classes.push('show-loading-progress')

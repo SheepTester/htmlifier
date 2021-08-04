@@ -373,13 +373,16 @@ function isFullscreen () {
     document.msFullscreenElement
   )
 }
-fullscreenBtn.addEventListener('click', () => {
-  fullscreenBtn.blur()
+function toggleFullscreen () {
   if (isFullscreen()) {
     exitFullscreen.call(document.body)
   } else {
     requestFullscreen.call(document.body)
   }
+}
+fullscreenBtn.addEventListener('click', () => {
+  fullscreenBtn.blur()
+  toggleFullscreen()
 })
 function handleFullscreenChange () {
   if (isFullscreen()) {
@@ -669,6 +672,15 @@ window.init = async ({ width, height, ...options }) => {
     if (event.keyCode === 32 || (event.keyCode >= 37 && event.keyCode <= 40)) {
       event.preventDefault()
     }
+    if (
+      event.key === 'f' &&
+      (event.ctrlKey || event.metaKey) &&
+      !event.shiftKey &&
+      !event.altKey
+    ) {
+      toggleFullscreen()
+      event.preventDefault()
+    }
   })
   document.addEventListener('keyup', e => {
     postKey(e, false)
@@ -676,6 +688,10 @@ window.init = async ({ width, height, ...options }) => {
     if (e.target !== document && e.target !== document.body) {
       e.preventDefault()
     }
+  })
+  vm.postIOData('keyboard', {
+    key: 'HTMLifier',
+    isDown: true
   })
 
   const question = document.getElementById('question')
