@@ -13,7 +13,10 @@ const bundle = decoder.decode(
     cmd: [
       'deno',
       'bundle',
-      new URL('../src/main.js', import.meta.url).toString()
+      '--no-check',
+      '--import-map',
+      new URL('../import-map.json', import.meta.url).toString(),
+      new URL('../client/index.ts', import.meta.url).toString()
     ],
     stdout: 'piped'
   }).output()
@@ -46,7 +49,7 @@ if (minify) {
 
 console.log('Substituting dependencies...')
 Deno.writeTextFile(
-  new URL('../src/main.bundle.min.js', import.meta.url),
+  new URL('../index.bundle.min.js', import.meta.url),
   result
     .replace(/['"]__htmlifier_TEMP__['"]/, () => JSON.stringify(template))
     .replace(/['"]__htmlifier_EW__['"]/, () => JSON.stringify(extensionWorker))

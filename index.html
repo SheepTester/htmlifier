@@ -57,6 +57,7 @@ window.onerror = function(message, source, lineno, colno, error) {
       <button class="htmlify" id="other-htmlify-btn" form="options" type="submit">HTMLify</button>
     </div>
     <div class="mainarea">
+      <div id="root"></div>
       <!-- no-offline -->
       <p><button id="offlineify">Download offline version</button> (An HTML file that can be opened and used in the browser without an internet connection)</p>
       <!-- /no-offline -->
@@ -227,7 +228,7 @@ window.onerror = function(message, source, lineno, colno, error) {
         href="https://leopardjs.now.sh/">Leopard</a>
       </p>
     </div>
-    <script src="./src/main.bundle.min.js" charset="utf-8"></script>
+    <script src="./index.bundle.min.js" charset="utf-8"></script>
     <script type="text/javascript">
 const otherHtmlifyBtn = document.getElementById('other-htmlify-btn')
 const logOutput = document.getElementById('log')

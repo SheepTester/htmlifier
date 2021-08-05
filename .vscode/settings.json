@@ -4,5 +4,6 @@
   "deno.unstable": false,
   "deno.suggest.imports.hosts": {
     "https://deno.land": true
-  }
+  },
+  "deno.config": "./tsconfig.json"
 }

@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "global.d.ts": "https://doc-proxy.deno.dev/builtin/stable",
+    "react": "https://doc-proxy.deno.dev/builtin/stable",
+    "csstype": "https://doc-proxy.deno.dev/builtin/stable",
+    "prop-types": "https://doc-proxy.deno.dev/builtin/stable",
+    "scheduler/tracing": "https://doc-proxy.deno.dev/builtin/stable"
+  }
+}

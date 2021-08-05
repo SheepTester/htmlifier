@@ -20,8 +20,8 @@ export type Logger = (
 ) => void
 
 /** Options for HTMLification */
-type HtmlifyOptions = {
-  /** Logging function to track the progress of HTMLification */
+type HtmlifyOptions = Partial<{
+  /** Logging function to track the progress of HTMLification. */
   log: Logger
 
   /**
@@ -30,10 +30,10 @@ type HtmlifyOptions = {
    */
   zip: boolean
 
-  /** Whether to include the VM inside the HTML file. Recommended: true */
+  /** Whether to include the VM inside the HTML file. Default: true */
   includeVm: boolean
 
-  /** The page title of the resulting HTML file */
+  /** The page title of the resulting HTML file. */
   title: string
 
   /**
@@ -42,33 +42,33 @@ type HtmlifyOptions = {
    */
   username: string
 
-  /** Width of stage (eg 480) */
+  /** Width of stage. Default: 480. */
   width: number
 
-  /** Height of stage (eg 360) */
+  /** Height of stage. Default: 360. */
   height: number
 
   /** Whether the stage should be stretched to fill the screen. */
   stretch: boolean
 
-  /** Whether to start the project automatically */
+  /** Whether to start the project automatically. Default: true. */
   autoStart: boolean
 
-  /** Whether turbo mode is enabled */
+  /** Whether turbo mode is enabled. */
   turbo: boolean
 
-  /** FPS of the project */
+  /** FPS of the project. Default: 30. */
   fps: number
 
   /**
    * Whether to enforce reasonable limits such as the maximum list length (on by
-   * default in vanilla Scratch).
+   * default in vanilla Scratch). Default: true.
    */
   limits: boolean
 
   /**
    * Whether sprite fencing is enabled to prevent sprites from going off
-   * screen (on by default in vanilla Scratch).
+   * screen (on by default in vanilla Scratch). Default: true.
    */
   fencing: boolean
 
@@ -85,10 +85,10 @@ type HtmlifyOptions = {
    */
   cursor: File | 'hidden' | null
 
-  /** A `File` containing the favicon image */
+  /** A `File` containing the favicon image. */
   favicon: File | null
 
-  /** A `File` containing the background image */
+  /** A `File` containing the background image. */
   backgroundImage: File | null
 
   /**
@@ -98,8 +98,15 @@ type HtmlifyOptions = {
    */
   extensions: string[]
 
-  /** Customisation options for the loading screen */
-  loading: {
+  /**
+   * Custom JavaScript code to add to the HTML.
+   *
+   * This is equivalent to "plugins" (a euphemism for userscript) in E羊icques.
+   */
+  injectedScripts: string
+
+  /** Customisation options for the loading screen. */
+  loading: Partial<{
     /** The colour of the loading progress bar or `null` for no progress bar */
     progressBar: Colour | null
 
@@ -111,38 +118,39 @@ type HtmlifyOptions = {
 
     /** Whether the loading image should be stretched to fill the screen. */
     stretch: boolean
-  }
+  }>
 
-  /** Customisation options for the buttons on the top right of the page */
-  buttons: {
-    /** Start/stop buttons */
+  /** Customisation options for the buttons on the top right of the page. */
+  buttons: Partial<{
+    /** Whether to show start/stop buttons. */
     startStop: boolean
 
-    /** Fullscreen button */
+    /** Whether to show the fullscreen button. */
     fullscreen: boolean
-  }
+  }>
 
-  /** Customisation of monitor colours */
-  monitors: {
+  /** Customisation of monitor colours. */
+  monitors: Partial<{
     /**
      * Background colour of the list and variable monitors; `null` for
      * translucent black. If `'none'`, then the monitors will just be the
-     * variable name and value text.
+     * variable name and value text. Default: null.
      */
     background: Colour | 'none' | null
 
-    /** The text colour of the list and variable monitors */
+    /** The text colour of the list and variable monitors. Default: `white`. */
     text: Colour
-  }
+  }>
 
   /**
    * Control the behaviour of cloud variables when HTMLified. Cloud variables
    * are stored in localStorage by default.
    */
-  cloud: {
+  cloud: Partial<{
     /**
      * The URL of the cloud server, starting with `ws://` or `wss://`. `null` to
-     * not use a web server.
+     * not use a web server and instead store cloud variables in localStorage.
+     * Default: null.
      */
     serverUrl: string | null
 
@@ -156,42 +164,56 @@ type HtmlifyOptions = {
      */
     specialBehaviours: boolean
 
-    /** The project ID used to identify the project to the cloud server */
+    /**
+     * The project ID used to identify the project to the cloud server. Default:
+     * `0`.
+     */
     projectId: string
-  }
-}
+  }>
+}>
 
 /** Converts a project to HTML */
 export default class Htmlifier {
   private async _createHtml (
     projectSource: ProjectSource,
     {
-      log,
-      zip: outputZip,
-      includeVm,
-      title,
-      username,
-      width,
-      height,
-      stretch: stretchStage,
-      autoStart,
-      turbo,
-      fps,
-      limits,
-      fencing,
-      pointerLock,
-      cursor,
-      favicon,
-      backgroundImage,
-      extensions,
+      log = () => {},
+      zip: outputZip = false,
+      includeVm = true,
+      title = '',
+      username = '',
+      width = 480,
+      height = 360,
+      stretch: stretchStage = false,
+      autoStart = true,
+      turbo = false,
+      fps = 30,
+      limits = true,
+      fencing = true,
+      pointerLock = false,
+      cursor = null,
+      favicon = null,
+      backgroundImage = null,
+      extensions = [],
+      injectedScripts = '',
       loading: {
-        progressBar,
-        image: loadingImage,
-        stretch: stretchLoadingImage
-      },
-      buttons: { startStop: startStopBtns, fullscreen: fullscreenBtns },
-      monitors: { background: monitorBackground, text: monitorText },
-      cloud
+        progressBar = null,
+        image: loadingImage = null,
+        stretch: stretchLoadingImage = false
+      } = {},
+      buttons: {
+        startStop: startStopBtns = false,
+        fullscreen: fullscreenBtns = false
+      } = {},
+      monitors: {
+        background: monitorBackground = null,
+        text: monitorText = 'white'
+      } = {},
+      cloud: {
+        serverUrl = null,
+        specialBehaviours = false,
+        projectId = '0'
+      } = {}
     }: HtmlifyOptions
   ): Promise<Blob> {
     const project = await getProject(projectSource, log)
@@ -414,7 +436,7 @@ export default class Htmlifier {
                 autoStart,
                 username,
                 loadingProgress: !!progressBar,
-                cloud,
+                cloud: { serverUrl, specialBehaviours, projectId },
                 extensionWorker,
                 extensions,
                 assets
@@ -422,7 +444,10 @@ export default class Htmlifier {
               null,
               '\t'
             )
-          )}\ninit(initOptions)\n</script>`
+          )}\ninit(initOptions)\n</script>` +
+          (injectedScripts.length > 0
+            ? `\n<script>\n${injectedScripts}\n</script>`
+            : '')
       )
     if (!includeVm) {
       html = html.replace('{VM}', () => `<script src="${VM_URL}"></script>`)
@@ -463,7 +488,7 @@ export default class Htmlifier {
 
   async htmlify (
     project: ProjectSource,
-    options: HtmlifyOptions
+    options: HtmlifyOptions = {}
   ): Promise<Blob> {
     return await this._createHtml(project, options)
   }
