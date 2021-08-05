@@ -89,18 +89,21 @@ export const defaultFileOptions: FileOptions = {
 }
 export const fileKeys = Object.keys(defaultFileOptions) as (keyof FileOptions)[]
 
-export type RadioOptions = {
-  'upload-mode': 'id' | 'file' | 'url'
-  'loading-image': 'file' | 'url'
+export const radioValues = {
+  'upload-mode': ['id', 'file', 'url'],
+  'loading-image': ['file', 'url'],
 
   // # Options
-  stretch: 'stage' | 'loading-image' | 'none'
+  stretch: ['stage', 'loading-image', 'none'],
 
   // ## Mouse pointers
-  cursor: 'default' | 'none' | 'file'
+  cursor: ['default', 'none', 'file'],
 
   // ## Cloud variable source
-  localstorage: 'localstorage' | 'ws'
+  localstorage: ['localstorage', 'ws']
+} as const
+export type RadioOptions = {
+  [key in keyof typeof radioValues]: typeof radioValues[key][number]
 }
 export const defaultRadioOptions: RadioOptions = {
   'upload-mode': 'id',

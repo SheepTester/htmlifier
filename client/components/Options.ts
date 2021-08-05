@@ -19,7 +19,8 @@ import {
 import { link } from '../utils.ts'
 import { NumberField, TextField } from './Field.ts'
 import { Fieldset } from './Fieldset.ts'
-import { RadioGroup } from './RadioGroup.ts'
+import { RadioGroups } from './RadioGroup.ts'
+import { label } from '../utils.ts'
 
 export const Options = () => {
   const [options, setOptions] = useState<ConversionOptions>(() => {
@@ -96,29 +97,37 @@ export const Options = () => {
     e(
       OptionsContext.Provider,
       { value: { options, onChange: handleOptionChange } },
-      e(RadioGroup, {
-        label: 'Project source',
-        name: 'upload-mode',
-        onChange: value =>
-          handleOptionChange('upload-mode', value as 'id' | 'file' | 'url'),
-        options: {
-          id: ['Project ID: ', e(NumberField, { name: 'id' })],
-          file: ['Upload project file: '],
+      e(RadioGroups['upload-mode'], {
+        title: 'Select project by',
+        labels: {
+          id: [
+            ['ID on the ', link('https://scratch.mit.edu/', 'Scratch website')],
+            label(
+              'Project ID: ',
+              e(NumberField, { name: 'id', placeholder: '104' })
+            )
+          ],
+          file: ['Uploaded file', ['Upload project file: ', 'wow']],
           url: [
-            'Project file from URL: ',
-            e(TextField, { name: 'project-url' })
+            'Project file hosted online',
+            label(
+              'URL: ',
+              e(TextField, {
+                name: 'project-url',
+                placeholder: 'https://example.com/project.sb3'
+              })
+            )
           ]
-        },
-        checked: options['upload-mode']
+        }
       }),
       e(
         Fieldset,
-        { label: 'Options' },
-        e(Fieldset, { label: 'Mouse pointers' }),
-        e(Fieldset, { label: 'Monitor style' }),
-        e(Fieldset, { label: 'Cloud variable source' }),
+        { title: 'Options' },
+        e(Fieldset, { title: 'Mouse pointers' }),
+        e(Fieldset, { title: 'Monitor style' }),
+        e(Fieldset, { title: 'Cloud variable source' }),
         e(Fieldset, {
-          label: [
+          title: [
             link('https://sheeptester.github.io/scratch-gui/', 'E羊icques'),
             ' (modded) options'
           ]
