@@ -1,18 +1,20 @@
-import { createElement as e, ChangeEvent } from '../lib/react.ts'
+import { OptionsContext } from '../contexts/options.ts'
+import { createElement as e, ChangeEvent, useContext } from '../lib/react.ts'
+import {
+  ConversionOptions,
+  NumberOptions,
+  OnOptionChange,
+  StringOptions
+} from '../options.ts'
 
-type TextFieldProps = {
+type FieldProps = {
   onChange: (value: string) => void
   name: string
   value: string
   type?: string
 }
 
-export const TextField = ({
-  onChange,
-  name,
-  value,
-  type = 'text'
-}: TextFieldProps) => {
+const Field = ({ onChange, name, value, type = 'text' }: FieldProps) => {
   return e('input', {
     type,
     name,
@@ -22,17 +24,36 @@ export const TextField = ({
   })
 }
 
-type NumberFieldProps = {
-  onChange: (value: number) => void
-  name: string
-  value: number
+type TextFieldProps<K extends keyof StringOptions> = {
+  name: K
+  type?: string
 }
 
-export const NumberField = ({ onChange, name, value }: NumberFieldProps) => {
-  return e(TextField, {
-    onChange: string => onChange(+string),
+export const TextField = <K extends keyof StringOptions>({
+  name,
+  type
+}: TextFieldProps<K>) => {
+  const { options, onChange } = useContext(OptionsContext)
+  return e(Field, {
+    onChange: string => onChange(name, string),
     name,
-    value: String(value),
+    value: String(options[name]),
+    type
+  })
+}
+
+type NumberFieldProps<K extends keyof NumberOptions> = {
+  name: K
+}
+
+export const NumberField = <K extends keyof NumberOptions>({
+  name
+}: NumberFieldProps<K>) => {
+  const { options, onChange } = useContext(OptionsContext)
+  return e(Field, {
+    onChange: string => onChange(name, +string),
+    name,
+    value: String(options[name]),
     type: 'number'
   })
 }

@@ -3,8 +3,10 @@
 // @deno-types="https://github.com/DefinitelyTyped/DefinitelyTyped/raw/master/types/react/index.d.ts"
 export {
   createElement,
+  createContext,
   useState,
   useEffect,
+  useContext,
   useCallback,
   Fragment,
   StrictMode
