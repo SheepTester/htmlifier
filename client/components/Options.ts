@@ -1,5 +1,3 @@
-// deno-lint-ignore-file no-extra-semi
-
 import {
   createElement as e,
   Fragment,
@@ -7,12 +5,14 @@ import {
   MouseEvent
 } from '../lib/react.ts'
 import { link } from '../utils.ts'
+import { NumberField, TextField } from './Field.ts'
 import { Fieldset } from './Fieldset.ts'
+import { RadioGroup } from './RadioGroup.ts'
 
 type Colour = string
 type Url = string
 
-type ConversionOptions = {
+export type ConversionOptions = {
   'upload-mode': 'id' | 'file' | 'url'
   id: number
   file: File | null
@@ -111,10 +111,15 @@ const defaultOptions: ConversionOptions = {
 
 const keys = Object.keys(defaultOptions) as (keyof ConversionOptions)[]
 
+type ConversionOptionsAsRecord = {
+  [key in keyof ConversionOptions]: string | number | boolean | File | null
+}
+
 export const Options = () => {
   const [options, setOptions] = useState<ConversionOptions>(() => {
     const options = { ...defaultOptions }
     const params = new URL(window.location.href).searchParams
+    const recordOptions = options as ConversionOptionsAsRecord
     for (const key of keys) {
       const param = params.get(key)
       if (param === null) {
@@ -122,17 +127,11 @@ export const Options = () => {
       }
       // Annoyingly, I can't do `options[key] = +param` etc.
       if (typeof options[key] === 'number') {
-        ;((options as unknown) as { [key in keyof ConversionOptions]: number })[
-          key
-        ] = +param
+        recordOptions[key] = +param
       } else if (typeof options[key] === 'string') {
-        ;((options as unknown) as { [key in keyof ConversionOptions]: string })[
-          key
-        ] = param
+        recordOptions[key] = param
       } else if (typeof options[key] === 'boolean') {
-        ;((options as unknown) as {
-          [key in keyof ConversionOptions]: boolean
-        })[key] = param === 'true' || param === 'on'
+        recordOptions[key] = param === 'true' || param === 'on'
       }
     }
     return options
@@ -148,6 +147,16 @@ export const Options = () => {
     ) {
       nonDefaultOptions.set(key, String(value))
     }
+  }
+
+  const handleOptionChange = <K extends keyof ConversionOptions>(
+    option: K,
+    value: ConversionOptions[K]
+  ) => {
+    setOptions({
+      ...options,
+      [option]: value
+    })
   }
 
   return e(
@@ -177,6 +186,32 @@ export const Options = () => {
         'HTMLify'
       )
     ),
+    e(RadioGroup, {
+      label: 'Project source',
+      name: 'upload-mode',
+      onChange: value =>
+        handleOptionChange('upload-mode', value as 'id' | 'file' | 'url'),
+      options: {
+        id: [
+          'Project ID: ',
+          e(NumberField, {
+            name: 'id',
+            value: options.id,
+            onChange: value => handleOptionChange('id', value)
+          })
+        ],
+        file: ['Upload project file: '],
+        url: [
+          'Project file from URL: ',
+          e(TextField, {
+            name: 'project-url',
+            value: options['project-url'],
+            onChange: value => handleOptionChange('project-url', value)
+          })
+        ]
+      },
+      checked: options['upload-mode']
+    }),
     e(
       Fieldset,
       { label: 'Options' },

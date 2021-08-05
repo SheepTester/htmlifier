@@ -6,5 +6,10 @@ type Props = {
 }
 
 export const Fieldset = ({ label, children }: Props) => {
-  return e('fieldset', null, e('legend', null, label), children)
+  return e(
+    'fieldset',
+    { className: 'fieldset' },
+    e('legend', { className: 'legend' }, label),
+    children
+  )
 }

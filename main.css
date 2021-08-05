@@ -85,6 +85,7 @@ input[type=submit] {
 }
 
 .radio-group {
+  border: none;
   border-left: 1px solid rgba(255, 255, 255, 0.3);
   padding-left: 2px;
   margin-left: -4px;
@@ -166,14 +167,14 @@ input[type=submit] {
   transition: background-color 0.25s;
 }
 
-legend {
+.legend {
   border: solid rgba(255, 255, 255, 0.5) 1px;
   border-radius: 10px;
   padding: 5px;
   background-color: #19191e;
 }
 
-fieldset {
+.fieldset {
   padding: 10px;
   border: solid rgba(255, 255, 255, 0.2) 1px;
   border-radius: 5px;
@@ -182,7 +183,7 @@ fieldset {
   transition: box-shadow 0.25s, border 0.25s;
   margin: 1em 0;
 }
-fieldset:hover {
+.fieldset:hover {
   box-shadow: rgb(255, 255, 255, 0.8) 0px 0px 10px;
   /* Fieldsets have this really weird bug on Chrome where translucent border
   /* colours result in a thicker border-top. */
@@ -190,13 +191,13 @@ fieldset:hover {
   transition: box-shadow 0.25s, border 0.25s;
 }
 
-fieldset > p:nth-child(2),
-fieldset > .radio-group > p:first-child,
-fieldset > fieldset:nth-child(2) {
+.fieldset > p:nth-child(2),
+.fieldset > .radio-group > p:first-child,
+.fieldset > .fieldset:nth-child(2) {
   margin-top: 0;
 }
-fieldset > p:last-child,
-fieldset > fieldset:last-child {
+.fieldset > p:last-child,
+.fieldset > .fieldset:last-child {
   margin-bottom: 0;
 }
 
