@@ -57,13 +57,10 @@ window.onerror = function(message, source, lineno, colno, error) {
       <button class="htmlify" id="other-htmlify-btn" form="options" type="submit">HTMLify</button>
     </div>
     <div class="mainarea">
-      <div id="root"></div>
-      <!-- no-offline -->
-      <p><button id="offlineify">Download offline version</button> (An HTML file that can be opened and used in the browser without an internet connection)</p>
-      <!-- /no-offline -->
       <p>This packages your Scratch project into a single HTML file that can run on its own in a web browser. The HTML file will be pretty big because it contains the entire Scratch engine (2.6 MB) and the costume and sound files used in the project.</p>
       <p>The HTMLifier may not be the best option for you; refer to the <a href="#see-also">See also section</a> for alternatives.</p>
       <p>The project will automatically start, and there are no green flag or stop sign buttons.</p>
+      <div id="root"></div>
       <p><a href="?" id="options-link">Save options in link</a> &middot; <a id="bookmarklet-link" title="Drag this link into your bookmarks bar and click it while on a project page to HTMLify the project.">HTMLify</a></p>
       <form id="options"></form>
       <ul class="log" id="log"></ul>

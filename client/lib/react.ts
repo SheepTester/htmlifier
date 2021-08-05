@@ -6,5 +6,10 @@ export {
   useState,
   useEffect,
   Fragment,
-  StrictMode,
+  StrictMode
 } from 'https://cdn.esm.sh/v43/react@17.0.2/es2020/react.js'
+
+export type {
+  ReactNode,
+  MouseEvent
+} from 'https://github.com/DefinitelyTyped/DefinitelyTyped/raw/master/types/react/index.d.ts'
