@@ -1,11 +1,6 @@
 import { OptionsContext } from '../contexts/options.ts'
 import { createElement as e, ReactNode, useContext } from '../lib/react.ts'
-import {
-  ConversionOptions,
-  radioKeys,
-  RadioOptions,
-  radioValues
-} from '../options.ts'
+import { ConversionOptions, RadioOptions, radioValues } from '../options.ts'
 import { label } from '../utils.ts'
 
 type Props<K extends keyof RadioOptions> = {
@@ -31,18 +26,34 @@ const RadioGroup = <K extends keyof RadioOptions>(name: K) => ({
     e('legend', null, title),
     possibleValues.map(value =>
       e(
-        'p',
-        { key: value },
-        label(
-          e('input', {
-            type: 'radio',
-            name,
-            checked: value === checked,
-            onChange: () => onChange(name, value as ConversionOptions[K])
-          }),
-          typeof labels[value] === 'string' ? labels[value] : labels[value][0]
-        ),
-        typeof labels[value] !== 'string' && [' · ', labels[value][1]]
+        OptionsContext.Provider,
+        {
+          key: value,
+          value: {
+            options,
+            onChange: (optionName, optionValue) => {
+              // Also select the radio if an inner input has changed
+              onChange(name, value as ConversionOptions[K])
+              onChange(optionName, optionValue)
+            }
+          }
+        },
+        e(
+          'p',
+          null,
+          label(
+            e('input', {
+              type: 'radio',
+              // id: `${name}--${value}`,
+              name,
+              checked: value === checked,
+              onChange: () => onChange(name, value as ConversionOptions[K])
+            }),
+            ' ',
+            typeof labels[value] === 'string' ? labels[value] : labels[value][0]
+          ),
+          typeof labels[value] !== 'string' && [' · ', labels[value][1]]
+        )
       )
     )
   )
