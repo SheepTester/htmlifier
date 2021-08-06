@@ -52,7 +52,7 @@ const RadioGroup = <K extends keyof RadioOptions>(name: K) => ({
             ' ',
             typeof labels[value] === 'string' ? labels[value] : labels[value][0]
           ),
-          typeof labels[value] !== 'string' && [' · ', labels[value][1]]
+          typeof labels[value] !== 'string' && [' ', labels[value][1]]
         )
       )
     )

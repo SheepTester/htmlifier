@@ -12,5 +12,5 @@ type ContextValue = {
 
 export const OptionsContext = createContext<ContextValue>({
   options: defaultOptions,
-  onChange: () => {}
+  onChange: () => { throw new Error('The onChange handler was not set.') }
 })

@@ -76,24 +76,24 @@ a:hover {
 }
 
 button,
-input[type=file],
+input[type='file'],
 ::-webkit-file-upload-button {
   cursor: pointer;
 }
-input[type=submit] {
+input[type='submit'] {
   font-size: 1.2em;
+}
+input[type='url'] {
+  width: 250px;
+}
+input[type='number'] {
+  width: 100px;
 }
 
 .radio-group {
   border: none;
   padding: 0;
-  border-left: 1px solid rgba(255, 255, 255, 0.3);
-  padding-left: 2px;
-  margin-left: -4px;
-  transition: border-left-color 0.2s;
-}
-.radio-group:hover {
-  border-left-color: white;
+  margin: 2em 0 1em;
 }
 
 .log {
@@ -153,7 +153,7 @@ input[type=submit] {
   top: -85px;
   padding: 15px;
   float: right;
-  background-color: rgba(100,250,150,0.5);
+  background-color: rgba(100, 250, 150, 0.5);
   border: 0px;
   border-radius: 5px;
   font-family: 'Roboto', sans-serif;
@@ -194,11 +194,14 @@ input[type=submit] {
 
 .fieldset > p:nth-child(2),
 .fieldset > .radio-group > p:first-child,
-.fieldset > .fieldset:nth-child(2) {
+.fieldset > .fieldset:nth-child(2),
+.fieldset > .radio-group:nth-child(2) {
   margin-top: 0;
 }
 .fieldset > p:last-child,
-.fieldset > .fieldset:last-child {
+.fieldset > .fieldset:last-child,
+.fieldset > .radio-group:last-child,
+.fieldset > .radio-group:last-child > p:last-child {
   margin-bottom: 0;
 }
 

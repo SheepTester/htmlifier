@@ -56,7 +56,7 @@ export const TextField = <K extends keyof StringOptions>({
 
 type NumberFieldProps<K extends keyof NumberOptions> = {
   name: K
-  placeholder?: string
+  placeholder?: number
 }
 
 export const NumberField = <K extends keyof NumberOptions>({
@@ -71,7 +71,7 @@ export const NumberField = <K extends keyof NumberOptions>({
       onChange(name, +string)
     },
     name,
-    placeholder,
+    placeholder: placeholder !== undefined ? String(placeholder) : '',
     value,
     type: 'number'
   })
