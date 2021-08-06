@@ -6,3 +6,14 @@ export const label = (...children: ReactNode[]) => e('label', null, children)
 
 export const blockLabel = (...children: ReactNode[]) =>
   e('p', null, e('label', null, children))
+
+export const download = (blob: Blob, name = 'result') => {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${name}.${blob.type === 'text/html' ? 'html' : 'zip'}`
+  document.body.append(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+}

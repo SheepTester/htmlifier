@@ -1,4 +1,5 @@
 import { JSZip } from 'https://deno.land/x/jszip@0.10.0/mod.ts'
+import { toBlob } from './ensure-ok.ts'
 import { Logger } from './htmlifier.ts'
 
 /** A source of the Scratch project's project.json and assets */
@@ -127,7 +128,7 @@ export async function getProject (
     log('I shall start downloading the project from scratch.mit.edu.', 'status')
     const project = await fetch(
       `https://projects.scratch.mit.edu/${source.id}`
-    ).then(r => r.blob())
+    ).then(toBlob)
     let json: Sb2ProjectJson | Sb3ProjectJson
     try {
       json = JSON.parse(await project.text())
@@ -151,7 +152,7 @@ export async function getProject (
       Array.from(assetHashes.keys(), async hash => {
         const blob = await fetch(
           `https://assets.scratch.mit.edu/internalapi/asset/${hash}/get/`
-        ).then(r => r.blob())
+        ).then(toBlob)
         assets.set(hash, blob)
         done++
         log(
@@ -171,7 +172,7 @@ export async function getProject (
   let file: Blob
   if (source.type === 'url') {
     log('I shall start downloading the project file from the URL.', 'status')
-    file = await fetch(source.url).then(r => r.blob())
+    file = await fetch(source.url).then(toBlob)
   } else {
     file = source.file
   }
@@ -210,7 +211,7 @@ export async function getProject (
           hash,
           await fetch(
             `https://assets.scratch.mit.edu/internalapi/asset/${hash}/get/`
-          ).then(r => r.blob())
+          ).then(toBlob)
         )
       }
       done++

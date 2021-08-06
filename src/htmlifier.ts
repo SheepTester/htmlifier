@@ -10,17 +10,17 @@ import {
   VM_URL,
   vm
 } from './dependencies.ts'
+import { toBlob, toText } from './ensure-ok.ts'
+
+export type { ProjectSource } from './get-project.ts'
 
 /** A CSS colour */
-type Colour = string
+export type Colour = string
 
-export type Logger = (
-  message: string,
-  type: 'status' | 'progress' | 'error'
-) => void
+export type Logger = (message: string, type: 'status' | 'progress') => void
 
 /** Options for HTMLification */
-type HtmlifyOptions = Partial<{
+export type HtmlifyOptions = Partial<{
   /** Logging function to track the progress of HTMLification. */
   log: Logger
 
@@ -282,9 +282,9 @@ export default class Htmlifier {
         extensionScripts[url] = outputZip
           ? await registerFile(
               'extension.worker.js',
-              await fetch(url).then(r => r.blob())
+              await fetch(url).then(toBlob)
             )
-          : await fetch(url).then(r => r.text())
+          : await fetch(url).then(toText)
       }
       // Prepend an override on importScripts to map extension URLs to locally
       // stored ones

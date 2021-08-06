@@ -100,7 +100,7 @@ export const radioValues = {
   cursor: ['default', 'none', 'file'],
 
   // ## Cloud variable source
-  localstorage: ['localstorage', 'ws']
+  'cloud-provider': ['localstorage', 'ws']
 } as const
 export type RadioOptions = {
   [key in keyof typeof radioValues]: typeof radioValues[key][number]
@@ -113,7 +113,7 @@ export const defaultRadioOptions: RadioOptions = {
 
   cursor: 'default',
 
-  localstorage: 'localstorage'
+  'cloud-provider': 'localstorage'
 }
 export const radioKeys = Object.keys(
   defaultRadioOptions

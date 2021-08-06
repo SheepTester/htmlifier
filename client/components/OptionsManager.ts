@@ -1,4 +1,5 @@
 import { OptionsContext } from '../contexts/options.ts'
+import { htmlify } from '../htmlify.ts'
 import {
   createElement as e,
   Fragment,
@@ -16,6 +17,8 @@ import {
   defaultRadioOptions,
   keys
 } from '../options.ts'
+import { HtmlifyBtn } from './HtmlifyBtn.ts'
+import { Log, LogMessage } from './Log.ts'
 import { Options } from './Options.ts'
 
 export const OptionsManager = () => {
@@ -66,6 +69,9 @@ export const OptionsManager = () => {
     }))
   }
 
+  const [loading, setLoading] = useState(false)
+  const [log, setLog] = useState<LogMessage[]>([])
+
   return e(
     Fragment,
     null,
@@ -97,6 +103,42 @@ export const OptionsManager = () => {
       OptionsContext.Provider,
       { value: { options, onChange: handleOptionChange } },
       e(Options)
-    )
+    ),
+    e(HtmlifyBtn, {
+      onClick: () => {
+        setLoading(true)
+        setLog([])
+        htmlify(options, (message, type) => {
+          setLog(log => [...log, { message, type }])
+        })
+          .then(blob => {
+            setLog(log => [
+              ...log,
+              {
+                message: 'Done.',
+                type: 'done',
+                result: blob
+              }
+            ])
+          })
+          .catch((error: unknown) => {
+            setLog(log => [
+              ...log,
+              {
+                message:
+                  error instanceof Error
+                    ? error.stack ?? error.message
+                    : String(error),
+                type: 'error'
+              }
+            ])
+            console.error(error)
+          })
+          .finally(() => {
+            setLoading(false)
+          })
+      }
+    }),
+    e(Log, { log, fileName: options.title })
   )
 }

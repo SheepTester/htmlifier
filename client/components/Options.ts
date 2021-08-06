@@ -3,6 +3,7 @@ import { link, label, blockLabel } from '../utils.ts'
 import { Checkbox } from './Checkbox.ts'
 import { NumberField, TextField } from './Field.ts'
 import { Fieldset } from './Fieldset.ts'
+import { File } from './File.ts'
 import { RadioGroups } from './RadioGroup.ts'
 
 export const Options = () => {
@@ -24,7 +25,10 @@ export const Options = () => {
             '/'
           )
         ],
-        file: ['selecting a file.', ['FILE']],
+        file: [
+          'selecting a file.',
+          [e(File, { name: 'file', accept: '.sb,.sb2,.sb3' })]
+        ],
         url: [
           'a project file hosted online.',
           label(
@@ -61,8 +65,14 @@ export const Options = () => {
         link('https://en.scratch-wiki.info/wiki/Turbo_Mode', 'turbo mode'),
         '?'
       ),
-      blockLabel('Favicon (the tab icon): ', 'FILE'),
-      blockLabel('Background image (shows black bars by default): ', 'FILE'),
+      blockLabel(
+        'Favicon (the tab icon): ',
+        e(File, { name: 'favicon-file', accept: 'image/*' })
+      ),
+      blockLabel(
+        'Background image (shows black bars by default): ',
+        e(File, { name: 'background-file', accept: 'image/*' })
+      ),
       e(
         'p',
         null,
@@ -76,7 +86,10 @@ export const Options = () => {
       e(RadioGroups['loading-image'], {
         title: 'Use loading image from',
         labels: {
-          file: ['a selected file.', 'FILE'],
+          file: [
+            'a selected file.',
+            e(File, { name: 'loading-image-file', accept: 'image/*' })
+          ],
           url: [
             'an image URL.',
             label(
@@ -130,7 +143,7 @@ export const Options = () => {
               'Use a custom cursor.',
               label(
                 'For best results, select a PNG that is up to 32 by 32 pixels: ',
-                'FILE'
+                e(File, { name: 'cursor-file', accept: 'image/*' })
               )
             ]
           }
@@ -170,7 +183,7 @@ export const Options = () => {
       e(
         Fieldset,
         { title: 'Cloud variable source' },
-        e(RadioGroups['localstorage'], {
+        e(RadioGroups['cloud-provider'], {
           title: 'Cursor style',
           labels: {
             localstorage: 'Save cloud variables locally using localStorage.',
