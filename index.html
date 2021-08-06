@@ -60,7 +60,11 @@ window.onerror = function(message, source, lineno, colno, error) {
       <p>This packages your Scratch project into a single HTML file that can run on its own in a web browser. The HTML file will be pretty big because it contains the entire Scratch engine (2.6 MB) and the costume and sound files used in the project.</p>
       <p>The HTMLifier may not be the best option for you; refer to the <a href="#see-also">See also section</a> for alternatives.</p>
       <p>The project will automatically start, and there are no green flag or stop sign buttons.</p>
-      <div id="root"></div>
+      <div id="root">
+        <noscript>
+          <p><strong>Please enable JavaScript. Converting projects can't be done with HTML and CSS alone.</strong></p>
+        </noscript>
+      </div>
       <p>If you want to view or edit the HTML file, you can use the specialized <a href="https://sheeptester.github.io/words-go-here/htmlifier/large-file-editor/">Large File Editor</a> to hide the long lines that may hang or crash normal text editors.</p>
       <h2 id="updates">Update history</h2>
       <p>See the code and previous versions on <a href="https://github.com/SheepTester/htmlifier/">Github</a>.</p>

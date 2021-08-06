@@ -1,11 +1,11 @@
-import { OptionsContext } from '../contexts/options.ts'
-import { htmlify } from '../htmlify.ts'
+import { OptionsContext } from './contexts/options.ts'
+import { htmlify } from './htmlify.ts'
 import {
   createElement as e,
   Fragment,
   useState,
   MouseEvent
-} from '../lib/react.ts'
+} from './lib/react.ts'
 import {
   defaultOptions,
   ConversionOptions,
@@ -16,13 +16,19 @@ import {
   radioKeys,
   defaultRadioOptions,
   keys
-} from '../options.ts'
-import { download } from '../utils.ts'
-import { HtmlifyBtn } from './HtmlifyBtn.ts'
-import { Log, LogMessage } from './Log.ts'
-import { Options } from './Options.ts'
+} from './options.ts'
+import { download } from './utils.ts'
+import { Log, LogMessage } from './components/Log.ts'
+import { Options } from './components/Options.ts'
+import { Offlineifier } from './components/Offlineifier.ts'
 
-export const OptionsManager = () => {
+declare global {
+  interface Window {
+    offline?: boolean
+  }
+}
+
+export const App = () => {
   const [options, setOptions] = useState<ConversionOptions>(() => {
     const params = new URL(window.location.href).searchParams
     // TypeScript is annoying sometimes
@@ -120,6 +126,7 @@ export const OptionsManager = () => {
   return e(
     Fragment,
     null,
+    e(Offlineifier, { offline: !!window.offline }),
     e(
       'p',
       null,
