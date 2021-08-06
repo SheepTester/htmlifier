@@ -4,7 +4,8 @@ import {
   createElement as e,
   Fragment,
   useState,
-  MouseEvent
+  MouseEvent,
+  ReactNode
 } from './lib/react.ts'
 import {
   defaultOptions,
@@ -22,6 +23,8 @@ import { Log, LogMessage } from './components/Log.ts'
 import { Options } from './components/Options.ts'
 import { Offlineifier } from './components/Offlineifier.ts'
 import { offlineify } from './offlineify.ts'
+import { Footnote, FootnotesContext } from './contexts/footnotes.ts'
+import { FootnoteList } from './components/FootnoteList.ts'
 
 declare global {
   interface Window {
@@ -121,9 +124,7 @@ export const App = () => {
         ])
       })
       .catch(handleError)
-      .finally(() => {
-        setLoading(false)
-      })
+      .finally(() => setLoading(false))
   }
 
   const handleOfflineify = () => {
@@ -145,9 +146,17 @@ export const App = () => {
         ])
       })
       .catch(handleError)
-      .finally(() => {
-        setLoading(false)
-      })
+      .finally(() => setLoading(false))
+  }
+
+  const [footnotes, setFootnotes] = useState<Map<symbol, Footnote>>(new Map())
+  const handleAddFootnote = (id: symbol, content: Footnote) => {
+    setFootnotes(footnotes => new Map([...footnotes, [id, content]]))
+  }
+  const handleRemoveFootnote = (id: symbol) => {
+    setFootnotes(
+      footnotes => new Map([...footnotes].filter(([footId]) => footId !== id))
+    )
   }
 
   return e(
@@ -185,8 +194,18 @@ export const App = () => {
     e(
       OptionsContext.Provider,
       { value: { options, onChange: handleOptionChange } },
-      e(Options, { onHtmlify: handleHtmlify, loading })
+      e(
+        FootnotesContext.Provider,
+        {
+          value: {
+            addFootnote: handleAddFootnote,
+            removeFootnote: handleRemoveFootnote
+          }
+        },
+        e(Options, { onHtmlify: handleHtmlify, loading })
+      )
     ),
-    e(Log, { log, fileName: options.title })
+    e(Log, { log, fileName: options.title }),
+    e(FootnoteList, { footnotes: [...footnotes.values()] })
   )
 }

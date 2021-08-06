@@ -4,6 +4,7 @@ import { Checkbox } from './Checkbox.ts'
 import { NumberField, TextField } from './Field.ts'
 import { Fieldset } from './Fieldset.ts'
 import { File } from './File.ts'
+import { Footnote } from './Footnote.ts'
 import { HtmlifyBtn } from './HtmlifyBtn.ts'
 import { RadioGroups } from './RadioGroup.ts'
 
@@ -69,7 +70,12 @@ export const Options = ({ onHtmlify, loading }: Props) => {
       ),
       blockLabel(
         e(Checkbox, { name: 'compatibility' }),
-        ' Enable compatibility mode?'
+        ' Enable compatibility mode?',
+        e(
+          Footnote,
+          { id: '2' },
+          'Compatibility mode forces projects to run at 30 FPS, like in Scratch 2.0. Turning this off allows the project to run at 60 FPS.'
+        )
       ),
       blockLabel(
         e(Checkbox, { name: 'turbo' }),
@@ -117,7 +123,12 @@ export const Options = ({ onHtmlify, loading }: Props) => {
       }),
       blockLabel(
         e(Checkbox, { name: 'autostart' }),
-        ' Start project immediately on load?'
+        ' Start project immediately on load?',
+        e(
+          Footnote,
+          { id: '5' },
+          'Browsers do not let websites automatically play audio until the user interacts with the website by clicking/tapping somewhere.'
+        )
       ),
       blockLabel(
         e(Checkbox, { name: 'fullscreen' }),
@@ -165,7 +176,14 @@ export const Options = ({ onHtmlify, loading }: Props) => {
         e(Checkbox, { name: 'zip' }),
         ' Lock the pointer on click? The mouse x/y blocks will report the ',
         e('em', null, 'accumulative'),
-        ' mouse position, which you can use to determine the change in position between frames.'
+        ' mouse position, which you can use to determine the change in position between frames.',
+        e(
+          Footnote,
+          { id: '3' },
+          'I think the implementation of this is poor. Maybe instead of setting mouse x/y, it can set a cloud variable with a certain name. You can leave feedback and suggestions on ',
+          link('https://scratch.mit.edu/users/Sheep_maker/', 'my profile'),
+          '.'
+        )
       ),
       e(
         Fieldset,
@@ -198,7 +216,17 @@ export const Options = ({ onHtmlify, loading }: Props) => {
         e(RadioGroups['cloud-provider'], {
           title: 'Cursor style',
           labels: {
-            localstorage: 'Save cloud variables locally using localStorage.',
+            localstorage: [
+              [
+                'Save cloud variables locally using localStorage.',
+                e(
+                  Footnote,
+                  { id: '1' },
+                  'You may have to deal with privacy laws around cookies outside of Scratch.'
+                )
+              ],
+              null
+            ],
             ws: [
               'Use a cloud variable server.',
               label(
@@ -220,7 +248,17 @@ export const Options = ({ onHtmlify, loading }: Props) => {
         }),
         blockLabel(
           e(Checkbox, { name: 'special-cloud' }),
-          ' Give certain cloud variables special behaviours depending on the name?'
+          ' Give certain cloud variables special behaviours depending on the name?',
+          e(
+            Footnote,
+            { id: '4' },
+            'See a list of the special behaviours for different cloud variable names on the ',
+            link(
+              'https://github.com/SheepTester/htmlifier/wiki/Special-cloud-behaviours',
+              'wiki'
+            ),
+            '.'
+          )
         )
       ),
       e(

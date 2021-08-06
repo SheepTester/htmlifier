@@ -62,6 +62,18 @@ body {
     opacity: 1;
   }
 }
+#root,
+.footnotes {
+  counter-reset: footnotes;
+}
+.footnote {
+  font-size: 0;
+}
+.footnote::after {
+  content: '[' counter(footnotes) ']';
+  counter-increment: footnotes;
+  font-size: small;
+}
 
 code {
   background-color: rgba(255, 255, 255, 0.1);
