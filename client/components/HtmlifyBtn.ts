@@ -31,5 +31,10 @@ export const HtmlifyBtn = ({ onClick, disabled = false }: Props) => {
     }
   }, [disabled])
 
-  return e('input', { type: 'submit', value: 'HTMLify', disabled })
+  return e('input', {
+    type: 'submit',
+    value: 'HTMLify',
+    id: 'htmlify',
+    disabled
+  })
 }

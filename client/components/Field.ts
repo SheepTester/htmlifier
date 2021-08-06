@@ -24,7 +24,7 @@ const Field = ({
 }: FieldProps) => {
   return e('input', {
     type,
-    // id: name,
+    id: name,
     name,
     placeholder,
     value,

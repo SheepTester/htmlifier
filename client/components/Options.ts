@@ -23,22 +23,21 @@ export const Options = ({ onHtmlify, loading }: Props) => {
       }
     },
     e(RadioGroups['upload-mode'], {
-      title: 'Select a project by',
+      title: 'Select a project by...',
       labels: {
         id: [
           [
-            'the ID of a project on the ',
-            link('https://scratch.mit.edu/', 'Scratch website'),
+            'a project ID on ',
+            link('https://scratch.mit.edu/', 'Scratch'),
             '.'
           ],
           label(
-            'Project ID: https://scratch.mit.edu/projects/',
-            e(NumberField, { name: 'id', placeholder: 104 }),
-            '/'
+            'Project ID: ',
+            e(NumberField, { name: 'id', placeholder: 104 })
           )
         ],
         file: [
-          'selecting a file.',
+          'selecting a file on your computer:',
           [e(File, { name: 'file', accept: '.sb,.sb2,.sb3' })]
         ],
         url: [
@@ -58,19 +57,19 @@ export const Options = ({ onHtmlify, loading }: Props) => {
       Fieldset,
       { title: 'Options' },
       blockLabel(
-        'Project name: ',
+        'Text to show in the browser tab: ',
         // TODO: Set title when selecting a file if the title was unchanged
-        e(TextField, { name: 'title' }),
-        ' (the text displayed in the browser tab)'
+        e(TextField, { name: 'title' })
       ),
       blockLabel(
-        'Username value: ',
-        e(TextField, { name: 'username' }),
-        ' (the value that the username block reports)'
+        'Value of the ',
+        e('code', null, 'username'),
+        ' block: ',
+        e(TextField, { name: 'username' })
       ),
       blockLabel(
         e(Checkbox, { name: 'compatibility' }),
-        ' Enable compatibility mode?',
+        ' Enable compatibility mode.',
         e(
           Footnote,
           { id: '2' },
@@ -81,37 +80,61 @@ export const Options = ({ onHtmlify, loading }: Props) => {
         e(Checkbox, { name: 'turbo' }),
         ' Enable ',
         link('https://en.scratch-wiki.info/wiki/Turbo_Mode', 'turbo mode'),
-        '?'
+        '.'
       ),
       blockLabel(
-        'Favicon (the tab icon): ',
+        'Tab icon (favicon): ',
         e(File, { name: 'favicon-file', accept: 'image/*' })
       ),
       blockLabel(
-        'Background image (shows black bars by default): ',
-        e(File, { name: 'background-file', accept: 'image/*' })
+        'Background image: ',
+        e(File, { name: 'background-file', accept: 'image/*' }),
+        ' Default: a black background.'
       ),
       e(
         'p',
         null,
-        label(e(Checkbox, { name: 'progress' }), ' Show loading progress bar?'),
+        label(
+          e(Checkbox, { name: 'progress' }),
+          ' Show a progress bar while loading.'
+        ),
         ' ',
         label(
-          'Colour: ',
+          'Colour of the progress bar: ',
           e(TextField, { name: 'progress-colour', type: 'color' })
         )
       ),
+      blockLabel(
+        e(Checkbox, { name: 'autostart' }),
+        ' Press the green flag automatically.',
+        e(
+          Footnote,
+          { id: '5' },
+          'Browsers do not let websites automatically play audio until the user interacts with the website by clicking/tapping somewhere. If sound is important, then you should make the user click on the project before starting.'
+        )
+      ),
+      blockLabel(
+        e(Checkbox, { name: 'fullscreen' }),
+        ' Show a fullscreen button.'
+      ),
+      blockLabel(
+        e(Checkbox, { name: 'start-stop-controls' }),
+        ' Show start/stop buttons, equivalent to the green flag/stop sign.'
+      ),
       e(RadioGroups['loading-image'], {
-        title: 'Use loading image from',
+        title: 'What image should show while the project loads?',
         labels: {
           file: [
-            'a selected file.',
-            e(File, { name: 'loading-image-file', accept: 'image/*' })
+            'A file on my computer.',
+            [
+              'Select a file: ',
+              e(File, { name: 'loading-image-file', accept: 'image/*' })
+            ]
           ],
           url: [
-            'an image URL.',
+            'An image online.',
             label(
-              'URL of the image: ',
+              'URL to the image: ',
               e(TextField, {
                 name: 'loading-image-url',
                 placeholder: 'https://example.com/image.png',
@@ -121,23 +144,6 @@ export const Options = ({ onHtmlify, loading }: Props) => {
           ]
         }
       }),
-      blockLabel(
-        e(Checkbox, { name: 'autostart' }),
-        ' Start project immediately on load?',
-        e(
-          Footnote,
-          { id: '5' },
-          'Browsers do not let websites automatically play audio until the user interacts with the website by clicking/tapping somewhere.'
-        )
-      ),
-      blockLabel(
-        e(Checkbox, { name: 'fullscreen' }),
-        ' Show fullscreen button?'
-      ),
-      blockLabel(
-        e(Checkbox, { name: 'start-stop-controls' }),
-        ' Show start/stop buttons?'
-      ),
       e(RadioGroups['stretch'], {
         title: 'What should be stretched?',
         labels: {
@@ -146,17 +152,9 @@ export const Options = ({ onHtmlify, loading }: Props) => {
           none: "Don't stretch anything; maintain the project's aspect ratio."
         }
       }),
-      blockLabel(
-        e(Checkbox, { name: 'zip' }),
-        " Output a .zip file? The .zip file will contain an index.html file and separate files for the project's assets, but this means opening the HTML file directly in the browser won't work. ",
-        link(
-          'https://github.com/SheepTester/htmlifier/wiki/Downloading-as-a-.zip',
-          'Learn more about the .zip file.'
-        )
-      ),
       e(
         Fieldset,
-        { title: 'Mouse pointers' },
+        { title: 'Mouse pointer (cursor)' },
         e(RadioGroups['cursor'], {
           title: 'Cursor style',
           labels: {
@@ -170,30 +168,30 @@ export const Options = ({ onHtmlify, loading }: Props) => {
               )
             ]
           }
-        })
-      ),
-      blockLabel(
-        e(Checkbox, { name: 'zip' }),
-        ' Lock the pointer on click? The mouse x/y blocks will report the ',
-        e('em', null, 'accumulative'),
-        ' mouse position, which you can use to determine the change in position between frames.',
-        e(
-          Footnote,
-          { id: '3' },
-          'I think the implementation of this is poor. Maybe instead of setting mouse x/y, it can set a cloud variable with a certain name. You can leave feedback and suggestions on ',
-          link('https://scratch.mit.edu/users/Sheep_maker/', 'my profile'),
-          '.'
+        }),
+        blockLabel(
+          e(Checkbox, { name: 'pointer-lock' }),
+          ' Lock the pointer when the user clicks on the project.',
+          e(
+            Footnote,
+            { id: '3' },
+            'The mouse x/y blocks will report the ',
+            e('em', null, 'accumulative'),
+            ' mouse position, which you can use to determine the change in position between frames. If you enable this, you should also ',
+            link('#no-limits', 'disable the maximum mouse x/y limit'),
+            '.'
+          )
         )
       ),
       e(
         Fieldset,
-        { title: 'Monitor style' },
+        { title: 'Variable/list monitor style' },
         e(
           'p',
           null,
           label(
             e(Checkbox, { name: 'use-colour' }),
-            ' Use opaque variable/list monitors? (If unchecked, a translucent black will be used.)'
+            ' Use opaque monitors. (If unchecked, a translucent black will be used.)'
           ),
           ' ',
           label(
@@ -207,28 +205,28 @@ export const Options = ({ onHtmlify, loading }: Props) => {
         ),
         blockLabel(
           e(Checkbox, { name: 'transparent-monitor' }),
-          ' Hide the monitor background boxes?'
+          ' Hide the boxes surrounding the monitors.'
         )
       ),
       e(
         Fieldset,
-        { title: 'Cloud variable source' },
+        { title: 'Cloud variables' },
         e(RadioGroups['cloud-provider'], {
-          title: 'Cursor style',
+          title: 'Where should cloud variables be stored?',
           labels: {
             localstorage: [
               [
-                'Save cloud variables locally using localStorage.',
+                'Save them in the browser. Good for saving game data.',
                 e(
                   Footnote,
                   { id: '1' },
-                  'You may have to deal with privacy laws around cookies outside of Scratch.'
+                  'Some jurisdictions have laws regarding the use of cookies, which you will have to deal if you share the converted project outside of Scratch.'
                 )
               ],
               null
             ],
             ws: [
-              'Use a cloud variable server.',
+              'Use a cloud variable server. Required for multiplayer.',
               label(
                 'Server URL: ',
                 e(TextField, {
@@ -236,28 +234,42 @@ export const Options = ({ onHtmlify, loading }: Props) => {
                   placeholder: 'ws://localhost:3000/',
                   type: 'url'
                 }),
-                " Scratch doesn't let other websites use its cloud server, but you can host your own using programs like ",
-                link(
-                  'https://github.com/SheepTester/primitive-cloud-server',
-                  'primitive-cloud-server'
-                ),
-                '.'
+                e(
+                  Footnote,
+                  { id: 'cloud-server' },
+                  " Scratch doesn't let other websites use its cloud server, but you can host your own using programs like ",
+                  link(
+                    'https://github.com/SheepTester/primitive-cloud-server',
+                    'primitive-cloud-server'
+                  ),
+                  '.'
+                )
               )
             ]
           }
         }),
         blockLabel(
           e(Checkbox, { name: 'special-cloud' }),
-          ' Give certain cloud variables special behaviours depending on the name?',
+          ' Give cloud variables with certain names ',
+          link(
+            'https://github.com/SheepTester/htmlifier/wiki/Special-cloud-behaviours',
+            'special behaviours'
+          ),
+          '.',
           e(
             Footnote,
             { id: '4' },
-            'See a list of the special behaviours for different cloud variable names on the ',
+            "Special cloud variable behaviours are non-standard way for Scratch projects to do things that normally can't be done in Scratch. See a list of the special behaviours for different cloud variable names on the ",
             link(
               'https://github.com/SheepTester/htmlifier/wiki/Special-cloud-behaviours',
               'wiki'
             ),
-            '.'
+            '. You can use ',
+            link(
+              'https://sheeptester.github.io/scratch-gui/?special_cloud=true',
+              'E羊icques'
+            ),
+            ' to use the special behaviours in the editor.'
           )
         )
       ),
@@ -272,7 +284,7 @@ export const Options = ({ onHtmlify, loading }: Props) => {
         e(
           'p',
           null,
-          label(e(Checkbox, { name: 'wider' }), ' Use a custom stage size?'),
+          label(e(Checkbox, { name: 'wider' }), ' Use a custom stage size.'),
           ' ',
           label('Width: ', e(NumberField, { name: 'width', placeholder: 480 })),
           label(
@@ -290,14 +302,27 @@ export const Options = ({ onHtmlify, loading }: Props) => {
           e(TextField, { name: 'extension-url' }),
           blockLabel(
             e(Checkbox, { name: 'no-limits' }),
-            ' Remove limits such as clone and list length limits?'
+            ' Remove limits such as clone and list length limits.'
           )
         )
       )
     ),
     blockLabel(
+      e(Checkbox, { name: 'zip' }),
+      ' Create a .zip file.',
+      e(
+        Footnote,
+        { id: 'zip' },
+        "The .zip file will contain an index.html file and separate files for the project's assets, but this means opening the HTML file directly in the browser won't work. ",
+        link(
+          'https://github.com/SheepTester/htmlifier/wiki/Downloading-as-a-.zip',
+          'Learn more about the .zip file.'
+        )
+      )
+    ),
+    blockLabel(
       e(Checkbox, { name: 'autodownload' }),
-      ' Download automatically?'
+      ' Download automatically when the conversion finishes.'
     ),
     e(HtmlifyBtn, {
       disabled: loading,

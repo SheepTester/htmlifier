@@ -44,7 +44,7 @@ const RadioGroup = <K extends keyof RadioOptions>(name: K) => ({
           label(
             e('input', {
               type: 'radio',
-              // id: `${name}--${value}`,
+              id: `${name}--${value}`,
               name,
               checked: value === checked,
               onChange: () => onChange(name, value as ConversionOptions[K])

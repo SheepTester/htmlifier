@@ -121,6 +121,12 @@ input[type='number'] {
   padding: 0;
   margin: 2em 0 1em;
 }
+.radio-group > legend {
+  font-weight: bold;
+}
+.radio-group + .radio-group {
+  margin-top: 1em;
+}
 
 .log {
   color: #b93700;

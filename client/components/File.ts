@@ -14,7 +14,7 @@ export const File = <K extends keyof FileOptions>({
   const { onChange } = useContext(OptionsContext)
   return e('input', {
     type: 'file',
-    // id: name,
+    id: name,
     name,
     accept,
     onChange: (event: ChangeEvent<HTMLInputElement>) => {

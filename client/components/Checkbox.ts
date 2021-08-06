@@ -12,7 +12,7 @@ export const Checkbox = <K extends keyof BooleanOptions>({
   const { options, onChange } = useContext(OptionsContext)
   return e('input', {
     type: 'checkbox',
-    // id: name,
+    id: name,
     name,
     checked: options[name],
     onChange: (event: ChangeEvent<HTMLInputElement>) => {
