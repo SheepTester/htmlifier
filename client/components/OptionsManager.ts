@@ -17,6 +17,7 @@ import {
   defaultRadioOptions,
   keys
 } from '../options.ts'
+import { download } from '../utils.ts'
 import { HtmlifyBtn } from './HtmlifyBtn.ts'
 import { Log, LogMessage } from './Log.ts'
 import { Options } from './Options.ts'
@@ -72,6 +73,50 @@ export const OptionsManager = () => {
   const [loading, setLoading] = useState(false)
   const [log, setLog] = useState<LogMessage[]>([])
 
+  const handleHtmlify = () => {
+    setLoading(true)
+    setLog([])
+    htmlify(options, (message, type) => {
+      setLog(log => [...log, { message, type }])
+    })
+      .then(blob => {
+        if (options.autodownload) {
+          download(blob)
+          setLog(log => [
+            ...log,
+            {
+              message:
+                'I shall now try to download the file. If nothing happens, then click the "Download" button.',
+              type: 'status'
+            }
+          ])
+        }
+        setLog(log => [
+          ...log,
+          {
+            message: 'Done.',
+            type: 'done',
+            result: blob
+          }
+        ])
+      })
+      .catch((error: unknown) => {
+        setLog(log => [
+          ...log,
+          {
+            message: `Unexpected error:\n${
+              error instanceof Error ? error.stack ?? error.message : error
+            }`,
+            type: 'error'
+          }
+        ])
+        console.error(error)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }
+
   return e(
     Fragment,
     null,
@@ -102,43 +147,8 @@ export const OptionsManager = () => {
     e(
       OptionsContext.Provider,
       { value: { options, onChange: handleOptionChange } },
-      e(Options)
+      e(Options, { onHtmlify: handleHtmlify, loading })
     ),
-    e(HtmlifyBtn, {
-      onClick: () => {
-        setLoading(true)
-        setLog([])
-        htmlify(options, (message, type) => {
-          setLog(log => [...log, { message, type }])
-        })
-          .then(blob => {
-            setLog(log => [
-              ...log,
-              {
-                message: 'Done.',
-                type: 'done',
-                result: blob
-              }
-            ])
-          })
-          .catch((error: unknown) => {
-            setLog(log => [
-              ...log,
-              {
-                message:
-                  error instanceof Error
-                    ? error.stack ?? error.message
-                    : String(error),
-                type: 'error'
-              }
-            ])
-            console.error(error)
-          })
-          .finally(() => {
-            setLoading(false)
-          })
-      }
-    }),
     e(Log, { log, fileName: options.title })
   )
 }

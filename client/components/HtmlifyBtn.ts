@@ -6,7 +6,7 @@ type Props = {
 }
 
 export const HtmlifyBtn = ({ onClick, disabled = false }: Props) => {
-  const otherBtn = useRef<HTMLButtonElement | null>(null)
+  const otherBtn = useRef<HTMLButtonElement>()
   useEffect(() => {
     const button = document.getElementById('other-htmlify-btn')
     if (button instanceof HTMLButtonElement) {
@@ -31,5 +31,5 @@ export const HtmlifyBtn = ({ onClick, disabled = false }: Props) => {
     }
   }, [disabled])
 
-  return e('input', { type: 'submit', value: 'HTMLify', onClick, disabled })
+  return e('input', { type: 'submit', value: 'HTMLify', disabled })
 }

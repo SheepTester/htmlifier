@@ -1,15 +1,26 @@
-import { createElement as e, Fragment } from '../lib/react.ts'
+import { createElement as e, FormEvent } from '../lib/react.ts'
 import { link, label, blockLabel } from '../utils.ts'
 import { Checkbox } from './Checkbox.ts'
 import { NumberField, TextField } from './Field.ts'
 import { Fieldset } from './Fieldset.ts'
 import { File } from './File.ts'
+import { HtmlifyBtn } from './HtmlifyBtn.ts'
 import { RadioGroups } from './RadioGroup.ts'
 
-export const Options = () => {
+type Props = {
+  onHtmlify: () => void
+  loading: boolean
+}
+
+export const Options = ({ onHtmlify, loading }: Props) => {
   return e(
-    Fragment,
-    null,
+    'form',
+    {
+      onSubmit: (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault()
+        onHtmlify()
+      }
+    },
     e(RadioGroups['upload-mode'], {
       title: 'Select a project by',
       labels: {
@@ -47,6 +58,7 @@ export const Options = () => {
       { title: 'Options' },
       blockLabel(
         'Project name: ',
+        // TODO: Set title when selecting a file if the title was unchanged
         e(TextField, { name: 'title' }),
         ' (the text displayed in the browser tab)'
       ),
@@ -248,6 +260,10 @@ export const Options = () => {
     blockLabel(
       e(Checkbox, { name: 'autodownload' }),
       ' Download automatically?'
-    )
+    ),
+    e(HtmlifyBtn, {
+      disabled: loading,
+      onClick: onHtmlify
+    })
   )
 }

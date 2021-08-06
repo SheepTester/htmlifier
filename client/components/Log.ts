@@ -1,4 +1,10 @@
-import { createElement as e } from '../lib/react.ts'
+import {
+  createElement as e,
+  useLayoutEffect,
+  useRef,
+  useState,
+  UIEvent
+} from '../lib/react.ts'
 import { download } from '../utils.ts'
 
 type DownloadBtnProps = {
@@ -57,9 +63,35 @@ type LogProps = {
 }
 
 export const Log = ({ log, fileName }: LogProps) => {
+  const [scrolled, setScrolled] = useState(false)
+
+  const ref = useRef<HTMLUListElement>()
+  useLayoutEffect(() => {
+    if (ref.current) {
+      if (scrolled) {
+        if (ref.current.scrollHeight <= ref.current.clientHeight) {
+          setScrolled(false)
+        }
+      } else {
+        ref.current.scrollTop = ref.current.scrollHeight
+      }
+    }
+  }, [log.length])
+
   return e(
     'ul',
-    { class: 'log' },
+    {
+      class: 'log',
+      ref,
+      onScroll: (event: UIEvent<HTMLUListElement>) => {
+        // Allow wiggle room of 10 px
+        if (event.currentTarget.scrollTop + event.currentTarget.clientHeight >= event.currentTarget.scrollHeight - 10) {
+          if (scrolled) setScrolled(false)
+        } else {
+          if (!scrolled) setScrolled(true)
+        }
+      }
+    },
     log.map((message, i) =>
       e(
         'li',
