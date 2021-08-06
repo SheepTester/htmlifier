@@ -37,7 +37,8 @@ If modifying the files in src/, you'll have to re-bundle everything.
 
 ```sh
 # Build once
-deno run --allow-run --allow-read=src --allow-write=src bin/build.ts
+deno run --allow-run --allow-read=src --allow-write=index.bundle.min.js \
+  --allow-net=sheeptester.github.io bin/build.ts
 
 # Automatically build when the files change (for development)
 nodemon --exec "deno run --allow-all" --watch src --watch client \

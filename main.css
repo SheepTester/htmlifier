@@ -48,6 +48,20 @@ body {
   z-index: 1000;
   animation: none;
 }
+.delayed {
+  animation: appear .5s 3s backwards;
+}
+@keyframes appear {
+  from {
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+    visibility: hidden;
+  }
+  to {
+    opacity: 1;
+  }
+}
 
 code {
   background-color: rgba(255, 255, 255, 0.1);

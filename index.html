@@ -50,7 +50,7 @@ window.onerror = function(message, source, lineno, colno, error) {
     </script>
   </head>
   <body>
-    <textarea id="errors" readonly></textarea>
+    <textarea id="errors" readonly placeholder="I have not logged any errors."></textarea>
     <div class="header">
       <h1>Project HTMLifier</h1>
       <h3><em>Convert a Scratch project to HTML</em></h3>
@@ -64,6 +64,7 @@ window.onerror = function(message, source, lineno, colno, error) {
         <noscript>
           <p><strong>Please enable JavaScript. Converting projects can't be done with HTML and CSS alone.</strong></p>
         </noscript>
+        <p class="delayed">If you see this, you can check to see if there were <a href="#errors">any issues</a> loading the HTMLifier. Make sure you're using a modern browser.</p>
       </div>
       <p>If you want to view or edit the HTML file, you can use the specialized <a href="https://sheeptester.github.io/words-go-here/htmlifier/large-file-editor/">Large File Editor</a> to hide the long lines that may hang or crash normal text editors.</p>
       <h2 id="updates">Update history</h2>
@@ -227,40 +228,13 @@ window.onerror = function(message, source, lineno, colno, error) {
     </div>
     <script src="./index.bundle.min.js" charset="utf-8"></script>
     <script type="text/javascript">
-/* no-offline */
-const offlineifyBtn = document.getElementById('offlineify');
-offlineifyBtn.addEventListener('click', e => {
-  logOutput.innerHTML = '';
-  offlineifyBtn.disabled = true;
-  scroll = true;
-  offlineify({log})
-    .then(() => {
-      offlineifyBtn.disabled = false;
-    })
-    .catch(err => {
-      console.error(err);
-      if (err.message !== 'error logged') {
-        log('Unexpected error:\n' + err.stack, 'error');
-      }
-      offlineifyBtn.disabled = false;
-      scroll = false;
-    });
-});
-/* /no-offline */
-
-const errorsTextarea = document.getElementById('errors');
-function onHashChange() {
-  if (window.location.hash === '#errors') {
-    if (!window.onNewError) {
-      window.onNewError = () => {
-        errorsTextarea.value = `${window.errors.length} error(s)\n${window.errors.join('\n')}`;
-      };
-      window.onNewError();
-    }
-  }
+var errorsTextarea = document.getElementById('errors');
+if (!window.onNewError) {
+  window.onNewError = function () {
+    errorsTextarea.value = window.errors.length + ' errors(s)\n' + window.errors.join('\n');
+  };
+  window.onNewError();
 }
-window.addEventListener('hashchange', onHashChange);
-onHashChange();
     </script>
   </body>
 </html>

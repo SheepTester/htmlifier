@@ -21,6 +21,7 @@ import { download } from './utils.ts'
 import { Log, LogMessage } from './components/Log.ts'
 import { Options } from './components/Options.ts'
 import { Offlineifier } from './components/Offlineifier.ts'
+import { offlineify } from './offlineify.ts'
 
 declare global {
   interface Window {
@@ -79,6 +80,19 @@ export const App = () => {
   const [loading, setLoading] = useState(false)
   const [log, setLog] = useState<LogMessage[]>([])
 
+  const handleError = (error: unknown) => {
+    setLog(log => [
+      ...log,
+      {
+        message: `Unexpected error:\n${
+          error instanceof Error ? error.stack ?? error.message : error
+        }`,
+        type: 'error'
+      }
+    ])
+    console.error(error)
+  }
+
   const handleHtmlify = () => {
     setLoading(true)
     setLog([])
@@ -106,18 +120,31 @@ export const App = () => {
           }
         ])
       })
-      .catch((error: unknown) => {
+      .catch(handleError)
+      .finally(() => {
+        setLoading(false)
+      })
+  }
+
+  const handleOfflineify = () => {
+    setLoading(true)
+    setLog([])
+    offlineify((message, type) => {
+      setLog(log => [...log, { message, type }])
+    })
+      .then(blob => {
+        download(blob, 'htmlifier-offline')
         setLog(log => [
           ...log,
           {
-            message: `Unexpected error:\n${
-              error instanceof Error ? error.stack ?? error.message : error
-            }`,
-            type: 'error'
+            message:
+              'I have finished creating the offline version of the HTMLifier.',
+            type: 'done',
+            result: blob
           }
         ])
-        console.error(error)
       })
+      .catch(handleError)
       .finally(() => {
         setLoading(false)
       })
@@ -126,7 +153,11 @@ export const App = () => {
   return e(
     Fragment,
     null,
-    e(Offlineifier, { offline: !!window.offline }),
+    e(Offlineifier, {
+      offline: !!window.offline,
+      onOfflineify: handleOfflineify,
+      loading
+    }),
     e(
       'p',
       null,
