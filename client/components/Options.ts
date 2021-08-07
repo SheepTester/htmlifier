@@ -7,6 +7,7 @@ import { File } from './File.ts'
 import { Footnote } from './Footnote.ts'
 import { HtmlifyBtn } from './HtmlifyBtn.ts'
 import { RadioGroups } from './RadioGroup.ts'
+import { UrlOrFileList } from './UrlOrFileList.ts'
 
 type Props = {
   onHtmlify: () => void
@@ -296,15 +297,21 @@ export const Options = ({ onHtmlify, loading }: Props) => {
             e(NumberField, { name: 'height', placeholder: 360 })
           )
         ),
-        blockLabel(
+        e(
+          'p',
+          null,
           'Load ',
           link(
             'https://github.com/LLK/scratch-vm/blob/develop/docs/extensions.md#types-of-extensions',
             'unofficial extension'
           ),
-          ' from URL: ',
-          e(TextField, { name: 'extension-url' })
+          ' from URL:'
         ),
+        e(UrlOrFileList, {
+          name: 'extensions',
+          placeholder: 'https://example.com/extension.js',
+          accept: '.js'
+        }),
         blockLabel(
           e(Checkbox, { name: 'no-limits' }),
           ' Remove limits such as clone and list length limits.'

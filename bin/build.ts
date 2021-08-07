@@ -8,19 +8,24 @@ const minify = Deno.args[0] !== 'dev'
 const decoder = new TextDecoder()
 const encoder = new TextEncoder()
 
-const bundle = decoder.decode(
-  await Deno.run({
-    cmd: [
-      'deno',
-      'bundle',
-      '--no-check',
-      '--import-map',
-      new URL('../import-map.json', import.meta.url).toString(),
-      new URL('../client/index.ts', import.meta.url).toString()
-    ],
-    stdout: 'piped'
-  }).output()
-)
+const bundleProcess = Deno.run({
+  cmd: [
+    'deno',
+    'bundle',
+    '--no-check',
+    '--import-map',
+    new URL('../import-map.json', import.meta.url).toString(),
+    new URL('../client/index.ts', import.meta.url).toString()
+  ],
+  stdout: 'piped'
+})
+const bundle = decoder.decode(await bundleProcess.output())
+const status = await bundleProcess.status()
+if (!status.success) {
+  throw new Error(
+    `\`deno bundle\` exited with code ${status.code}, signal ${status.signal}`
+  )
+}
 
 let result = `(async () => {
   const dependencies_vm = '__htmlifier_VM__'

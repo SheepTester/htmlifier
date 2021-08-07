@@ -43,7 +43,7 @@ export const htmlify = async (options: ConversionOptions, log?: Logger) => {
     favicon: options['favicon-file'],
     backgroundImage: options['background-file'],
 
-    extensions: options['extension-url'] ? [options['extension-url']] : [],
+    extensions: options.extensions,
 
     loading: {
       progressBar: options.progress ? options['progress-colour'] : null,
@@ -60,11 +60,8 @@ export const htmlify = async (options: ConversionOptions, log?: Logger) => {
     },
 
     monitors: {
-      background: options['use-colour']
-        ? options['monitor-colour']
-        : options['transparent-monitor']
-        ? 'none'
-        : null,
+      showContainer: !options['transparent-monitor'],
+      valueBackground: options['use-colour'] ? options['monitor-colour'] : null,
       text: options['monitor-text']
     },
 

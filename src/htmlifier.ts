@@ -96,7 +96,7 @@ export type HtmlifyOptions = Partial<{
    *
    * @see https://github.com/LLK/scratch-vm/blob/develop/docs/extensions.md#types-of-extensions
    */
-  extensions: string[]
+  extensions: (string | File)[]
 
   /**
    * Custom JavaScript code to add to the HTML.
@@ -129,16 +129,28 @@ export type HtmlifyOptions = Partial<{
     fullscreen: boolean
   }>
 
-  /** Customisation of monitor colours. */
+  /** Customisation of list and variable monitor colours. */
   monitors: Partial<{
     /**
-     * Background colour of the list and variable monitors; `null` for
-     * translucent black. If `'none'`, then the monitors will just be the
-     * variable name and value text. Default: null.
+     * Whether to show the container box surrounding the monitor. In Scratch,
+     * this is normally shown in light grey, but in HTMLified projects it is
+     * translucent black. Default: true.
      */
-    background: Colour | 'none' | null
+    showContainer: boolean
 
-    /** The text colour of the list and variable monitors. Default: `white`. */
+    /**
+     * Background colour of the monitor value. This includes the orange boxes
+     * around the variable value and red boxes around list item values. If
+     * `null`, then a translucent black will be used.
+     *
+     * If `valueBackground` is `null` and `showContainer` is `false`, then only
+     * the monitor text will be shown.
+     */
+    valueBackground: Colour | null
+
+    /**
+     * The text colour of the monitors' labels and values. Default: `white`.
+     */
     text: Colour
   }>
 
@@ -206,7 +218,8 @@ export default class Htmlifier {
         fullscreen: fullscreenBtns = false
       } = {},
       monitors: {
-        background: monitorBackground = null,
+        showContainer = true,
+        valueBackground = null,
         text: monitorText = 'white'
       } = {},
       cloud: {
@@ -230,6 +243,10 @@ export default class Htmlifier {
       file: Blob | string
     ): Promise<string> {
       if (outputZip) {
+        fileName = fileName.replace(/[^a-z0-9. _\-,()]|^[ .]+|[ ]+$/gi, '_')
+        while (files.has(fileName)) {
+          fileName = 'another ' + fileName
+        }
         files.set(fileName, file)
         return `./${fileName}`
       } else {
@@ -272,33 +289,50 @@ export default class Htmlifier {
     let extensionWorker: { url: string } | { script: string } = {
       url: EXTENSION_WORKER_URL
     }
-    if (extensions.length > 0 && includeVm) {
+    if (extensions.length > 0) {
       log(
         'I shall start downloading each extension script file from their URL.',
         'status'
       )
-      const extensionScripts: Record<string, string> = {}
-      for (const url of extensions) {
-        extensionScripts[url] = outputZip
-          ? await registerFile(
-              'extension.worker.js',
-              await fetch(url).then(toBlob)
-            )
-          : await fetch(url).then(toText)
+      const extensionScripts: string[] = []
+      for (const extensionSource of extensions) {
+        if (extensionSource instanceof File) {
+          extensionScripts.push(
+            outputZip
+              ? await registerFile(
+                  extensionSource.name,
+                  await extensionSource.text()
+                )
+              : await extensionSource.text()
+          )
+        } else if (includeVm) {
+          extensionScripts.push(
+            outputZip
+              ? await registerFile(
+                  extensionSource + '.js',
+                  await fetch(extensionSource).then(toBlob)
+                )
+              : await fetch(extensionSource).then(toText)
+          )
+        }
       }
-      // Prepend an override on importScripts to map extension URLs to locally
-      // stored ones
-      const workerScript = [
-        `const scripts = ${JSON.stringify(extensionScripts, null, '\t')}`,
-        'const oldImportScripts = window.importScripts',
-        outputZip
-          ? 'window.importScripts = (...urls) => oldImportScripts(...urls.map(url => scripts[url] || url))'
-          : 'window.importScripts = (...urls) => urls.forEach(url => scripts[url] ? eval(scripts[url]) : oldImportScripts(url))',
-        extensionWorkerSource
-      ].join('\n')
-      extensionWorker = outputZip
-        ? { url: await registerFile('extension.worker.js', workerScript) }
-        : { script: workerScript }
+      if (includeVm) {
+        // Prepend an override on importScripts to map extension URLs to locally
+        // stored ones
+        const workerScript = [
+          `const scripts = ${JSON.stringify(extensionScripts, null, '\t')}`,
+          'const oldImportScripts = self.importScripts',
+          // Fallback to URL import in case the extension importScripts some other
+          // URL
+          outputZip
+            ? 'self.importScripts = (...urls) => oldImportScripts(...urls.map(url => scripts[url] || url))'
+            : 'self.importScripts = (...urls) => urls.forEach(url => scripts[url] ? eval(scripts[url]) : oldImportScripts(url))',
+          extensionWorkerSource
+        ].join('\n')
+        extensionWorker = outputZip
+          ? { url: await registerFile('extension-worker.js', workerScript) }
+          : { script: workerScript }
+      }
     }
 
     log('Now, I shall join everything together into an HTML file.', 'status')
@@ -306,7 +340,6 @@ export default class Htmlifier {
     let html = template
     const classes: string[] = []
     const styles: string[] = []
-    const bodyStyles: string[] = []
 
     html = html.replace('{TITLE}', () => escapeHtml(title))
     if (stretchStage) {
@@ -327,7 +360,11 @@ export default class Htmlifier {
         'cursor' + getFileExtension(cursor),
         cursor
       )
-      bodyStyles.push(`cursor: url("${escapeCss(cursorUrl)}"), auto;`)
+      styles.push(
+        'body {',
+        `cursor: url("${escapeCss(cursorUrl)}"), auto;`,
+        '}'
+      )
     }
     if (favicon) {
       const faviconUrl = await registerFile(
@@ -369,7 +406,7 @@ export default class Htmlifier {
         '#loading-progress::before {',
         `color: ${progressBar};`,
         '}',
-        '#loading-progress::after',
+        '#loading-progress::after {',
         `background-color: ${progressBar};`,
         '}'
       )
@@ -398,22 +435,21 @@ export default class Htmlifier {
     if (startStopBtns) {
       classes.push('show-start-stop-btns')
     }
-    if (monitorBackground === null || monitorBackground !== 'none') {
+    if (showContainer) {
       classes.push('show-monitor-box')
-      if (monitorBackground) {
-        styles.push(
-          '.custom-monitor-colour .default .monitor-value,',
-          '.custom-monitor-colour .slider .monitor-value,',
-          '.custom-monitor-colour .large,',
-          '.custom-monitor-colour .row {',
-          `background-color: ${monitorBackground};`,
-          '}'
-        )
-      }
+    }
+    if (valueBackground) {
+      styles.push(
+        '.default .monitor-value,',
+        '.slider .monitor-value,',
+        '.large,',
+        '.row {',
+        `background-color: ${valueBackground};`,
+        '}'
+      )
     }
     styles.push('.monitor {', `color: ${monitorText};`, '}')
 
-    styles.push('body {', ...bodyStyles, '}')
     html = html
       .replace('{CLASSES}', () => classes.join(' '))
       .replace('{STYLES}', () =>
@@ -438,7 +474,7 @@ export default class Htmlifier {
                 loadingProgress: !!progressBar,
                 cloud: { serverUrl, specialBehaviours, projectId },
                 extensionWorker,
-                extensions,
+                extensionCount: extensions.length,
                 assets
               },
               null,

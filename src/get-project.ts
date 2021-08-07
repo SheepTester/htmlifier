@@ -11,8 +11,8 @@ export type ProjectSource =
     }
   | {
       type: 'file'
-      /** A `File` object containing the project file data (.sb, .sb2, .sb3) */
-      file: File
+      /** A `Blob` object containing the project file data (.sb, .sb2, .sb3) */
+      file: Blob
     }
   | {
       type: 'url'

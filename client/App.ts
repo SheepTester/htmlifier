@@ -15,7 +15,8 @@ import {
   numberKeys,
   radioKeys,
   defaultRadioOptions,
-  keys
+  keys,
+  listKeys
 } from './options.ts'
 import { download } from './utils.ts'
 import { Log, LogMessage } from './components/Log.ts'
@@ -54,6 +55,9 @@ export const App = () => {
       const param = params.get(key)
       if (param !== null) options[key] = param === 'on'
     }
+    for (const key of listKeys) {
+      options[key] = params.getAll(key)
+    }
 
     // Compatibility with old options
     if (params.get('wider') !== 'on') {
@@ -63,6 +67,10 @@ export const App = () => {
     if (!params.has('fps') && params.get('compatibility') === 'on') {
       options.fps = 60
     }
+    const extensionUrl = params.get('extension-url')
+    if (extensionUrl) {
+      options.extensions.push(extensionUrl)
+    }
 
     return options
   })
@@ -70,7 +78,13 @@ export const App = () => {
   const nonDefaultOptions = new URLSearchParams()
   for (const key of keys) {
     const value = options[key]
-    if (
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (typeof item === 'string') {
+          nonDefaultOptions.append(key, item)
+        }
+      }
+    } else if (
       !(value instanceof File) &&
       value !== null &&
       value !== defaultOptions[key]

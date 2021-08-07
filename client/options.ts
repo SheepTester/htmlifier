@@ -12,10 +12,7 @@ export const defaultStringOptions = {
   'monitor-text': '#ffffff',
 
   // ## Cloud variable source
-  'cloud-ws': '',
-
-  // ## E羊icques (modded) options
-  'extension-url': ''
+  'cloud-ws': ''
 }
 export type StringOptions = typeof defaultStringOptions
 export const stringKeys = Object.keys(
@@ -120,23 +117,29 @@ export const radioKeys = Object.keys(
   defaultRadioOptions
 ) as (keyof RadioOptions)[]
 
+const empty: (string | File)[] = []
+export const defaultListOptions = {
+  extensions: empty,
+  plugins: empty
+}
+export type ListOptions = typeof defaultListOptions
+export const listKeys = Object.keys(defaultListOptions) as (keyof ListOptions)[]
+
 export type ConversionOptions = StringOptions &
   NumberOptions &
   BooleanOptions &
   FileOptions &
-  RadioOptions
-export const defaultOptions = {
+  RadioOptions &
+  ListOptions
+export const defaultOptions: ConversionOptions = {
   ...defaultStringOptions,
   ...defaultNumberOptions,
   ...defaultBooleanOptions,
   ...defaultFileOptions,
-  ...defaultRadioOptions
+  ...defaultRadioOptions,
+  ...defaultListOptions
 }
 export const keys = Object.keys(defaultOptions) as (keyof ConversionOptions)[]
-
-export type ConversionOptionsAsRecord = {
-  [key in keyof ConversionOptions]: string | number | boolean | File | null
-}
 
 export type OnOptionChange = <K extends keyof ConversionOptions>(
   option: K,

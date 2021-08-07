@@ -460,19 +460,19 @@ window.init = async ({ width, height, ...options }) => {
   vm.setVideoProvider(new VideoProvider(width, height))
   vm.start()
 
-  if (options.extensions.length > 0) {
+  if (options.extensionCount > 0) {
     const OldWorker = window.Worker
     window.Worker = class extends OldWorker {
       // deno-lint-ignore constructor-super
       constructor (...args) {
-        if (args[0].endsWith('extension.worker.js')) {
+        if (args[0].endsWith('extension-worker.js')) {
           if (options.extensionWorker.url) {
             super(options.extensionWorker.url, ...args.slice(1))
           } else {
             super(
               URL.createObjectURL(
                 new Blob([options.extensionWorker.script], {
-                  type: 'application/json'
+                  type: 'text/javascript'
                 })
               ),
               ...args.slice(1)
@@ -482,9 +482,6 @@ window.init = async ({ width, height, ...options }) => {
           super(...args)
         }
       }
-    }
-    for (const extension of options.extensions) {
-      await vm.loadExtensionURL(extension)
     }
   }
 
@@ -794,8 +791,8 @@ window.init = async ({ width, height, ...options }) => {
 
   vm.postIOData('userData', { username: options.username })
 
-  for (const url of options.extensions) {
-    await vm.extensionManager.loadExtensionURL(url)
+  for (let i = 0; i < options.extensionCount; i++) {
+    await vm.extensionManager.loadExtensionURL(String(i))
   }
 
   await vm.loadProject(
