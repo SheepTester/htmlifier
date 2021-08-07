@@ -1,5 +1,6 @@
 import {
   createElement as e,
+  Fragment,
   useLayoutEffect,
   useRef,
   useState,
@@ -81,11 +82,14 @@ export const Log = ({ log, fileName }: LogProps) => {
   return e(
     'ul',
     {
-      class: 'log',
+      className: 'log',
       ref,
       onScroll: (event: UIEvent<HTMLUListElement>) => {
         // Allow wiggle room of 10 px
-        if (event.currentTarget.scrollTop + event.currentTarget.clientHeight >= event.currentTarget.scrollHeight - 10) {
+        if (
+          event.currentTarget.scrollTop + event.currentTarget.clientHeight >=
+          event.currentTarget.scrollHeight - 10
+        ) {
           if (scrolled) setScrolled(false)
         } else {
           if (!scrolled) setScrolled(true)
@@ -97,12 +101,15 @@ export const Log = ({ log, fileName }: LogProps) => {
         'li',
         { key: i, className: `log-entry log-${message.type}` },
         message.message,
-        message.type === 'done' && [
-          ' ',
-          e(DownloadBtn, { blob: message.result, name: fileName }),
-          ' ',
-          e(PreviewBtn, { blob: message.result })
-        ]
+        message.type === 'done' &&
+          e(
+            Fragment,
+            null,
+            ' ',
+            e(DownloadBtn, { blob: message.result, name: fileName }),
+            ' ',
+            e(PreviewBtn, { blob: message.result })
+          )
       )
     )
   )

@@ -1,5 +1,10 @@
 import { OptionsContext } from '../contexts/options.ts'
-import { createElement as e, ReactNode, useContext } from '../lib/react.ts'
+import {
+  createElement as e,
+  Fragment,
+  ReactNode,
+  useContext
+} from '../lib/react.ts'
 import { ConversionOptions, RadioOptions, radioValues } from '../options.ts'
 import { label } from '../utils.ts'
 
@@ -52,7 +57,8 @@ const RadioGroup = <K extends keyof RadioOptions>(name: K) => ({
             ' ',
             typeof labels[value] === 'string' ? labels[value] : labels[value][0]
           ),
-          typeof labels[value] !== 'string' && [' ', labels[value][1]]
+          typeof labels[value] !== 'string' &&
+            e(Fragment, null, ' ', labels[value][1])
         )
       )
     )

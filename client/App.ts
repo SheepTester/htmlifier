@@ -4,8 +4,7 @@ import {
   createElement as e,
   Fragment,
   useState,
-  MouseEvent,
-  ReactNode
+  MouseEvent
 } from './lib/react.ts'
 import {
   defaultOptions,
@@ -53,8 +52,18 @@ export const App = () => {
     }
     for (const key of booleanKeys) {
       const param = params.get(key)
-      if (param !== null) options[key] = param === 'true' || param === 'on'
+      if (param !== null) options[key] = param === 'on'
     }
+
+    // Compatibility with old options
+    if (params.get('wider') !== 'on') {
+      options.width = 480
+      options.height = 360
+    }
+    if (!params.has('fps') && params.get('compatibility') === 'on') {
+      options.fps = 60
+    }
+
     return options
   })
 

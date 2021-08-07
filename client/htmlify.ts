@@ -23,13 +23,13 @@ export const htmlify = async (options: ConversionOptions, log?: Logger) => {
     title: options.title,
     username: options.username,
 
-    width: options.wider ? options.width : 480,
-    height: options.wider ? options.height : 360,
+    width: options.width,
+    height: options.height,
     stretch: options.stretch === 'stage',
 
     autoStart: options.autostart,
     turbo: options.turbo,
-    fps: options.compatibility ? 60 : 30,
+    fps: options.fps,
     limits: !options['no-limits'],
     fencing: !options['no-limits'],
     pointerLock: options['pointer-lock'],

@@ -25,6 +25,9 @@ export const stringKeys = Object.keys(
 export const defaultNumberOptions = {
   id: 276660763,
 
+  // # Options
+  fps: 30,
+
   // ## E羊icques (modded) options
   width: 480,
   height: 360
@@ -39,7 +42,6 @@ export const defaultBooleanOptions = {
   // 'include-file': true,
 
   // # Options
-  compatibility: true,
   turbo: false,
   progress: true,
   autostart: true,
@@ -58,7 +60,6 @@ export const defaultBooleanOptions = {
   'special-cloud': false,
 
   // ## E羊icques (modded) options
-  wider: false,
   'no-limits': false,
 
   autodownload: true

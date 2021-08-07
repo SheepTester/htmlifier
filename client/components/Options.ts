@@ -1,4 +1,4 @@
-import { createElement as e, FormEvent } from '../lib/react.ts'
+import { createElement as e, FormEvent, Fragment } from '../lib/react.ts'
 import { link, label, blockLabel } from '../utils.ts'
 import { Checkbox } from './Checkbox.ts'
 import { NumberField, TextField } from './Field.ts'
@@ -26,11 +26,13 @@ export const Options = ({ onHtmlify, loading }: Props) => {
       title: 'Select a project by...',
       labels: {
         id: [
-          [
+          e(
+            Fragment,
+            null,
             'a project ID on ',
             link('https://scratch.mit.edu/', 'Scratch'),
             '.'
-          ],
+          ),
           label(
             'Project ID: ',
             e(NumberField, { name: 'id', placeholder: 104 })
@@ -38,7 +40,7 @@ export const Options = ({ onHtmlify, loading }: Props) => {
         ],
         file: [
           'selecting a file on your computer:',
-          [e(File, { name: 'file', accept: '.sb,.sb2,.sb3' })]
+          e(File, { name: 'file', accept: '.sb,.sb2,.sb3' })
         ],
         url: [
           'a project file hosted online.',
@@ -68,13 +70,8 @@ export const Options = ({ onHtmlify, loading }: Props) => {
         e(TextField, { name: 'username' })
       ),
       blockLabel(
-        e(Checkbox, { name: 'compatibility' }),
-        ' Enable compatibility mode.',
-        e(
-          Footnote,
-          { id: '2' },
-          'Compatibility mode forces projects to run at 30 FPS, like in Scratch 2.0. Turning this off allows the project to run at 60 FPS.'
-        )
+        'Frames per second: ',
+        e(NumberField, { name: 'fps', placeholder: 30 })
       ),
       blockLabel(
         e(Checkbox, { name: 'turbo' }),
@@ -126,10 +123,12 @@ export const Options = ({ onHtmlify, loading }: Props) => {
         labels: {
           file: [
             'A file on my computer.',
-            [
+            e(
+              Fragment,
+              null,
               'Select a file: ',
               e(File, { name: 'loading-image-file', accept: 'image/*' })
-            ]
+            )
           ],
           url: [
             'An image online.',
@@ -215,14 +214,16 @@ export const Options = ({ onHtmlify, loading }: Props) => {
           title: 'Where should cloud variables be stored?',
           labels: {
             localstorage: [
-              [
+              e(
+                Fragment,
+                null,
                 'Save them in the browser. Good for saving game data.',
                 e(
                   Footnote,
                   { id: '1' },
                   'Some jurisdictions have laws regarding the use of cookies, which you will have to deal if you share the converted project outside of Scratch.'
                 )
-              ],
+              ),
               null
             ],
             ws: [
@@ -276,17 +277,20 @@ export const Options = ({ onHtmlify, loading }: Props) => {
       e(
         Fieldset,
         {
-          title: [
+          title: e(
+            Fragment,
+            null,
             link('https://sheeptester.github.io/scratch-gui/', 'E羊icques'),
             ' (modded) options'
-          ]
+          )
         },
         e(
           'p',
           null,
-          label(e(Checkbox, { name: 'wider' }), ' Use a custom stage size.'),
-          ' ',
-          label('Width: ', e(NumberField, { name: 'width', placeholder: 480 })),
+          label(
+            'Stage width: ',
+            e(NumberField, { name: 'width', placeholder: 480 })
+          ),
           label(
             'Height: ',
             e(NumberField, { name: 'height', placeholder: 360 })
@@ -299,11 +303,11 @@ export const Options = ({ onHtmlify, loading }: Props) => {
             'unofficial extension'
           ),
           ' from URL: ',
-          e(TextField, { name: 'extension-url' }),
-          blockLabel(
-            e(Checkbox, { name: 'no-limits' }),
-            ' Remove limits such as clone and list length limits.'
-          )
+          e(TextField, { name: 'extension-url' })
+        ),
+        blockLabel(
+          e(Checkbox, { name: 'no-limits' }),
+          ' Remove limits such as clone and list length limits.'
         )
       )
     ),

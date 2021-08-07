@@ -21,7 +21,7 @@ export const Footnote = ({ id, children }: Props) => {
     return () => {
       removeFootnote(symbol)
     }
-  })
+  }, [])
 
   return e(
     'a',

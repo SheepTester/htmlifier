@@ -28,8 +28,9 @@ const Field = ({
     name,
     placeholder,
     value,
-    onChange: (event: ChangeEvent<HTMLInputElement>) =>
+    onChange: (event: ChangeEvent<HTMLInputElement>) => {
       onChange(event.target.value)
+    }
   })
 }
 

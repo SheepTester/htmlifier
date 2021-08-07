@@ -1,7 +1,7 @@
 // deno bundle --no-check --import-map import-map.json client/index.ts | terser > index.bundle.min.js
 
-import { createElement as e } from './lib/react.ts'
+import { createElement as e, StrictMode } from './lib/react.ts'
 import { render } from './lib/react-dom.ts'
 import { App } from './App.ts'
 
-render(e(App), document.getElementById('root'))
+render(e(StrictMode, null, e(App)), document.getElementById('root'))
