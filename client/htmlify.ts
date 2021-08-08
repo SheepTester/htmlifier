@@ -57,12 +57,17 @@ export const htmlify = async (options: ConversionOptions, log?: Logger) => {
 
     buttons: {
       startStop: options['start-stop-controls'],
-      fullscreen: options.fullscreen
+      fullscreen: options.fullscreen,
+      download: options['download-btn'],
+      addSprite: options['add-sprite-btn']
     },
 
     monitors: {
       showContainer: !options['transparent-monitor'],
-      valueBackground: options['use-colour'] ? options['monitor-colour'] : null,
+      valueBackground:
+        options['monitor-value'] === 'colour'
+          ? options['monitor-colour']
+          : null,
       text: options['monitor-text']
     },
 

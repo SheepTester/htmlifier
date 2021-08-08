@@ -47,6 +47,23 @@ export interface ButtonOptions {
 
   /** Whether to show the fullscreen button. */
   fullscreen: boolean
+
+  /**
+   * Whether to show a button that downloads the project's current state as an
+   * .sb3. Apparently this is useful for some kinds of projects where they want
+   * you to remix the project to save the game state or add your own thing to
+   * the project.
+   */
+  download: boolean
+
+  /**
+   * Whether to show a button that lets you add a sprite by selecting a
+   * .sprite3/.sprite2 file.
+   *
+   * Apparently, this can be used for an OS project to add a custom app, where
+   * each app is contained within a sprite.
+   */
+  addSprite: boolean
 }
 
 /**
@@ -293,7 +310,9 @@ export default class Htmlifier {
       } = {},
       buttons: {
         startStop: startStopBtns = false,
-        fullscreen: fullscreenBtns = false
+        fullscreen: fullscreenBtn = false,
+        download: downloadBtn = false,
+        addSprite: addSpriteBtn = false
       } = {},
       monitors: {
         showContainer = true,
@@ -537,18 +556,14 @@ export default class Htmlifier {
     } else {
       html = html.replace('{LOADING_IMAGE}', '')
     }
-    if (stretchLoadingImage) {
-      classes.push('stretch-loading-image')
-    }
-    if (fullscreenBtns) {
-      classes.push('show-fullscreen-btn')
-    }
-    if (startStopBtns) {
-      classes.push('show-start-stop-btns')
-    }
-    if (showContainer) {
-      classes.push('show-monitor-box')
-    }
+
+    if (stretchLoadingImage) classes.push('stretch-loading-image')
+    if (startStopBtns) classes.push('show-start-stop-btns')
+    if (fullscreenBtn) classes.push('show-fullscreen-btn')
+    if (downloadBtn) classes.push('show-download-btn')
+    if (addSpriteBtn) classes.push('show-add-sprite-btn')
+    if (showContainer) classes.push('show-monitor-box')
+
     if (valueBackground) {
       styles.push(
         '.default .monitor-value,',

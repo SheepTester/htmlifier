@@ -119,6 +119,14 @@ export const Options = ({ onHtmlify, loading }: Props) => {
         e(Checkbox, { name: 'start-stop-controls' }),
         ' Show start/stop buttons, equivalent to the green flag/stop sign.'
       ),
+      blockLabel(
+        e(Checkbox, { name: 'download-btn' }),
+        ' Show a button that downloads an .sb3 with the current state of the project.'
+      ),
+      blockLabel(
+        e(Checkbox, { name: 'add-sprite-btn' }),
+        ' Show a button that lets you select a sprite to add.'
+      ),
       e(RadioGroups['loading-image'], {
         title: 'What image should show while the project loads?',
         labels: {

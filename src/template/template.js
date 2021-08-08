@@ -375,7 +375,7 @@ function isFullscreen () {
 }
 function toggleFullscreen () {
   if (isFullscreen()) {
-    exitFullscreen.call(document.body)
+    exitFullscreen.call(document)
   } else {
     requestFullscreen.call(document.body)
   }
@@ -856,10 +856,33 @@ window.init = async ({ width, height, ...options }) => {
     document.body.classList.remove('running')
     stopSign.disabled = true
   })
-
   if (options.autoStart) {
     vm.greenFlag()
   }
+
+  document
+    .getElementById('download-btn')
+    .addEventListener('click', async () => {
+      download(await vm.saveProjectSb3(), document.title + '.sb3')
+    })
+  const addSpriteInput = document.getElementById('add-sprite-file')
+  addSpriteInput.addEventListener('change', async () => {
+    addSpriteInput.disabled = true
+    for (const file of addSpriteInput.files) {
+      // 1. Convert the File to an arrayBuffer. I care less about browser
+      // support, so I can use async/await + .arrayBuffer
+      // https://github.com/LLK/scratch-gui/blob/develop/src/lib/file-uploader.js#L25
+      const sprite = new Uint8Array(await file.arrayBuffer())
+
+      // 2. Convert a costume to a sprite (skipping for now)
+      // https://github.com/LLK/scratch-gui/blob/develop/src/lib/file-uploader.js#L208
+
+      // 3. Add to VM
+      await vm.addSprite(sprite)
+    }
+    addSpriteInput.disabled = false
+    addSpriteInput.value = null
+  })
 
   canvas.addEventListener('mousedown', handleMouseDown)
   canvas.addEventListener('touchstart', handleMouseDown, { passive: false })

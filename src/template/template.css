@@ -90,6 +90,7 @@ body,
   background-color: rgba(0, 0, 0, 0.5);
   border-bottom-left-radius: 12px;
 }
+.buttons .button,
 .buttons button {
   display: none;
   -webkit-appearance: none;
@@ -102,7 +103,8 @@ body,
   background-position: center;
   background-size: 24px;
 }
-.buttons button:disabled {
+.buttons button:disabled,
+#add-sprite-file:disabled + #add-sprite-btn {
   cursor: auto;
   opacity: 0.5;
 }
@@ -121,9 +123,28 @@ body,
 .fullscreen #fullscreen-btn {
   background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"%3E%3Cpath d="M10 32h6v6h4V28H10v4zm6-16h-6v4h10V10h-4v6zm12 22h4v-6h6v-4H28v10zm4-22v-6h-4v10h10v-4h-6z" fill="%23fff"/%3E%3C/svg%3E');
 }
+#download-btn {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='M5,20h14v-2H5V20z M19,9h-4V3H9v6H5l7,7L19,9z'/%3E%3C/svg%3E");
+}
+#add-sprite-btn {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z'/%3E%3C/svg%3E");
+}
+#add-sprite-file {
+  display: none;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
 .show-start-stop-btns #start-btn,
 .show-start-stop-btns #stop-btn,
-.show-fullscreen-btn #fullscreen-btn {
+.show-fullscreen-btn #fullscreen-btn,
+.show-download-btn #download-btn,
+.show-add-sprite-btn #add-sprite-btn,
+.show-add-sprite-btn #add-sprite-file {
   display: inline-block;
 }
 .monitor {

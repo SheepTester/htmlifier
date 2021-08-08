@@ -44,6 +44,8 @@ export const defaultBooleanOptions = {
   autostart: true,
   fullscreen: true,
   'start-stop-controls': false,
+  'download-btn': false,
+  'add-sprite-btn': false,
   zip: false,
 
   // ## Mouse pointers

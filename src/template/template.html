@@ -72,11 +72,28 @@
       </div>
     </div>
     <div id="loading-progress" data-progress="0/0"></div>
-    {LOADING_IMAGE}
-    {BACKGROUND_CSS}
+    {LOADING_IMAGE} {BACKGROUND_CSS}
     <div class="buttons">
-      <button id="start-btn" aria-label="Start project"></button>
-      <button id="stop-btn" aria-label="Stop project" disabled></button>
+      <!--
+        Only support sprite files (no images) for now. See
+        https://github.com/SheepTester/htmlifier/issues/67#issuecomment-894746718
+      -->
+      <input
+        type="file"
+        id="add-sprite-file"
+        accept=".sprite2, .sprite3"
+        aria-label="Select a Scratch sprite to add"
+        multiple
+      />
+      <label
+        class="button"
+        id="add-sprite-btn"
+        for="add-sprite-file"
+        title="Add Scratch sprite to project"
+      ></label>
+      <button id="download-btn" aria-label="Download Scratch project"></button>
+      <button id="start-btn" aria-label="Start"></button>
+      <button id="stop-btn" aria-label="Stop" disabled></button>
       <button id="fullscreen-btn" aria-label="Enter/exit fullscreen"></button>
     </div>
     <textarea id="errors" readonly></textarea>
