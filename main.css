@@ -24,10 +24,10 @@ body {
   color: rgba(255, 255, 255, 0.5);
   margin: 10px;
 }
-#bookmarklet-link {
+.bookmarklet-link {
   font-size: 0;
 }
-#bookmarklet-link::after {
+.bookmarklet-link::after {
   content: 'Bookmarklet';
   font-size: 1rem;
 }
@@ -48,11 +48,40 @@ body {
   z-index: 1000;
   animation: none;
 }
+.delayed {
+  animation: appear 0.5s 3s backwards;
+}
+@keyframes appear {
+  from {
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+    visibility: hidden;
+  }
+  to {
+    opacity: 1;
+  }
+}
+#root,
+.footnotes {
+  counter-reset: footnotes;
+}
+.footnote {
+  font-size: 0;
+}
+.footnote::after {
+  content: '[' counter(footnotes) ']';
+  counter-increment: footnotes;
+  font-size: small;
+}
 
 code {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
   padding: 0 5px;
+}
+details > summary:first-of-type {
+  cursor: pointer;
 }
 
 a {
@@ -76,22 +105,30 @@ a:hover {
 }
 
 button,
-input[type=file],
+input[type='file'],
 ::-webkit-file-upload-button {
   cursor: pointer;
 }
-input[type=submit] {
+input[type='submit'] {
   font-size: 1.2em;
+}
+input[type='url'] {
+  width: 250px;
+}
+input[type='number'] {
+  width: 100px;
 }
 
 .radio-group {
-  border-left: 1px solid rgba(255, 255, 255, 0.3);
-  padding-left: 2px;
-  margin-left: -4px;
-  transition: border-left-color 0.2s;
+  border: none;
+  padding: 0;
+  margin: 2em 0 1em;
 }
-.radio-group:hover {
-  border-left-color: white;
+.radio-group > legend {
+  font-weight: bold;
+}
+.radio-group + .radio-group {
+  margin-top: 1em;
 }
 
 .log {
@@ -151,7 +188,7 @@ input[type=submit] {
   top: -85px;
   padding: 15px;
   float: right;
-  background-color: rgba(100,250,150,0.5);
+  background-color: rgba(100, 250, 150, 0.5);
   border: 0px;
   border-radius: 5px;
   font-family: 'Roboto', sans-serif;
@@ -166,14 +203,14 @@ input[type=submit] {
   transition: background-color 0.25s;
 }
 
-legend {
+.legend {
   border: solid rgba(255, 255, 255, 0.5) 1px;
   border-radius: 10px;
   padding: 5px;
   background-color: #19191e;
 }
 
-fieldset {
+.fieldset {
   padding: 10px;
   border: solid rgba(255, 255, 255, 0.2) 1px;
   border-radius: 5px;
@@ -182,7 +219,7 @@ fieldset {
   transition: box-shadow 0.25s, border 0.25s;
   margin: 1em 0;
 }
-fieldset:hover {
+.fieldset:hover {
   box-shadow: rgb(255, 255, 255, 0.8) 0px 0px 10px;
   /* Fieldsets have this really weird bug on Chrome where translucent border
   /* colours result in a thicker border-top. */
@@ -190,13 +227,16 @@ fieldset:hover {
   transition: box-shadow 0.25s, border 0.25s;
 }
 
-fieldset > p:nth-child(2),
-fieldset > .radio-group > p:first-child,
-fieldset > fieldset:nth-child(2) {
+.fieldset > p:nth-child(2),
+.fieldset > .radio-group > p:first-child,
+.fieldset > .fieldset:nth-child(2),
+.fieldset > .radio-group:nth-child(2) {
   margin-top: 0;
 }
-fieldset > p:last-child,
-fieldset > fieldset:last-child {
+.fieldset > p:last-child,
+.fieldset > .fieldset:last-child,
+.fieldset > .radio-group:last-child,
+.fieldset > .radio-group:last-child > p:last-child {
   margin-bottom: 0;
 }
 

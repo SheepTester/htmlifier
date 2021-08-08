@@ -1,0 +1,10 @@
+{
+  "deno.enable": true,
+  "deno.lint": true,
+  "deno.unstable": false,
+  "deno.suggest.imports.hosts": {
+    "https://deno.land": true,
+    "https://cdn.esm.sh": false
+  },
+  "deno.config": "./tsconfig.json"
+}

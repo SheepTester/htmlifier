@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{TITLE}</title>
+    <script type="text/javascript">
+      window.errors = []
+      if (window.addEventListener) {
+        window.addEventListener(
+          'error',
+          function (e) {
+            if (e.message) {
+              if (e.error && e.error.stack) {
+                if (e.message.indexOf('Uncaught SyntaxError') === 0) {
+                  window.errors.push(
+                    e.message +
+                      ' at ' +
+                      e.filename +
+                      ':' +
+                      e.lineno +
+                      ':' +
+                      e.colno
+                  )
+                } else {
+                  window.errors.push(e.error.stack)
+                }
+                if (window.onNewError) window.onNewError()
+              }
+            } else {
+              window.errors.push(
+                'Problem loading ' + (e.target.src || e.target.href)
+              )
+              if (window.onNewError) window.onNewError()
+            }
+            window.onerror = null
+          },
+          true
+        ) // true so that errors bubble up to window
+        window.addEventListener(
+          'unhandledrejection',
+          function (e) {
+            window.errors.push(
+              e.reason && (e.reason.stack || e.reason.message || e.reason)
+            )
+            if (window.onNewError) window.onNewError()
+          },
+          false
+        )
+      }
+      window.onerror = function (message, source, lineno, colno, error) {
+        if (colno) {
+          lineno += ':' + colno
+        }
+        if (error && error.stack) {
+          window.errors.push(error.stack)
+        } else {
+          window.errors.push(message + ' at ' + source + ':' + lineno)
+        }
+        if (window.onNewError) window.onNewError()
+      }
+    </script>
+    {FAVICON} {CSS} {STYLES}
+  </head>
+  <body class="loading {CLASSES}">
+    <div id="wrapper">
+      <canvas id="stage"></canvas>
+      <div id="monitors"></div>
+      <div id="asking-box">
+        <label id="question" for="answer">Question</label>
+        <input type="text" id="answer" />
+      </div>
+    </div>
+    <div id="loading-progress" data-progress="0%"></div>
+    {LOADING_IMAGE} {BACKGROUND_CSS}
+    <div class="buttons">
+      <!--
+        Only support sprite files (no images) for now. See
+        https://github.com/SheepTester/htmlifier/issues/67#issuecomment-894746718
+      -->
+      <input
+        type="file"
+        id="add-sprite-file"
+        accept=".sprite2, .sprite3"
+        aria-label="Select a Scratch sprite to add"
+        multiple
+      />
+      <label
+        class="button"
+        id="add-sprite-btn"
+        for="add-sprite-file"
+        title="Add Scratch sprite to project"
+      ></label>
+      <button id="download-btn" aria-label="Download Scratch project"></button>
+      <button id="start-btn" aria-label="Start"></button>
+      <button id="stop-btn" aria-label="Stop" disabled></button>
+      <button id="fullscreen-btn" aria-label="Enter/exit fullscreen"></button>
+    </div>
+    <textarea id="errors" readonly></textarea>
+    {VM} {JS} {DATA}
+  </body>
+</html>
