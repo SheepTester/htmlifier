@@ -4,7 +4,8 @@ import {
   createElement as e,
   Fragment,
   useState,
-  MouseEvent
+  MouseEvent,
+  ReactNode
 } from './lib/react.ts'
 import {
   defaultOptions,
@@ -23,7 +24,7 @@ import { Log, LogMessage } from './components/Log.ts'
 import { Options } from './components/Options.ts'
 import { Offlineifier } from './components/Offlineifier.ts'
 import { offlineify } from './offlineify.ts'
-import { Footnote, FootnotesContext } from './contexts/footnotes.ts'
+import { FootnotesContext } from './contexts/footnotes.ts'
 import { FootnoteList } from './components/FootnoteList.ts'
 
 declare global {
@@ -191,7 +192,7 @@ export const App = () => {
 
   // To ensure that the footnote list renders synchronously, I need to mutate
   // `footnotes` directly
-  const [footnotes] = useState<Map<symbol, Footnote>>(new Map())
+  const [footnotes] = useState<Map<string, ReactNode>>(new Map())
 
   return e(
     Fragment,
@@ -235,6 +236,6 @@ export const App = () => {
       )
     ),
     e(Log, { log, fileName: options.title }),
-    e(FootnoteList, { getFootnotes: () => [...footnotes.values()] })
+    e(FootnoteList, { getFootnotes: () => [...footnotes] })
   )
 }

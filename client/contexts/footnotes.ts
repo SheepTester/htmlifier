@@ -1,12 +1,7 @@
 import { createContext, ReactNode } from '../lib/react.ts'
 
-export type Footnote = {
-  id: string
-  content: ReactNode
-}
-
 type ContextValue = {
-  footnotes: Map<symbol, Footnote>
+  footnotes: Map<string, ReactNode>
 }
 
 export const FootnotesContext = createContext<ContextValue>({

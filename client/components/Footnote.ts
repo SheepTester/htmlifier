@@ -3,8 +3,7 @@ import {
   createElement as e,
   ReactNode,
   useContext,
-  useEffect,
-  useState
+  useEffect
 } from '../lib/react.ts'
 
 type Props = {
@@ -13,13 +12,11 @@ type Props = {
 }
 
 export const Footnote = ({ id, children }: Props) => {
-  const [symbol] = useState(Symbol())
-
   const { footnotes } = useContext(FootnotesContext)
-  footnotes.set(symbol, { id, content: children })
+  footnotes.set(id, children)
   useEffect(() => {
     return () => {
-      footnotes.delete(symbol)
+      footnotes.delete(id)
     }
   }, [])
 
