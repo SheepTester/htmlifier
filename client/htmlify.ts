@@ -6,7 +6,10 @@ type LoggerWithError = (
   type: 'status' | 'progress' | 'error'
 ) => void
 
-export const htmlify = (options: ConversionOptions, log?: LoggerWithError): Promise<Blob | null> => {
+export const htmlify = (
+  options: ConversionOptions,
+  log?: LoggerWithError
+): Promise<Blob | null> => {
   const htmlifier = new Htmlifier()
   let project: ProjectSource
   if (options['upload-mode'] === 'file') {
@@ -37,8 +40,8 @@ export const htmlify = (options: ConversionOptions, log?: LoggerWithError): Prom
     autoStart: options.autostart,
     turbo: options.turbo,
     fps: options.fps,
-    limits: !options['no-limits'],
-    fencing: !options['no-limits'],
+    limits: options.limits,
+    fencing: options.fencing,
     pointerLock: options['pointer-lock'],
 
     cursor:

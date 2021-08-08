@@ -339,8 +339,12 @@ export const Options = ({ onHtmlify, loading }: Props) => {
           accept: '.js'
         }),
         blockLabel(
-          e(Checkbox, { name: 'no-limits' }),
-          ' Remove limits such as clone and list length limits.'
+          e(Checkbox, { name: 'limits' }),
+          ' Enforce limits such as the clone and list length limits.'
+        ),
+        blockLabel(
+          e(Checkbox, { name: 'fencing' }),
+          ' Prevent sprites from moving off-screen (sprite fencing).'
         )
       )
     ),

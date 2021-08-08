@@ -565,11 +565,14 @@ export default class Htmlifier {
     if (showContainer) classes.push('show-monitor-box')
 
     if (valueBackground) {
+      // This class is mainly to overcome selector precedence because
+      // .show-monitor-box .large has greater precedence over .large
+      classes.push('custom-monitor-colour')
       styles.push(
-        '.default .monitor-value,',
-        '.slider .monitor-value,',
-        '.large,',
-        '.row {',
+        '.custom-monitor-colour .default .monitor-value,',
+        '.custom-monitor-colour .slider .monitor-value,',
+        '.custom-monitor-colour .large,',
+        '.custom-monitor-colour .row-value {',
         `background-color: ${valueBackground};`,
         '}'
       )

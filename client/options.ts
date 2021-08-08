@@ -58,7 +58,8 @@ export const defaultBooleanOptions = {
   'special-cloud': false,
 
   // ## E羊icques (modded) options
-  'no-limits': false,
+  limits: true,
+  fencing: true,
 
   autodownload: true
 }

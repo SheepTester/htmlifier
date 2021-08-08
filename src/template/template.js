@@ -400,7 +400,7 @@ window.init = async ({ width, height, ...options }) => {
   window.vm = new window.NotVirtualMachine(width, height)
   vm.setCompatibilityMode(options.fps)
   vm.setTurboMode(options.turbo)
-  vm.requireLimits(options.limits, options.fencing)
+  vm.requireLimits(options.limits, { fencing: options.fencing })
 
   const storage = new ScratchStorage()
   const AssetType = storage.AssetType
@@ -756,7 +756,7 @@ window.init = async ({ width, height, ...options }) => {
         monitor.style.top = y + 'px'
         monitor.append(label, value)
 
-        monitorStates[id] = { monitor, valueElem: value }
+        monitorStates[id] = { monitor, valueElem: value, wasVisible: true }
 
         if (mode === 'slider') {
           const slider = document.createElement('input')
