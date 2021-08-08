@@ -15,11 +15,11 @@ type Props = {
 export const Footnote = ({ id, children }: Props) => {
   const [symbol] = useState(Symbol())
 
-  const { addFootnote, removeFootnote } = useContext(FootnotesContext)
+  const { footnotes } = useContext(FootnotesContext)
+  footnotes.set(symbol, { id, content: children })
   useEffect(() => {
-    addFootnote(symbol, { id, content: children })
     return () => {
-      removeFootnote(symbol)
+      footnotes.delete(symbol)
     }
   }, [])
 

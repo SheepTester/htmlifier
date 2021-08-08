@@ -203,230 +203,243 @@
           >). This can be used for some OS projects to add new apps, where each
           app is a sprite.
         </li>
-      </ul>
-      <h3>
-        2021-03-16 (<a
-          href="https://github.com/SheepTester/htmlifier/releases/download/2021-03-16/htmlifier-offline.html"
-          >download</a
-        >)
-      </h3>
-      <ul>
+        <li>List monitors now show item numbers.</li>
         <li>
-          New cloud behaviours:
-          <ul>
-            <li>
-              <code>☁ url</code> contains the current URL of the web page.
-            </li>
-            <li>
-              <code>☁ pasted</code> contains the last pasted text by the user.
-            </li>
-            <li>
-              <code>☁ username</code>, when set, will change what the "username"
-              block reports.
-            </li>
-          </ul>
-        </li>
-        <li>Fixed the background image not showing in full screen.</li>
-        <li>Fixed the progress bar being shown under the loading image.</li>
-      </ul>
-      <h3>
-        2021-02-07 (<a
-          href="https://github.com/SheepTester/htmlifier/releases/download/2021-02-07/htmlifier-offline.html"
-          >download</a
-        >)
-      </h3>
-      <ul>
-        <li>Save the options in the URL</li>
-        <li>
-          New customisation options:
-          <ul>
-            <li>Background image</li>
-            <li>Cursor</li>
-            <li>Favicon</li>
-            <li>New loading bar design with customisable colours</li>
-            <li>
-              Loading screen image from a URL
-              <ul>
-                <li>Option to stretch only the loading screen image</li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-        <li>
-          Option to show start/stop buttons (equivalent to the green flag/stop
-          sign)
-        </li>
-        <li>
-          New special cloud behaviours:
-          <ul>
-            <li>Better support for <code>☁ eval</code> returning Promises</li>
-            <li><code>☁ open link</code> opens a URL in a new tab.</li>
-            <li><code>☁ redirect</code> redirects to a URL.</li>
-            <li>
-              <code>☁ set clipboard</code> tries to copy text to the clipboard.
-            </li>
-            <li><code>☁ set server ip</code> changes the cloud server URL.</li>
-          </ul>
-        </li>
-        <li>
-          Ability to distinguish between left/right modifier keys using
-          <code>&lt;key (join [code_ShiftLeft] []) pressed?>&gt;</code>, for
-          example.
-        </li>
-        <li>
-          Clicking on a variable slider no longer gives it focus, so keys will
-          continue to work.
-        </li>
-        <li>A bookmarklet creator</li>
-        <li>
-          BREAKING: The mouse lock position now sets mouse x/y to the
-          accumulative mouse position, which should be more reliable. This works
-          best with the "Remove limits" option.
-        </li>
-        <li>
-          Updated CSS by
-          <a href="https://scratch.mit.edu/users/mrcringekidyt/"
-            >Mr. Cringe Kid</a
-          >
-        </li>
-        <li>Fixed the HTMLification log progress not resetting</li>
-        <li>
-          Also, the
-          <a href="https://github.com/SheepTester/primitive-cloud-server"
-            >primitive cloud server</a
-          >
-          has been updated.
+          The loading bar now shows a percentage rather than a fraction (<a
+            href="https://scratch.mit.edu/users/Sheep_maker/#comments-120295599"
+            >by request</a
+          >).
         </li>
       </ul>
-      <h3>2020-12-18</h3>
-      <ul>
-        <li>
-          Specific mouse buttons can now be detected using
-          <code>&lt;key (join [MouseN] []) pressed?&gt;</code>, where
-          <code>N</code> can be 1 for left click, 2 for middle click, 3 for
-          right click, and 0 for touch/pen.
-        </li>
-        <li>
-          Fixed an issue where Scratch 2.0 projects with bitmap costumes
-          wouldn't work.
-        </li>
-      </ul>
-      <h3>
-        2020-06-13 (<a
-          href="https://github.com/SheepTester/htmlifier/releases/download/2020-06-13/htmlifier-offline.html"
-          >download</a
-        >)
-      </h3>
-      <ul>
-        <li>More options for styling variable/list monitors</li>
-        <li>Option to generate a .zip of files</li>
-        <li>Option to preview the HTMLified project</li>
-        <li>
-          Readded the option for a progress counter despite lack of demand
-        </li>
-        <li>Warn if a file might be too large for JavaScript to HTMLify</li>
-        <li>Fixed HTMLifying 2.0 projects</li>
-      </ul>
-      <h3>
-        2020-06-01 (<a
-          href="https://github.com/SheepTester/htmlifier/releases/download/2020-06-01/htmlifier-offline.html"
-          >download</a
-        >)
-      </h3>
-      <ul>
-        <li>Option to remove clone/list length limits</li>
-        <li>Option to hide the cursor</li>
-        <li>
-          Ability to distinguish between cloud variables for localStorage and
-          the server (and run JavaScript using cloud variables)
-        </li>
-        <li>Option for rudimentary pointer lock</li>
-        <li>Fixed mouse position and unresized lists not showing</li>
-        <li>
-          Default project changed to one of
-          <a href="https://scratch.mit.edu/users/ScratchCat/">ScratchCat</a>'s
-        </li>
-        <li>
-          Unfortunately, as part of these changes, I removed the option for a
-          progress bar. If there's demand, I'll try to add it back.
-        </li>
-      </ul>
-      <h3>2020-05-01</h3>
-      <ul>
-        <li>Support for custom extensions from a URL</li>
-        <li>
-          CSS by
-          <a href="https://scratch.mit.edu/users/mrcringekidyt/"
-            >Mr. Cringe Kid</a
-          >
-        </li>
-      </ul>
-      <h3>
-        2020-03-29 (<a
-          href="https://github.com/SheepTester/words-go-here/releases/download/htmlifier-2020-03-29/htmlifier-offline.html"
-          >download</a
-        >)
-      </h3>
-      <ul>
-        <li>Fixed custom stage sizes</li>
-      </ul>
-      <h3>2020-03-27</h3>
-      <ul>
-        <li>Show an image such as a gif while loading</li>
-        <li>Fixed dragging sprites simulating another green flag click</li>
-      </ul>
-      <h3>2020-01-06</h3>
-      <ul>
-        <li>An offline version of the HTMLifier</li>
-      </ul>
-      <h3>2019-12-25</h3>
-      <ul>
-        <li>
-          An option to use a custom cloud server for cloud variables instead of
-          saving to localStorage
-        </li>
-      </ul>
-      <h3>2019-11-23</h3>
-      <ul>
-        <li>A fullscreen button</li>
-        <li>An option to change monitor colours</li>
-      </ul>
-      <h3>2019-10-05</h3>
-      <ul>
-        <li>New ask box</li>
-      </ul>
-      <h3>2019-09-28</h3>
-      <ul>
-        <li>A status text that shows the assets loaded</li>
-        <li>Support the video extension</li>
-        <li>Support draggable sprites</li>
-      </ul>
-      <h3>2019-08-08</h3>
-      <ul>
-        <li>Removed "Scratch" from the name of this utility just in case</li>
-      </ul>
-      <h3>2019-07-27</h3>
-      <ul>
-        <li>Support 16:9 projects</li>
-        <li>Simplify the number of modes for HTMLification</li>
-      </ul>
-      <h3>2019-07-13</h3>
-      <ul>
-        <li>Cloud variables store in localStorage</li>
-      </ul>
-      <h3>2019-06-29</h3>
-      <ul>
-        <li>Upload project file instead of using project ID</li>
-        <li>Toggle compatibility and turbo mode</li>
-      </ul>
-      <h3>2019-03-31</h3>
-      <ul>
-        <li>Variable and list watchers</li>
-      </ul>
-      <h3>2019-02-09</h3>
-      <ul>
-        <li>Project start</li>
-      </ul>
+      <details>
+        <summary>Past updates</summary>
+        <h3>
+          2021-03-16 (<a
+            href="https://github.com/SheepTester/htmlifier/releases/download/2021-03-16/htmlifier-offline.html"
+            >download</a
+          >)
+        </h3>
+        <ul>
+          <li>
+            New cloud behaviours:
+            <ul>
+              <li>
+                <code>☁ url</code> contains the current URL of the web page.
+              </li>
+              <li>
+                <code>☁ pasted</code> contains the last pasted text by the user.
+              </li>
+              <li>
+                <code>☁ username</code>, when set, will change what the
+                "username" block reports.
+              </li>
+            </ul>
+          </li>
+          <li>Fixed the background image not showing in full screen.</li>
+          <li>Fixed the progress bar being shown under the loading image.</li>
+        </ul>
+        <h3>
+          2021-02-07 (<a
+            href="https://github.com/SheepTester/htmlifier/releases/download/2021-02-07/htmlifier-offline.html"
+            >download</a
+          >)
+        </h3>
+        <ul>
+          <li>Save the options in the URL</li>
+          <li>
+            New customisation options:
+            <ul>
+              <li>Background image</li>
+              <li>Cursor</li>
+              <li>Favicon</li>
+              <li>New loading bar design with customisable colours</li>
+              <li>
+                Loading screen image from a URL
+                <ul>
+                  <li>Option to stretch only the loading screen image</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li>
+            Option to show start/stop buttons (equivalent to the green flag/stop
+            sign)
+          </li>
+          <li>
+            New special cloud behaviours:
+            <ul>
+              <li>Better support for <code>☁ eval</code> returning Promises</li>
+              <li><code>☁ open link</code> opens a URL in a new tab.</li>
+              <li><code>☁ redirect</code> redirects to a URL.</li>
+              <li>
+                <code>☁ set clipboard</code> tries to copy text to the
+                clipboard.
+              </li>
+              <li>
+                <code>☁ set server ip</code> changes the cloud server URL.
+              </li>
+            </ul>
+          </li>
+          <li>
+            Ability to distinguish between left/right modifier keys using
+            <code>&lt;key (join [code_ShiftLeft] []) pressed?>&gt;</code>, for
+            example.
+          </li>
+          <li>
+            Clicking on a variable slider no longer gives it focus, so keys will
+            continue to work.
+          </li>
+          <li>A bookmarklet creator</li>
+          <li>
+            BREAKING: The mouse lock position now sets mouse x/y to the
+            accumulative mouse position, which should be more reliable. This
+            works best with the "Remove limits" option.
+          </li>
+          <li>
+            Updated CSS by
+            <a href="https://scratch.mit.edu/users/mrcringekidyt/"
+              >Mr. Cringe Kid</a
+            >
+          </li>
+          <li>Fixed the HTMLification log progress not resetting</li>
+          <li>
+            Also, the
+            <a href="https://github.com/SheepTester/primitive-cloud-server"
+              >primitive cloud server</a
+            >
+            has been updated.
+          </li>
+        </ul>
+        <h3>2020-12-18</h3>
+        <ul>
+          <li>
+            Specific mouse buttons can now be detected using
+            <code>&lt;key (join [MouseN] []) pressed?&gt;</code>, where
+            <code>N</code> can be 1 for left click, 2 for middle click, 3 for
+            right click, and 0 for touch/pen.
+          </li>
+          <li>
+            Fixed an issue where Scratch 2.0 projects with bitmap costumes
+            wouldn't work.
+          </li>
+        </ul>
+        <h3>
+          2020-06-13 (<a
+            href="https://github.com/SheepTester/htmlifier/releases/download/2020-06-13/htmlifier-offline.html"
+            >download</a
+          >)
+        </h3>
+        <ul>
+          <li>More options for styling variable/list monitors</li>
+          <li>Option to generate a .zip of files</li>
+          <li>Option to preview the HTMLified project</li>
+          <li>
+            Readded the option for a progress counter despite lack of demand
+          </li>
+          <li>Warn if a file might be too large for JavaScript to HTMLify</li>
+          <li>Fixed HTMLifying 2.0 projects</li>
+        </ul>
+        <h3>
+          2020-06-01 (<a
+            href="https://github.com/SheepTester/htmlifier/releases/download/2020-06-01/htmlifier-offline.html"
+            >download</a
+          >)
+        </h3>
+        <ul>
+          <li>Option to remove clone/list length limits</li>
+          <li>Option to hide the cursor</li>
+          <li>
+            Ability to distinguish between cloud variables for localStorage and
+            the server (and run JavaScript using cloud variables)
+          </li>
+          <li>Option for rudimentary pointer lock</li>
+          <li>Fixed mouse position and unresized lists not showing</li>
+          <li>
+            Default project changed to one of
+            <a href="https://scratch.mit.edu/users/ScratchCat/">ScratchCat</a>'s
+          </li>
+          <li>
+            Unfortunately, as part of these changes, I removed the option for a
+            progress bar. If there's demand, I'll try to add it back.
+          </li>
+        </ul>
+        <h3>2020-05-01</h3>
+        <ul>
+          <li>Support for custom extensions from a URL</li>
+          <li>
+            CSS by
+            <a href="https://scratch.mit.edu/users/mrcringekidyt/"
+              >Mr. Cringe Kid</a
+            >
+          </li>
+        </ul>
+        <h3>
+          2020-03-29 (<a
+            href="https://github.com/SheepTester/words-go-here/releases/download/htmlifier-2020-03-29/htmlifier-offline.html"
+            >download</a
+          >)
+        </h3>
+        <ul>
+          <li>Fixed custom stage sizes</li>
+        </ul>
+        <h3>2020-03-27</h3>
+        <ul>
+          <li>Show an image such as a gif while loading</li>
+          <li>Fixed dragging sprites simulating another green flag click</li>
+        </ul>
+        <h3>2020-01-06</h3>
+        <ul>
+          <li>An offline version of the HTMLifier</li>
+        </ul>
+        <h3>2019-12-25</h3>
+        <ul>
+          <li>
+            An option to use a custom cloud server for cloud variables instead
+            of saving to localStorage
+          </li>
+        </ul>
+        <h3>2019-11-23</h3>
+        <ul>
+          <li>A fullscreen button</li>
+          <li>An option to change monitor colours</li>
+        </ul>
+        <h3>2019-10-05</h3>
+        <ul>
+          <li>New ask box</li>
+        </ul>
+        <h3>2019-09-28</h3>
+        <ul>
+          <li>A status text that shows the assets loaded</li>
+          <li>Support the video extension</li>
+          <li>Support draggable sprites</li>
+        </ul>
+        <h3>2019-08-08</h3>
+        <ul>
+          <li>Removed "Scratch" from the name of this utility just in case</li>
+        </ul>
+        <h3>2019-07-27</h3>
+        <ul>
+          <li>Support 16:9 projects</li>
+          <li>Simplify the number of modes for HTMLification</li>
+        </ul>
+        <h3>2019-07-13</h3>
+        <ul>
+          <li>Cloud variables store in localStorage</li>
+        </ul>
+        <h3>2019-06-29</h3>
+        <ul>
+          <li>Upload project file instead of using project ID</li>
+          <li>Toggle compatibility and turbo mode</li>
+        </ul>
+        <h3>2019-03-31</h3>
+        <ul>
+          <li>Variable and list watchers</li>
+        </ul>
+        <h3>2019-02-09</h3>
+        <ul>
+          <li>Project start</li>
+        </ul>
+      </details>
       <h2 id="credits">Credits</h2>
       <p>
         Made by

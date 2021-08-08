@@ -184,15 +184,9 @@ export const App = () => {
       .finally(() => setLoading(false))
   }
 
-  const [footnotes, setFootnotes] = useState<Map<symbol, Footnote>>(new Map())
-  const handleAddFootnote = (id: symbol, content: Footnote) => {
-    setFootnotes(footnotes => new Map([...footnotes, [id, content]]))
-  }
-  const handleRemoveFootnote = (id: symbol) => {
-    setFootnotes(
-      footnotes => new Map([...footnotes].filter(([footId]) => footId !== id))
-    )
-  }
+  // To ensure that the footnote list renders synchronously, I need to mutate
+  // `footnotes` directly
+  const [footnotes] = useState<Map<symbol, Footnote>>(new Map())
 
   return e(
     Fragment,
@@ -231,16 +225,11 @@ export const App = () => {
       { value: { options, onChange: handleOptionChange } },
       e(
         FootnotesContext.Provider,
-        {
-          value: {
-            addFootnote: handleAddFootnote,
-            removeFootnote: handleRemoveFootnote
-          }
-        },
+        { value: { footnotes } },
         e(Options, { onHtmlify: handleHtmlify, loading })
       )
     ),
     e(Log, { log, fileName: options.title }),
-    e(FootnoteList, { footnotes: [...footnotes.values()] })
+    e(FootnoteList, { getFootnotes: () => [...footnotes.values()] })
   )
 }

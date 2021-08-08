@@ -2,14 +2,14 @@ import { Footnote } from '../contexts/footnotes.ts'
 import { createElement as e } from '../lib/react.ts'
 
 type Props = {
-  footnotes: Footnote[]
+  getFootnotes: () => Footnote[]
 }
 
-export const FootnoteList = ({ footnotes }: Props) => {
+export const FootnoteList = ({ getFootnotes }: Props) => {
   return e(
     'div',
     { className: 'footnotes' },
-    footnotes.map(({ id, content }) =>
+    getFootnotes().map(({ id, content }) =>
       e(
         'p',
         { key: id, id: `note-${id}` },

@@ -6,15 +6,9 @@ export type Footnote = {
 }
 
 type ContextValue = {
-  addFootnote: (id: symbol, content: Footnote) => void
-  removeFootnote: (id: symbol) => void
+  footnotes: Map<symbol, Footnote>
 }
 
 export const FootnotesContext = createContext<ContextValue>({
-  addFootnote: () => {
-    throw new Error('Not implemented')
-  },
-  removeFootnote: () => {
-    throw new Error('Not implemented')
-  }
+  footnotes: new Map()
 })
