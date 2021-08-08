@@ -185,20 +185,20 @@ export const Options = ({ onHtmlify, loading }: Props) => {
       ),
       e(
         Fieldset,
-        { title: 'Variable/list monitor style' },
-        e(
-          'p',
-          null,
-          label(
-            e(Checkbox, { name: 'use-colour' }),
-            ' Use opaque monitors. (If unchecked, a translucent black will be used.)'
-          ),
-          ' ',
-          label(
-            'Colour: ',
-            e(TextField, { name: 'monitor-colour', type: 'color' })
-          )
-        ),
+        { title: 'Variable/list monitor colour' },
+        e(RadioGroups['monitor-value'], {
+          title: 'Monitor value background colour',
+          labels: {
+            translucent: 'Translucent black.',
+            colour: [
+              'Opaque',
+              label(
+                'colour: ',
+                e(TextField, { name: 'monitor-colour', type: 'color' })
+              )
+            ]
+          }
+        }),
         blockLabel(
           'Monitor text colour: ',
           e(TextField, { name: 'monitor-text', type: 'color' })
@@ -275,6 +275,24 @@ export const Options = ({ onHtmlify, loading }: Props) => {
           )
         )
       ),
+      e(
+        'p',
+        null,
+        'Include custom JavaScript',
+        e(
+          Footnote,
+          { id: 'plugins' },
+          'The custom JavaScript will be included in the HTML file so that you can add custom functionality to the project. These are also compatible with ',
+          link('https://sheeptester.github.io/scratch-gui/', 'E羊icques'),
+          ' plugins.'
+        ),
+        ':'
+      ),
+      e(UrlOrFileList, {
+        name: 'plugins',
+        placeholder: 'https://example.com/script.js',
+        accept: '.js'
+      }),
       e(
         Fieldset,
         {

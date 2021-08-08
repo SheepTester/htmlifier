@@ -50,7 +50,6 @@ export const defaultBooleanOptions = {
   'pointer-lock': false,
 
   // ## Monitor style
-  'use-colour': false,
   'transparent-monitor': false,
 
   // ## Cloud variable source
@@ -97,6 +96,9 @@ export const radioValues = {
   // ## Mouse pointers
   cursor: ['default', 'none', 'file'],
 
+  // ## Monitor style
+  'monitor-value': ['translucent', 'colour'],
+
   // ## Cloud variable source
   'cloud-provider': ['localstorage', 'ws']
 } as const
@@ -110,6 +112,8 @@ export const defaultRadioOptions: RadioOptions = {
   stretch: 'none',
 
   cursor: 'default',
+
+  'monitor-value': 'translucent',
 
   'cloud-provider': 'localstorage'
 }

@@ -19,8 +19,99 @@ export type Colour = string
 
 export type Logger = (message: string, type: 'status' | 'progress') => void
 
-/** Options for HTMLification */
-export type HtmlifyOptions = Partial<{
+/**
+ * Options customising the screen that shows while the project is
+ * loading.
+ */
+export interface LoadingOptions {
+  /** The colour of the loading progress bar or `null` for no progress bar */
+  progressBar: Colour | null
+
+  /**
+   * An image to show while the project is loading. Either a `File`, a URL to
+   * an image (not included inside the HTML file), or `null` for no image.
+   */
+  image: File | string | null
+
+  /** Whether the loading image should be stretched to fill the screen. */
+  stretch: boolean
+}
+
+/**
+ * Options for toggling which buttons are shown in the top-right corner of the
+ * resulting HTML file.
+ */
+export interface ButtonOptions {
+  /** Whether to show start/stop buttons. */
+  startStop: boolean
+
+  /** Whether to show the fullscreen button. */
+  fullscreen: boolean
+}
+
+/**
+ * Options customising the design of variable and list monitors.
+ *
+ * Note that by default, unlike Scratch, monitors are translucent black with
+ * white text because dark theme is cool. I assume a common use of the HTMLifier
+ * is to publish projects on other websites like itch.io, and because of the
+ * negative stigma around Scratch being for beginners to programming, I think it
+ * could be helpful to make it less obvious that a project was made in Scratch.
+ */
+export interface MonitorOptions {
+  /**
+   * Whether to show the container box surrounding the monitor. In Scratch,
+   * this is normally shown in light grey, but in HTMLified projects it is
+   * translucent black. Default: true.
+   */
+  showContainer: boolean
+
+  /**
+   * Background colour of the monitor value. This includes the orange boxes
+   * around the variable value and red boxes around list item values. If
+   * `null`, then a translucent black will be used.
+   *
+   * If `valueBackground` is `null` and `showContainer` is `false`, then only
+   * the monitor text will be shown.
+   */
+  valueBackground: Colour | null
+
+  /**
+   * The text colour of the monitors' labels and values. Default: `white`.
+   */
+  text: Colour
+}
+
+/**
+ * Options defining how cloud variables are stored.
+ */
+export interface CloudOptions {
+  /**
+   * The URL of the cloud server, starting with `ws://` or `wss://`. `null` to
+   * not use a web server and instead store cloud variables in localStorage.
+   * Default: null.
+   */
+  serverUrl: string | null
+
+  /**
+   * Whether to use special cloud variable behaviours for cloud variables of
+   * certain names. Some of these special cloud variables interact with web
+   * APIs when set by the project, or are automatically set with a value such
+   * as the URL of the page.
+   *
+   * @see https://github.com/SheepTester/htmlifier/wiki/Special-cloud-behaviours
+   */
+  specialBehaviours: boolean
+
+  /**
+   * The project ID used to identify the project to the cloud server. Default:
+   * `0`. Not needed if `serverUrl` is `null`.
+   */
+  projectId: string
+}
+
+/** Options to customise the resulting converted HTML file. */
+export interface HtmlifyOptions {
   /** Logging function to track the progress of HTMLification. */
   log: Logger
 
@@ -92,99 +183,86 @@ export type HtmlifyOptions = Partial<{
   backgroundImage: File | null
 
   /**
-   * List of URLs to the unofficial extensions that the project uses.
+   * List of URLs or JavaScript files containing the unofficial extensions that
+   * the project uses.
    *
-   * @see https://github.com/LLK/scratch-vm/blob/develop/docs/extensions.md#types-of-extensions
+   * @see
+   * https://github.com/LLK/scratch-vm/blob/develop/docs/extensions.md#types-of-extensions
    */
   extensions: (string | File)[]
 
   /**
-   * Custom JavaScript code to add to the HTML.
+   * List of URLs or JavaScript files to include in the resulting HTML file. In
+   * addition to having access to DOM APIs (as opposed to unofficial extensions,
+   * which are sandboxed in a Web Worker), the resulting HTML file also makes
+   * the following variables global:
    *
-   * This is equivalent to "plugins" (a euphemism for userscript) in E羊icques.
+   * - `vm` has the instance of Scratch's `VirtualMachine`
+   * - `setCloud(name, value)` sets a cloud variable with the name `name`
+   *   (including the ☁) to `value`
+   *
+   * These injected scripts are equivalent to E羊icques "plugins," which are a
+   * euphemism for userscripts.
    */
-  injectedScripts: string
+  injectedScripts: (string | File)[]
 
   /** Customisation options for the loading screen. */
-  loading: Partial<{
-    /** The colour of the loading progress bar or `null` for no progress bar */
-    progressBar: Colour | null
-
-    /**
-     * An image to show while the project is loading. Either a `File`, a URL to
-     * an image (not included inside the HTML file), or `null` for no image.
-     */
-    image: File | string | null
-
-    /** Whether the loading image should be stretched to fill the screen. */
-    stretch: boolean
-  }>
+  loading: Partial<LoadingOptions>
 
   /** Customisation options for the buttons on the top right of the page. */
-  buttons: Partial<{
-    /** Whether to show start/stop buttons. */
-    startStop: boolean
-
-    /** Whether to show the fullscreen button. */
-    fullscreen: boolean
-  }>
+  buttons: Partial<ButtonOptions>
 
   /** Customisation of list and variable monitor colours. */
-  monitors: Partial<{
-    /**
-     * Whether to show the container box surrounding the monitor. In Scratch,
-     * this is normally shown in light grey, but in HTMLified projects it is
-     * translucent black. Default: true.
-     */
-    showContainer: boolean
-
-    /**
-     * Background colour of the monitor value. This includes the orange boxes
-     * around the variable value and red boxes around list item values. If
-     * `null`, then a translucent black will be used.
-     *
-     * If `valueBackground` is `null` and `showContainer` is `false`, then only
-     * the monitor text will be shown.
-     */
-    valueBackground: Colour | null
-
-    /**
-     * The text colour of the monitors' labels and values. Default: `white`.
-     */
-    text: Colour
-  }>
+  monitors: Partial<MonitorOptions>
 
   /**
    * Control the behaviour of cloud variables when HTMLified. Cloud variables
    * are stored in localStorage by default.
    */
-  cloud: Partial<{
-    /**
-     * The URL of the cloud server, starting with `ws://` or `wss://`. `null` to
-     * not use a web server and instead store cloud variables in localStorage.
-     * Default: null.
-     */
-    serverUrl: string | null
+  cloud: Partial<CloudOptions>
+}
 
-    /**
-     * Whether to use special cloud variable behaviours for cloud variables of
-     * certain names. Some of these special cloud variables interact with web
-     * APIs when set by the project, or are automatically set with a value such
-     * as the URL of the page.
-     *
-     * @see https://github.com/SheepTester/htmlifier/wiki/Special-cloud-behaviours
-     */
-    specialBehaviours: boolean
-
-    /**
-     * The project ID used to identify the project to the cloud server. Default:
-     * `0`.
-     */
-    projectId: string
-  }>
-}>
-
-/** Converts a project to HTML */
+/**
+ * A "converter" that "converts" a project to HTML.
+ *
+ * I put "convert" in scare quotes because there's really no conversion going
+ * on. It just stuffs the Scratch VM and the project data into a single HTML
+ * file that makes the Scratch VM run the project. It's no different than a
+ * self-contained embed of the Scratch project player.
+ *
+ * However, to the common Scratcher, this isn't a big concern. They just want to
+ * see the `.sb3` file extension get turned into a `.html` that can be previewed
+ * immediately in the browser. That is "conversion" enough for them.
+ *
+ * I often see Scratchers asking how to convert from an .sb3 file to some other
+ * language, like JavaScript, Python, or Java. But this is inherently flawed;
+ * programming languages alone aren't required to be able to render graphics or
+ * play sound. @apple502j said it well:
+ *
+ * > The whole idea of "converting something into another language" is flawed.
+ * > Just like how cultural difference affects translation of real-life
+ * > languages, there are big differences that make this idea very hard to
+ * > implement. For example, JavaScript itself does not offer stage rendering,
+ * > so you'll have to add a few hundreds of kilobytes of code just to make that
+ * > cat appear.
+ *
+ * The TurboWarp Packager has a more accurate and descriptive name, at the cost
+ * of not being what the common Scratcher would be thinking of when they want to
+ * turn their Scratch project into a web page. In contrast, the HTMLifier is
+ * somewhat deceptive, considering that similar existing programs (e.g.
+ * Phosphorus) actually do convert Scratch blocks into JavaScript. The HTMLifier
+ * can be seen as a joke, [originally made as a lazy solution to vague
+ * demands](https://scratch.mit.edu/discuss/post/3432236/).
+ *
+ * Anyways, here's an example.
+ *
+ * ```ts
+ * // Converts "Scratch 3.0 is here!" https://scratch.mit.edu/projects/276660763/
+ * const result = await new Htmlifier()
+ *   .htmlify({ type: 'id', id: '276660763' })
+ *   .then(blob => blob.text())
+ * ```
+ */
 export default class Htmlifier {
   private async _createHtml (
     projectSource: ProjectSource,
@@ -207,7 +285,7 @@ export default class Htmlifier {
       favicon = null,
       backgroundImage = null,
       extensions = [],
-      injectedScripts = '',
+      injectedScripts = [],
       loading: {
         progressBar = null,
         image: loadingImage = null,
@@ -227,7 +305,7 @@ export default class Htmlifier {
         specialBehaviours = false,
         projectId = '0'
       } = {}
-    }: HtmlifyOptions
+    }: Partial<HtmlifyOptions>
   ): Promise<Blob> {
     const project = await getProject(projectSource, log)
 
@@ -332,6 +410,39 @@ export default class Htmlifier {
         extensionWorker = outputZip
           ? { url: await registerFile('extension-worker.js', workerScript) }
           : { script: workerScript }
+      }
+    }
+
+    type Script =
+      | { type: 'url'; url: string }
+      | { type: 'inline'; source: string }
+    const injectedJs: Script[] = []
+    if (injectedScripts.length > 0) {
+      log(
+        'I shall start downloading each script file from their URL.',
+        'status'
+      )
+      for (const source of injectedScripts) {
+        if (outputZip) {
+          injectedJs.push({
+            type: 'url',
+            url:
+              source instanceof File
+                ? await registerFile(source.name, await source.text())
+                : await registerFile(
+                    source + '.js',
+                    await fetch(source).then(toBlob)
+                  )
+          })
+        } else {
+          injectedJs.push({
+            type: 'inline',
+            source:
+              source instanceof File
+                ? await source.text()
+                : await fetch(source).then(toText)
+          })
+        }
       }
     }
 
@@ -480,10 +591,13 @@ export default class Htmlifier {
               null,
               '\t'
             )
-          )}\ninit(initOptions)\n</script>` +
-          (injectedScripts.length > 0
-            ? `\n<script>\n${injectedScripts}\n</script>`
-            : '')
+          )}\ninit(initOptions)\n</script>${injectedJs
+            .map(script =>
+              script.type === 'inline'
+                ? `<script>\n${script.source}\n</script>`
+                : `<script src="${script.url}"></script>`
+            )
+            .join('\n')}`
       )
     if (!includeVm) {
       html = html.replace('{VM}', () => `<script src="${VM_URL}"></script>`)
@@ -522,9 +636,13 @@ export default class Htmlifier {
     }
   }
 
+  /**
+   * Convert `project` to HTML. Returns a `Blob` containing the HTML file, or a
+   * ZIP file if the `zip` option was enabled.
+   */
   async htmlify (
     project: ProjectSource,
-    options: HtmlifyOptions = {}
+    options: Partial<HtmlifyOptions> = {}
   ): Promise<Blob> {
     return await this._createHtml(project, options)
   }

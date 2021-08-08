@@ -44,6 +44,7 @@ export const htmlify = async (options: ConversionOptions, log?: Logger) => {
     backgroundImage: options['background-file'],
 
     extensions: options.extensions,
+    injectedScripts: options.plugins,
 
     loading: {
       progressBar: options.progress ? options['progress-colour'] : null,

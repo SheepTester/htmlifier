@@ -71,6 +71,8 @@ export const App = () => {
     if (extensionUrl) {
       options.extensions.push(extensionUrl)
     }
+    options['monitor-value'] =
+      params.get('use-colour') === 'on' ? 'colour' : 'translucent'
 
     return options
   })

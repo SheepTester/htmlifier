@@ -70,5 +70,6 @@ export const RadioGroups = {
   'loading-image': RadioGroup('loading-image'),
   stretch: RadioGroup('stretch'),
   cursor: RadioGroup('cursor'),
+  'monitor-value': RadioGroup('monitor-value'),
   'cloud-provider': RadioGroup('cloud-provider')
 }
