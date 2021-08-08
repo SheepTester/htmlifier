@@ -42,7 +42,7 @@ export async function offlineify (log: Logger): Promise<Blob> {
     .replace(/\/\* no-offline \*\/[^]*?\/\* \/no-offline \*\//g, '')
     // Using functions to avoid $ substitution
     .replace(
-      '<link rel="stylesheet" href="./main.css">',
+      '<link rel="stylesheet" href="./main.css" />',
       () => `<style>\n${css}\n</style>`
     )
     .replace(

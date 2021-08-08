@@ -10,13 +10,13 @@ export const Offlineifier = ({ offline, onOfflineify, loading }: Props) => {
   return offline
     ? null
     : e(
-        'p',
-        null,
-        e(
-          'button',
-          { onClick: onOfflineify, disabled: loading },
-          'Download offline version'
-        ),
-        ' (An HTML file that can be opened and used in the browser without an internet connection)'
+        'button',
+        {
+          onClick: onOfflineify,
+          disabled: loading,
+          title:
+            'Downloads an HTML file that can be opened and used in the browser without an internet connection.'
+        },
+        'Download offline version'
       )
 }

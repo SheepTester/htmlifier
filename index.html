@@ -103,10 +103,6 @@
         The HTMLifier may not be the best option for you; refer to the
         <a href="#see-also">See also section</a> for alternatives.
       </p>
-      <p>
-        The project will automatically start, and there are no green flag or
-        stop sign buttons.
-      </p>
       <div id="root">
         <noscript>
           <p>
@@ -135,6 +131,79 @@
         See the code and previous versions on
         <a href="https://github.com/SheepTester/htmlifier/">Github</a>.
       </p>
+      <h3>2021-08-??</h3>
+      <ul>
+        <li>
+          To support the use of the HTMLifier in
+          <a href="https://nodejs.org/en/">Node</a> and
+          <a href="https://deno.land/">Deno</a>, I rewrote the HTMLifier, so now
+          it can be used programmatically (<a
+            href="https://github.com/SheepTester/htmlifier/issues/27"
+            >by request</a
+          >). This might mean there could be many bugs.
+        </li>
+        <li>
+          I also remade the options area in
+          <a href="https://reactjs.org/">React</a> and reworded a few options in
+          the process.
+        </li>
+        <li>
+          The Scratch engine is stored in a separate file (<code>vm.js</code>)
+          when you download as a ZIP, so you can make multiple HTMLified
+          projects share the same Scratch engine file to avoid wasting disk
+          space (by request).
+        </li>
+        <li>Downloading as a ZIP now works for <code>.sb2</code> files.</li>
+        <li>
+          <code>ctrl</code>/<code>⌘</code> + <code>F</code> now toggles
+          fullscreen (<a
+            href="https://scratch.mit.edu/users/Sheep_maker/#comments-141217533"
+            >by request</a
+          >).
+        </li>
+        <li>
+          The loading image now appears <em>before</em> the background image (by
+          request).
+        </li>
+        <li>
+          You can detect whether the project has been HTMLified by doing
+          <code>&lt;key (join [HTMLifier] []) pressed?&gt;</code> (<a
+            href="https://scratch.mit.edu/users/Sheep_maker/#comments-129186942"
+            >by request</a
+          >).
+        </li>
+        <li>
+          You can now add more than one unofficial extension (<a
+            href="https://scratch.mit.edu/users/Sheep_maker/#comments-123224516"
+            >by request</a
+          >).
+        </li>
+        <li>
+          You can add custom JavaScript (called "plugins" in
+          <a href="https://sheeptester.github.io/scratch-gui/">E羊icques</a>) to
+          the HTML. You can also upload JavaScript files instead of pasting URLs
+          for both extensions and plugins. (Both
+          <a
+            href="https://scratch.mit.edu/users/Sheep_maker/#comments-142357006"
+            >by request</a
+          >.)
+        </li>
+        <li>
+          Added an option to show a button that downloads the project with the
+          current variable and list values stored (<a
+            href="https://scratch.mit.edu/users/Sheep_maker/#comments-126598941"
+            >by request</a
+          >). This can be used to save your progress through a game.
+        </li>
+        <li>
+          Added an option to show a button that lets you select a Scratch sprite
+          to add to the project (<a
+            href="https://scratch.mit.edu/users/Sheep_maker/#comments-120920668"
+            >by request</a
+          >). This can be used for some OS projects to add new apps, where each
+          app is a sprite.
+        </li>
+      </ul>
       <h3>
         2021-03-16 (<a
           href="https://github.com/SheepTester/htmlifier/releases/download/2021-03-16/htmlifier-offline.html"
@@ -364,8 +433,10 @@
         <a href="https://scratch.mit.edu/users/Sheep_maker/">Sheep_maker</a>,
         who used <a href="https://github.com/LLK/scratch-vm/">scratch-vm</a>,
         <a href="http://danml.com/download.html">download.js</a>,
-        <a href="https://stuk.github.io/jszip/">JSZip</a>, and their
-        dependencies for this project.
+        <a href="https://stuk.github.io/jszip/">JSZip</a>,
+        <a href="https://deno.land/">Deno</a>,
+        <a href="https://reactjs.org/">React</a>, and their dependencies for
+        this project.
       </p>
       <p>
         CSS by
@@ -379,14 +450,16 @@
         that vanilla Scratch uses, sacrificing speed and editability.
       </p>
       <p>
-        Scratch to JavaScript compilers (best for performance):
+        If you want better performance, <em>compile</em> the project to
+        JavaScript:
         <a href="https://phosphorus.github.io/">Phosphorus</a> (Scratch 2.0),
         <a href="https://forkphorus.github.io/">Forkphorus</a>, and
         <a href="https://turbowarp.org/">TurboWarp</a>.
       </p>
       <p>
-        Scratch to JavaScript converter (best for learning JavaScript):
-        <a href="https://leopardjs.now.sh/">Leopard</a>
+        If you want to learn JavaScript, convert the Scratch blocks to close
+        equivalents in JavaScript using
+        <a href="https://leopardjs.now.sh/">Leopard</a>.
       </p>
     </div>
     <script src="./index.bundle.min.js" charset="utf-8"></script>
