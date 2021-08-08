@@ -60,7 +60,7 @@ export const App = () => {
     }
 
     // Compatibility with old options
-    if (params.get('wider') !== 'on') {
+    if (params.get('wider') === 'off') {
       options.width = 480
       options.height = 360
     }
@@ -128,6 +128,16 @@ export const App = () => {
       setLog(log => [...log, { message, type }])
     })
       .then(blob => {
+        if (!blob) {
+          setLog(log => [
+            ...log,
+            {
+              message: "You didn't select a project file.",
+              type: 'error'
+            }
+          ])
+          return
+        }
         if (options.autodownload) {
           download(blob)
           setLog(log => [

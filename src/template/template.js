@@ -419,12 +419,14 @@ window.init = async ({ width, height, ...options }) => {
     storage.webHelper.load = function (...args) {
       const result = _load.call(this, ...args)
       total += 1
-      progress.dataset.progress = complete + '/' + total
-      progress.style.setProperty('--progress', (complete / total) * 100 + '%')
+      const percentage = (complete / total) * 100
+      progress.dataset.progress = percentage.toFixed(2) + '%'
+      progress.style.setProperty('--progress', percentage + '%')
       result.then(() => {
         complete += 1
-        progress.dataset.progress = complete + '/' + total
-        progress.style.setProperty('--progress', (complete / total) * 100 + '%')
+        const percentage = (complete / total) * 100
+        progress.dataset.progress = percentage.toFixed(2) + '%'
+        progress.style.setProperty('--progress', percentage + '%')
       })
       return result
     }
@@ -722,70 +724,137 @@ window.init = async ({ width, height, ...options }) => {
   const monitorStates = {}
   vm.runtime.addListener('MONITORS_UPDATE', monitors => {
     monitors.forEach((record, id) => {
+      const {
+        value,
+        visible,
+        mode,
+        x,
+        y,
+        width,
+        height,
+        params,
+        opcode,
+        spriteName,
+        sliderMin,
+        sliderMax,
+        isDiscrete,
+        targetId
+      } = record
+
       if (!monitorStates[id]) {
-        const monitor = document.createElement('div')
-        monitor.className = 'monitor ' + record.mode
-        monitor.style.left = record.x + 'px'
-        monitor.style.top = record.y + 'px'
-        if (record.mode === 'list') {
-          // If the list has never been resized, the width/height will be 0.
-          // Weird!
-          monitor.style.width = (record.width || 100) + 'px'
-          monitor.style.height = (record.height || 200) + 'px'
-        }
         const label = document.createElement('span')
         label.className = 'monitor-label'
-        let name = record.params.VARIABLE || record.params.LIST || record.opcode
-        if (record.spriteName) name = `${record.spriteName}: ${name}`
-        label.textContent = name
-        monitor.appendChild(label)
+        const name = params.VARIABLE || params.LIST || opcode
+        label.textContent = spriteName ? `${spriteName}: ${name}` : name
+
         const value = document.createElement('span')
         value.className = 'monitor-value'
-        monitor.appendChild(value)
-        monitorStates[id] = { monitor, value }
-        if (record.mode === 'slider') {
+
+        const monitor = document.createElement('div')
+        monitor.className = 'monitor ' + mode
+        monitor.style.left = x + 'px'
+        monitor.style.top = y + 'px'
+        monitor.append(label, value)
+
+        monitorStates[id] = { monitor, valueElem: value }
+
+        if (mode === 'slider') {
           const slider = document.createElement('input')
           slider.type = 'range'
-          slider.min = record.sliderMin
-          slider.max = record.sliderMax
-          slider.step = record.isDiscrete ? 1 : 0.01
-          // Per #54, but it deviates from Scratch
+          slider.min = sliderMin
+          slider.max = sliderMax
+          slider.step = isDiscrete ? 1 : 0.01
+          // Prevent tab focus, per #54, but it deviates from Scratch
           slider.tabIndex = -1
           slider.addEventListener('input', () => {
-            getVariable(record.targetId, id).value = slider.value
+            getVariable(targetId, id).value = slider.value
           })
           slider.addEventListener('change', () => {
-            getVariable(record.targetId, id).value = slider.value
+            getVariable(targetId, id).value = slider.value
           })
           monitorStates[id].slider = slider
-          monitor.appendChild(slider)
+          monitor.append(slider)
+        } else if (mode === 'list') {
+          // If the list has never been resized, the width/height will be 0.
+          // Weird!
+          monitor.style.width = (width || 100) + 'px'
+          monitor.style.height = (height || 200) + 'px'
+
+          monitorStates[id].rowElems = []
         }
-        monitorWrapper.appendChild(monitor)
+
+        monitorWrapper.append(monitor)
       }
-      monitorStates[id].monitor.style.display = record.visible ? null : 'none'
-      if (record.visible) {
-        let value = record.value
-        if (typeof value === 'number') {
-          value = Number(value.toFixed(6))
+
+      const {
+        monitor,
+        valueElem,
+        wasVisible,
+        lastValue = [],
+        slider,
+        rowElems
+      } = monitorStates[id]
+      if (visible) {
+        if (!wasVisible) {
+          monitor.style.display = null
         }
-        if (typeof value === 'boolean') {
-          value = value.toString()
+        const differed = Array.isArray(value)
+          ? JSON.stringify(lastValue) !== JSON.stringify(value)
+          : lastValue !== value
+        if (differed) {
+          if (Array.isArray(value)) {
+            if (lastValue.length !== rowElems.length) {
+              console.error(
+                "List monitor rowElems and lastValue lengths don't match."
+              )
+            }
+
+            value.forEach((val, i) => {
+              if (i >= lastValue.length) {
+                // Could also set width to (lastValue.length + '').length + 'ch'
+                const index = document.createElement('div')
+                index.className = 'index'
+                index.textContent = i + 1
+
+                const value = document.createElement('div')
+                value.className = 'row-value'
+
+                const row = document.createElement('div')
+                row.className = 'row'
+                row.append(index, value)
+
+                valueElem.append(row)
+                rowElems[i] = value
+              }
+
+              if (lastValue[i] !== val) {
+                rowElems[i].textContent = val
+              }
+            })
+
+            if (value.length < lastValue.length) {
+              for (const toRemove of rowElems.splice(
+                value.length,
+                lastValue.length - value.length
+              )) {
+                toRemove.parentNode.remove()
+              }
+            }
+          } else {
+            // The HTMLifier used to use Number(value.toFixed(6)) but I don't
+            // think Scratch does that for monitors
+            valueElem.textContent = value
+            if (slider) {
+              slider.value = value
+            }
+          }
         }
-        if (Array.isArray(value)) {
-          if (monitorStates[id].lastValue === JSON.stringify(value)) return
-          // TODO: Avoid recreating list items
-          monitorStates[id].value.innerHTML = ''
-          value.forEach(val => {
-            const row = document.createElement('div')
-            row.className = 'row'
-            row.textContent = val
-            monitorStates[id].value.appendChild(row)
-          })
-        } else {
-          monitorStates[id].value.textContent = value
-          if (monitorStates[id].slider) monitorStates[id].slider.value = value
-        }
+      } else if (wasVisible) {
+        monitor.style.display = 'none'
       }
+      monitorStates[id].wasVisible = visible
+      // `value` is a live array
+      monitorStates[id].lastValue = Array.isArray(value) ? [...value] : value
     })
   })
 
@@ -916,8 +985,8 @@ window.download = (blob, name = 'download') => {
   const link = document.createElement('a')
   link.href = url
   link.download = name
-  document.body.appendChild(link)
+  document.body.append(link)
   link.click()
-  document.body.removeChild(link)
+  link.remove()
   URL.revokeObjectURL(url)
 }

@@ -1,21 +1,28 @@
-import Htmlifier, { Logger, ProjectSource } from '../src/htmlifier.ts'
+import Htmlifier, { ProjectSource } from '../src/htmlifier.ts'
 import { ConversionOptions } from './options.ts'
 
-export const htmlify = async (options: ConversionOptions, log?: Logger) => {
+type LoggerWithError = (
+  message: string,
+  type: 'status' | 'progress' | 'error'
+) => void
+
+export const htmlify = (options: ConversionOptions, log?: LoggerWithError): Promise<Blob | null> => {
   const htmlifier = new Htmlifier()
-  const project: ProjectSource =
-    options['upload-mode'] === 'file'
-      ? {
-          type: 'file',
-          file:
-            options.file ||
-            (await Promise.reject(
-              new Error("You didn't select a project file.")
-            ))
-        }
-      : options['upload-mode'] === 'url'
-      ? { type: 'url', url: options['project-url'] }
-      : { type: 'id', id: String(options.id) }
+  let project: ProjectSource
+  if (options['upload-mode'] === 'file') {
+    if (!options.file) {
+      return Promise.resolve(null)
+    }
+    project = {
+      type: 'file',
+      file: options.file
+    }
+  } else {
+    project =
+      options['upload-mode'] === 'url'
+        ? { type: 'url', url: options['project-url'] }
+        : { type: 'id', id: String(options.id) }
+  }
   return htmlifier.htmlify(project, {
     zip: options.zip,
     includeVm: true,
