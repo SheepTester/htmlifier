@@ -48,6 +48,10 @@ body {
   z-index: 1000;
   animation: none;
 }
+.problem {
+  font-weight: bold;
+  color: #faa;
+}
 .delayed {
   animation: appear 0.5s 3s backwards;
 }
