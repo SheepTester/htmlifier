@@ -6,6 +6,6 @@
  * - 'init' -> ''
  */
 export default function getFileExtension (nameOrFile: string | File): string {
-  const fileName = nameOrFile instanceof File ? nameOrFile.name : nameOrFile
+  const fileName = typeof nameOrFile === 'string' ? nameOrFile : nameOrFile.name
   return fileName.includes('.') ? fileName.slice(fileName.lastIndexOf('.')) : ''
 }
