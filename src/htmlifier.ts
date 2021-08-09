@@ -348,7 +348,9 @@ export default class Htmlifier {
         return `./${fileName}`
       } else {
         return await getDataUrl(
-          file instanceof Blob ? file : new Blob([file], { type: 'text/plain' })
+          typeof file === 'string'
+            ? new Blob([file], { type: 'text/plain' })
+            : file
         )
       }
     }
@@ -393,7 +395,7 @@ export default class Htmlifier {
       )
       const extensionScripts: string[] = []
       for (const extensionSource of extensions) {
-        if (extensionSource instanceof File) {
+        if (typeof extensionSource !== 'string') {
           extensionScripts.push(
             outputZip
               ? await registerFile(
@@ -446,20 +448,20 @@ export default class Htmlifier {
           injectedJs.push({
             type: 'url',
             url:
-              source instanceof File
-                ? await registerFile(source.name, await source.text())
-                : await registerFile(
+              typeof source === 'string'
+                ? await registerFile(
                     source + '.js',
                     await fetch(source).then(toBlob)
                   )
+                : await registerFile(source.name, await source.text())
           })
         } else {
           injectedJs.push({
             type: 'inline',
             source:
-              source instanceof File
-                ? await source.text()
-                : await fetch(source).then(toText)
+              typeof source === 'string'
+                ? await fetch(source).then(toText)
+                : await source.text()
           })
         }
       }
@@ -543,12 +545,12 @@ export default class Htmlifier {
     }
     if (loadingImage) {
       const imageUrl =
-        loadingImage instanceof File
-          ? await registerFile(
+        typeof loadingImage === 'string'
+          ? loadingImage
+          : await registerFile(
               'loading' + getFileExtension(loadingImage),
               loadingImage
             )
-          : loadingImage
       html = html.replace(
         '{LOADING_IMAGE}',
         () => `<img src="${escapeHtml(imageUrl)}" id="loading-image">`
