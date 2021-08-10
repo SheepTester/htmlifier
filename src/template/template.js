@@ -558,11 +558,11 @@ window.init = async ({ width, height, ...options }) => {
       canvasWidth: rect.width,
       canvasHeight: rect.height
     })
-    return mousePosition
+    return { mousePosition, rect }
   }
   function handleMouseMove (event) {
     if (postIfPointerLocked(event)) return
-    const mousePosition = postMouse(event)
+    const { mousePosition, rect } = postMouse(event)
     if (mouseDown && !isDragging) {
       const distanceFromMouseDown = Math.hypot(
         mousePosition.x - mouseDownPosition.x,
@@ -594,7 +594,7 @@ window.init = async ({ width, height, ...options }) => {
       isDown: true
     })
     if (postIfPointerLocked(event, true)) return
-    mouseDownPosition = postMouse(event, true)
+    mouseDownPosition = postMouse(event, true).mousePosition
     mouseDownTimeoutId = setTimeout(handleStartDrag, 400)
     event.preventDefault()
     if (!document.body.classList.contains('asking')) {
