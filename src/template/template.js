@@ -54,10 +54,10 @@ class CloudProvider {
       })
     }
     this._handleOpen = () => {
-      sendData({ method: 'handshake' })
+      this._sendData({ method: 'handshake' })
     }
     this._handleClose = () => {
-      setTimeout(openConnection, 500)
+      setTimeout(() => this._openConnection(), 500)
     }
 
     this.handleUrlChange = () => {
@@ -73,6 +73,10 @@ class CloudProvider {
           (event.clipboardData || window.clipboardData).getData('text')
         )
       })
+    }
+
+    if (this._serverUrl) {
+      this._openConnection()
     }
   }
 
@@ -127,7 +131,7 @@ class CloudProvider {
           this._ws.onclose = noop
           this._ws.close()
         }
-        openConnection()
+        this._openConnection()
       } else if (name === CLOUD_PREFIX + 'username') {
         this._options.username = value
         vm.postIOData('userData', { username: value })
@@ -895,9 +899,6 @@ window.init = async ({ width, height, ...options }) => {
   }
   if (options.cloud.specialBehaviours) {
     cloudProvider.handleUrlChange()
-  }
-  if (options.cloud.serverUrl) {
-    openConnection()
   }
 
   progress.remove()
