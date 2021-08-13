@@ -61,5 +61,5 @@ main()
 ## Documentation
 
 [Auto-generated
-documentation](https://doc.deno.land/https/github.com/SheepTester/htmlifier/raw/v1.0.0/src/htmlifier.ts)
+documentation](https://doc.deno.land/https/github.com/SheepTester/htmlifier/raw/v1.0.2/src/htmlifier.ts)
 is available courtesy of deno doc.

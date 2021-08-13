@@ -1,6 +1,6 @@
 {
   "name": "@sheeptester/htmlifier",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Packages a Scratch project in an HTML file with no optimisations.",
   "type": "module",
   "main": "index.min.js",

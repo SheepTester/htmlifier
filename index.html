@@ -99,22 +99,42 @@
         contains the entire Scratch engine (2.6 MB) and the costume and sound
         files used in the project.
       </p>
-      <p>
-        The HTMLifier may not be the best option for you; refer to the
-        <a href="#see-also">See also section</a> for alternatives.
-      </p>
+      <div class="notice info">
+        <p>
+          Note: The
+          <strong
+            ><a href="https://packager.turbowarp.org/"
+              >TurboWarp Packager</a
+            ></strong
+          >
+          has better performance and can produce .exe files. Refer to the
+          <a href="#see-also">See also section</a> for more alternatives.
+        </p>
+      </div>
       <div id="root">
         <noscript>
-          <p class="problem">
-            Please enable JavaScript. Converting projects can't be done with
-            HTML and CSS alone.
-          </p>
+          <div class="notice start-warning">
+            <p>
+              Please enable JavaScript. Converting projects can't be done with
+              HTML and CSS alone.
+            </p>
+          </div>
         </noscript>
-        <p class="problem delayed">
-          If you see this, you can check to see if there were
-          <a href="#errors">any issues</a> loading the HTMLifier. Make sure
-          you're using a modern browser.
-        </p>
+        <div class="notice start-warning hidden" id="js-enabled">
+          <p>
+            If you see this, you can check to see if there were
+            <a href="#errors">any issues</a> loading the HTMLifier. Make sure
+            you're using a modern browser.
+          </p>
+          <p class="hidden" id="no-nullish-coalescing">
+            Your browser does not support modern JavaScript features; check to
+            make sure
+            <a
+              href="https://caniuse.com/mdn-javascript_operators_nullish_coalescing"
+              >your browser is modern</a
+            >.
+          </p>
+        </div>
       </div>
       <p>
         If you want to view or edit the HTML file, you can use the specialized
@@ -129,6 +149,15 @@
         See the code and previous versions on
         <a href="https://github.com/SheepTester/htmlifier/">Github</a>.
       </p>
+      <h3>
+        2021-08-12 (<a
+          href="https://github.com/SheepTester/htmlifier/releases/download/v1.0.2/htmlifier-offline.html"
+          >download</a
+        >)
+      </h3>
+      <ul>
+        <li>Fixed connecting to cloud servers.</li>
+      </ul>
       <h3>
         2021-08-09 (<a
           href="https://github.com/SheepTester/htmlifier/releases/download/v1.0.1/htmlifier-offline.html"
@@ -480,8 +509,8 @@
       <p>
         If you want better performance, <em>compile</em> the project to
         JavaScript:
-        <a href="https://phosphorus.github.io/">Phosphorus</a> (Scratch 2.0),
-        <a href="https://forkphorus.github.io/">Forkphorus</a>, and
+        <a href="https://phosphorus.github.io/">Phosphorus</a> (Scratch 2.0
+        only), <a href="https://forkphorus.github.io/">Forkphorus</a>, and
         <a href="https://turbowarp.org/">TurboWarp</a>.
       </p>
       <p>
@@ -499,6 +528,16 @@
             window.errors.length + ' errors(s)\n' + window.errors.join('\n')
         }
         window.onNewError()
+      }
+      try {
+        eval('0 ?? 0')
+      } catch (_) {
+        var oldBrowserNotice = document.getElementById('no-nullish-coalescing')
+        oldBrowserNotice.className = ''
+      }
+      var hasJs = document.getElementById('js-enabled')
+      if (hasJs) {
+        hasJs.classList.remove('hidden')
       }
     </script>
   </body>
