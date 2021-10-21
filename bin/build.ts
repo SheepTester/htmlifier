@@ -43,7 +43,7 @@ class FileReader {
 
   async readAsDataURL (blob) {
     // https://stackoverflow.com/a/62684503
-    this.result = Buffer.from(await blob.arrayBuffer()).toString('base64')
+    this.result = \`data:\${blob.type};base64,\${Buffer.from(await blob.arrayBuffer()).toString('base64')}\`
     this.callback()
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@sheeptester/htmlifier",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Packages a Scratch project in an HTML file with no optimisations.",
   "type": "module",
   "main": "index.min.js",
@@ -12,8 +12,16 @@
     "scratch",
     "sb3"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SheepTester/htmlifier.git"
+  },
   "author": "SheepTester",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SheepTester/htmlifier/issues"
+  },
+  "homepage": "https://sheeptester.github.io/htmlifier/",
   "dependencies": {
     "fetch-blob": "^3.1.2",
     "node-fetch": "^2.6.1"
