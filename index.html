@@ -88,7 +88,7 @@
         id="other-htmlify-btn"
         form="options"
         type="submit"
-      >
+      title="HTMLify">
         HTMLify
       </button>
     </div>
@@ -104,11 +104,11 @@
           Note: The
           <strong
             ><a href="https://packager.turbowarp.org/"
-              >TurboWarp Packager</a
+              title="TurboWarp Packager">TurboWarp Packager</a
             ></strong
           >
           has better performance and can produce .exe files. Refer to the
-          <a href="#see-also">See also section</a> for more alternatives.
+          <a href="#see-also" title="See also">See also section</a> for more alternatives.
         </p>
       </div>
       <div id="root">
@@ -123,7 +123,7 @@
         <div class="notice start-warning hidden" id="js-enabled">
           <p>
             If you see this, you can check to see if there were
-            <a href="#errors">any issues</a> loading the HTMLifier. Make sure
+            <a href="#errors" title="Errors">any issues</a> loading the HTMLifier. Make sure
             you're using a modern browser.
           </p>
           <p class="hidden" id="no-nullish-coalescing">
@@ -131,8 +131,8 @@
             make sure
             <a
               href="https://caniuse.com/mdn-javascript_operators_nullish_coalescing"
-              >your browser is modern</a
-            >.
+              title="Check if your browser is modern">your browser is modern.</a
+            >
           </p>
         </div>
       </div>
@@ -140,52 +140,52 @@
         If you want to view or edit the HTML file, you can use the specialized
         <a
           href="https://sheeptester.github.io/words-go-here/htmlifier/large-file-editor/"
-          >Large File Editor</a
+          title="Large File Editor">Large File Editor</a
         >
         to hide the long lines that may hang or crash normal text editors.
       </p>
-      <h2 id="updates">Update history</h2>
+      <h2 id="updates">Update History</h2>
       <p>
         See the code and previous versions on
-        <a href="https://github.com/SheepTester/htmlifier/">Github</a>.
+        <a href="https://github.com/SheepTester/htmlifier/" title="GitHub">GitHub.</a>
       </p>
       <h3>
-        2021-08-12 (<a
+        August 12, 2021 (<a
           href="https://github.com/SheepTester/htmlifier/releases/download/v1.0.2/htmlifier-offline.html"
-          >download</a
+          title="Download v1.0.2 of August 12, 2021">Download</a
         >)
       </h3>
       <ul>
         <li>Fixed connecting to cloud servers.</li>
       </ul>
       <h3>
-        2021-08-09 (<a
+        August 9, 2021 (<a
           href="https://github.com/SheepTester/htmlifier/releases/download/v1.0.1/htmlifier-offline.html"
-          >download</a
+          title="Download v1.0.1 of August 9, 2021">Download</a
         >)
       </h3>
       <ul>
         <li>Fixed sprite dragging.</li>
       </ul>
       <h3>
-        2021-08-08 (<a
+        August 8, 2021 (<a
           href="https://github.com/SheepTester/htmlifier/releases/download/v1.0.0/htmlifier-offline.html"
-          >download</a
+          title="Download v1.0.0 of August 8, 2021">Download</a
         >)
       </h3>
       <ul>
         <li>
           To support the use of the HTMLifier in
-          <a href="https://nodejs.org/en/">Node</a> and
-          <a href="https://deno.land/">Deno</a>, I rewrote the HTMLifier, so now
+          <a href="https://nodejs.org/en/" title="Node">Node</a> and
+          <a href="https://deno.land/" title="Deno">Deno</a>, I rewrote the HTMLifier, so now
           it can be used programmatically (<a
             href="https://github.com/SheepTester/htmlifier/issues/27"
-            >by request</a
+            title="By request">by request</a
           >). This might mean there could be many bugs.
         </li>
         <li>
           I also remade the options area in
-          <a href="https://reactjs.org/">React</a> and reworded a few options in
+          <a href="https://reactjs.org/" title="React">React</a> and reworded a few options in
           the process.
         </li>
         <li>
@@ -199,7 +199,7 @@
           <code>ctrl</code>/<code>⌘</code> + <code>F</code> now toggles
           fullscreen (<a
             href="https://scratch.mit.edu/users/Sheep_maker/#comments-141217533"
-            >by request</a
+            title="By request">by request</a
           >).
         </li>
         <li>
@@ -210,37 +210,37 @@
           You can detect whether the project has been HTMLified by doing
           <code>&lt;key (join [HTMLifier] []) pressed?&gt;</code> (<a
             href="https://scratch.mit.edu/users/Sheep_maker/#comments-129186942"
-            >by request</a
+            title="By request">by request</a
           >).
         </li>
         <li>
           You can now add more than one unofficial extension (<a
             href="https://scratch.mit.edu/users/Sheep_maker/#comments-123224516"
-            >by request</a
+            title="By request">by request</a
           >).
         </li>
         <li>
           You can add custom JavaScript (called "plugins" in
-          <a href="https://sheeptester.github.io/scratch-gui/">E羊icques</a>) to
+          <a href="https://sheeptester.github.io/scratch-gui/" title="E羊icques">E羊icques</a>) to
           the HTML. You can also upload JavaScript files instead of pasting URLs
           for both extensions and plugins. (Both
           <a
             href="https://scratch.mit.edu/users/Sheep_maker/#comments-142357006"
-            >by request</a
+            title="By request">by request</a
           >.)
         </li>
         <li>
           Added an option to show a button that downloads the project with the
           current variable and list values stored (<a
             href="https://scratch.mit.edu/users/Sheep_maker/#comments-126598941"
-            >by request</a
+            title="By request">by request</a
           >). This can be used to save your progress through a game.
         </li>
         <li>
           Added an option to show a button that lets you select a Scratch sprite
           to add to the project (<a
             href="https://scratch.mit.edu/users/Sheep_maker/#comments-120920668"
-            >by request</a
+            title="By request">by request</a
           >). This can be used for some OS projects to add new apps, where each
           app is a sprite.
         </li>
@@ -248,7 +248,7 @@
         <li>
           The loading bar now shows a percentage rather than a fraction (<a
             href="https://scratch.mit.edu/users/Sheep_maker/#comments-120295599"
-            >by request</a
+            title="By request">by request</a
           >).
         </li>
         <li>
@@ -257,11 +257,11 @@
         </li>
       </ul>
       <details>
-        <summary>Past updates</summary>
+        <summary>Past Updates</summary>
         <h3>
-          2021-03-16 (<a
+          March 16, 2021 (<a
             href="https://github.com/SheepTester/htmlifier/releases/download/2021-03-16/htmlifier-offline.html"
-            >download</a
+            title="Download update of March 16, 2021">download</a
           >)
         </h3>
         <ul>
@@ -269,7 +269,7 @@
             New cloud behaviours:
             <ul>
               <li>
-                <code>☁ url</code> contains the current URL of the web page.
+                <code>☁ URL</code> contains the current URL of the web page.
               </li>
               <li>
                 <code>☁ pasted</code> contains the last pasted text by the user.
@@ -284,9 +284,9 @@
           <li>Fixed the progress bar being shown under the loading image.</li>
         </ul>
         <h3>
-          2021-02-07 (<a
+          February 7, 2021 (<a
             href="https://github.com/SheepTester/htmlifier/releases/download/2021-02-07/htmlifier-offline.html"
-            >download</a
+            title="Download update of February 7, 2021">Download</a
           >)
         </h3>
         <ul>
@@ -321,7 +321,7 @@
                 clipboard.
               </li>
               <li>
-                <code>☁ set server ip</code> changes the cloud server URL.
+                <code>☁ set server IP</code> changes the cloud server URL.
               </li>
             </ul>
           </li>
@@ -343,19 +343,19 @@
           <li>
             Updated CSS by
             <a href="https://scratch.mit.edu/users/mrcringekidyt/"
-              >Mr. Cringe Kid</a
+              title="Mr. Cringe Kid">Mr. Cringe Kid</a
             >
           </li>
           <li>Fixed the HTMLification log progress not resetting</li>
           <li>
             Also, the
             <a href="https://github.com/SheepTester/primitive-cloud-server"
-              >primitive cloud server</a
+              title="Primitive cloud server">primitive cloud server</a
             >
             has been updated.
           </li>
         </ul>
-        <h3>2020-12-18</h3>
+        <h3>December 18, 2020</h3>
         <ul>
           <li>
             Specific mouse buttons can now be detected using
@@ -369,9 +369,9 @@
           </li>
         </ul>
         <h3>
-          2020-06-13 (<a
+          June 13, 2020 (<a
             href="https://github.com/SheepTester/htmlifier/releases/download/2020-06-13/htmlifier-offline.html"
-            >download</a
+            title="Download update of June 13, 2020">Download</a
           >)
         </h3>
         <ul>
@@ -385,9 +385,9 @@
           <li>Fixed HTMLifying 2.0 projects</li>
         </ul>
         <h3>
-          2020-06-01 (<a
+          June 1, 2020 (<a
             href="https://github.com/SheepTester/htmlifier/releases/download/2020-06-01/htmlifier-offline.html"
-            >download</a
+            title="Download update of June 1, 2020">Download</a
           >)
         </h3>
         <ul>
@@ -401,86 +401,86 @@
           <li>Fixed mouse position and unresized lists not showing</li>
           <li>
             Default project changed to one of
-            <a href="https://scratch.mit.edu/users/ScratchCat/">ScratchCat</a>'s
+            <a href="https://scratch.mit.edu/users/ScratchCat/" title="ScratchCat">ScratchCat</a>'s
           </li>
           <li>
             Unfortunately, as part of these changes, I removed the option for a
             progress bar. If there's demand, I'll try to add it back.
           </li>
         </ul>
-        <h3>2020-05-01</h3>
+        <h3>May 1, 2020</h3>
         <ul>
           <li>Support for custom extensions from a URL</li>
           <li>
             CSS by
             <a href="https://scratch.mit.edu/users/mrcringekidyt/"
-              >Mr. Cringe Kid</a
-            >
+              title="Mr. Cringe Kid">Mr. Cringe Kid</a
+            >!
           </li>
         </ul>
         <h3>
-          2020-03-29 (<a
+          March 29, 2020 (<a
             href="https://github.com/SheepTester/words-go-here/releases/download/htmlifier-2020-03-29/htmlifier-offline.html"
-            >download</a
+            title="Download version of March 29, 2020">Download</a
           >)
         </h3>
         <ul>
           <li>Fixed custom stage sizes</li>
         </ul>
-        <h3>2020-03-27</h3>
+        <h3>March 27, 2020</h3>
         <ul>
-          <li>Show an image such as a gif while loading</li>
+          <li>Show an image such as a GIF while loading</li>
           <li>Fixed dragging sprites simulating another green flag click</li>
         </ul>
-        <h3>2020-01-06</h3>
+        <h3>January 6, 2020</h3>
         <ul>
           <li>An offline version of the HTMLifier</li>
         </ul>
-        <h3>2019-12-25</h3>
+        <h3>December 25, 2019</h3>
         <ul>
           <li>
             An option to use a custom cloud server for cloud variables instead
             of saving to localStorage
           </li>
         </ul>
-        <h3>2019-11-23</h3>
+        <h3>November 23, 2019</h3>
         <ul>
           <li>A fullscreen button</li>
           <li>An option to change monitor colours</li>
         </ul>
-        <h3>2019-10-05</h3>
+        <h3>October 5, 2019</h3>
         <ul>
           <li>New ask box</li>
         </ul>
-        <h3>2019-09-28</h3>
+        <h3>September 28, 2019</h3>
         <ul>
           <li>A status text that shows the assets loaded</li>
           <li>Support the video extension</li>
           <li>Support draggable sprites</li>
         </ul>
-        <h3>2019-08-08</h3>
+        <h3>August 8, 2019</h3>
         <ul>
           <li>Removed "Scratch" from the name of this utility just in case</li>
         </ul>
-        <h3>2019-07-27</h3>
+        <h3>July 27, 2019</h3>
         <ul>
           <li>Support 16:9 projects</li>
           <li>Simplify the number of modes for HTMLification</li>
         </ul>
-        <h3>2019-07-13</h3>
+        <h3>July 13, 2019</h3>
         <ul>
           <li>Cloud variables store in localStorage</li>
         </ul>
-        <h3>2019-06-29</h3>
+        <h3>June 29, 2019</h3>
         <ul>
           <li>Upload project file instead of using project ID</li>
-          <li>Toggle compatibility and turbo mode</li>
+          <li>Toggle compatibility and Turbo Mode</li>
         </ul>
-        <h3>2019-03-31</h3>
+        <h3>March 31, 2019</h3>
         <ul>
           <li>Variable and list watchers</li>
         </ul>
-        <h3>2019-02-09</h3>
+        <h3>February 9, 2019</h3>
         <ul>
           <li>Project start</li>
         </ul>
@@ -488,17 +488,17 @@
       <h2 id="credits">Credits</h2>
       <p>
         Made by
-        <a href="https://scratch.mit.edu/users/Sheep_maker/">Sheep_maker</a>,
-        who used <a href="https://github.com/LLK/scratch-vm/">scratch-vm</a>,
-        <a href="https://stuk.github.io/jszip/">JSZip</a>,
-        <a href="https://deno.land/">Deno</a>,
-        <a href="https://reactjs.org/">React</a>, and their dependencies for
+        <a href="https://scratch.mit.edu/users/Sheep_maker/" title="Sheep_maker">Sheep_maker</a>,
+        who used <a href="https://github.com/LLK/scratch-vm/" title="scratch-vm">scratch-vm</a>,
+        <a href="https://stuk.github.io/jszip/" title="JSZip">JSZip</a>,
+        <a href="https://deno.land/" title="Deno">Deno</a>,
+        <a href="https://reactjs.org/" title="React">React</a>, and their dependencies for
         this project.
       </p>
       <p>
         CSS by
-        <a href="https://scratch.mit.edu/users/mrcringekidyt/">Mr. Cringe Kid</a
-        >.
+        <a href="https://scratch.mit.edu/users/mrcringekidyt/" title="Mr. Cringe Kid">Mr. Cringe Kid</a
+        >!
       </p>
       <h2 id="see-also">See also</h2>
       <p>
@@ -509,14 +509,14 @@
       <p>
         If you want better performance, <em>compile</em> the project to
         JavaScript:
-        <a href="https://phosphorus.github.io/">Phosphorus</a> (Scratch 2.0
-        only), <a href="https://forkphorus.github.io/">Forkphorus</a>, and
-        <a href="https://turbowarp.org/">TurboWarp</a>.
+        <a href="https://phosphorus.github.io/" title="Phosphorus">Phosphorus</a> (Scratch 2.0
+        only), <a href="https://forkphorus.github.io/" title="Forkphorus">Forkphorus</a>, and
+        <a href="https://turbowarp.org/" title="TurboWarp">TurboWarp</a>.
       </p>
       <p>
         If you want to learn JavaScript, convert the Scratch blocks to close
         equivalents in JavaScript using
-        <a href="https://leopardjs.now.sh/">Leopard</a>.
+        <a href="https://leopardjs.now.sh/" title="Leopard">Leopard.</a>
       </p>
     </div>
     <script src="./index.bundle.min.js" charset="utf-8"></script>
